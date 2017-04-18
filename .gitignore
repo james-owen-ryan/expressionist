@@ -1,0 +1,5 @@
+node_modules
+venv
+static/scripts/build
+*.pyc
+grammars
