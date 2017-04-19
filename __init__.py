@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask, render_template, request
+from flask import jsonify
 import webbrowser
 
 import Markups
@@ -28,6 +29,9 @@ globals are horrible in these two, but because we're not in python 3.x
 we don't have nonlocal keywords. Make sure we modify our copy instead of make a new one this way
 """
 
+@app.route('/api/grammar/load_dir', methods=['GET'])
+def load_dir():
+    return jsonify(results=os.listdir(os.path.abspath(os.path.join(os.path.dirname(__file__), 'grammars/load/'))))
 
 @app.route('/api/grammar/load', methods=['POST'])
 def load_grammar():

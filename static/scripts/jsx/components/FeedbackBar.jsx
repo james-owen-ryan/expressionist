@@ -16,7 +16,7 @@ var FeedbackBar = React.createClass({
         var markups_str = ""
         if (this.props.markup) {
             this.props.markup.forEach(function (tags) {
-                markups_str += tags + '\n'
+                markups_str += tags + '<br>'
             })
         }
         return (
@@ -29,7 +29,7 @@ var FeedbackBar = React.createClass({
 
                 <div id="Markup"
                      style={{"border": "2px solid black", "height": "100%", "float": "left", "width": "40%", "overflow": "auto", "padding": "10px"}}>
-                    {markups_str}
+                    <p dangerouslySetInnerHTML={{__html: markups_str}}></p>
                 </div>
 
             </div>

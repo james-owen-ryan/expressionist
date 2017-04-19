@@ -11,6 +11,8 @@ var NonterminalBoard = require('./NonterminalBoard.jsx')
 var RuleBoard = require('./RuleBoard.jsx')
 var FeedbackBar = require('./FeedbackBar.jsx')
 var HeaderBar = require('./HeaderBar.jsx')
+var Modal = require('react-bootstrap').Modal
+var Button = require('react-bootstrap').Button
 import { Router, browserHistory } from 'react-router'
 
 var Interface = React.createClass({
@@ -42,7 +44,7 @@ var Interface = React.createClass({
             expansion_feedback: "",
             markup_feedback: [],
             current_nonterminal: "",
-            current_rule: -1
+            current_rule: -1,
         }
     },
     componentDidMount(){
@@ -61,7 +63,6 @@ var Interface = React.createClass({
         console.log(this.state.current_rule)
     },
     componentWillReceiveProps(){ this.updateFromServer() },
-
 
     //update state from server
     updateFromServer: function () {
@@ -86,6 +87,13 @@ var Interface = React.createClass({
         this.setState({system_vars: d})
         console.log($SCRIPT_ROOT)
 
+    },
+
+    handleRuleAddUpdate: function(){
+        this.updateFromServer();
+        var lastindex=this.state.nonterminals[this.state.current_nonterminal].rules.length
+        this.setState({current_rule: lastindex})
+        this.updateHistory(this.state.current_nonterminal, lastindex)
     },
 
     //this handles the context switching (what nonterminal are we on)
@@ -413,35 +421,6 @@ YES, in all caps")
         this.updateHistory(this.state.current_nonterminal, index)
     },
 
-    handleRuleAdd: function () {
-        //AJAX GOES HERE
-        console.log("add a new Rule")
-        var expansion = window.prompt("Please enter Rule expansion")
-        var app_rate = window.prompt("please enter application_rate")
-        if (expansion != "" && !isNaN(app_rate)) {
-            var object = {
-                "rule": expansion,
-                "app_rate": app_rate,
-                "nonterminal": this.state.current_nonterminal
-            }
-            console.log(object)
-            ajax({
-                url: $SCRIPT_ROOT + '/api/rule/add',
-                type: "POST",
-                contentType: "application/json",
-                data: JSON.stringify(object),
-                async: false,
-                cache: false
-            })
-            console.log("adding a rule")
-            this.updateFromServer()
-            var lastindex=this.state.nonterminals[this.state.current_nonterminal].rules.length
-            console.log(lastindex)
-            this.setState({current_rule: lastindex})
-            this.updateHistory(this.state.current_nonterminal, lastindex)
-        }
-    },
-
     onRuleDelete: function (index) {
         var object = {
             "rule": this.state.current_rule,
@@ -479,23 +458,6 @@ YES, in all caps")
             })
             this.updateFromServer()
         }
-    },
-
-    loadGrammar: function () {
-        var filename = window.prompt("Enter the Name of the Grammar you wish to load")
-        if (filename != "") {
-            ajax({
-                url: $SCRIPT_ROOT + '/api/grammar/from_file',
-                type: "POST",
-                contentType: "text/plain",
-                data: filename,
-                async: false,
-                cache: false
-            })
-            this.updateFromServer()
-        }
-
-
     },
 
     saveGrammar: function () {
@@ -579,7 +541,7 @@ YES, in all caps")
             <div style={{position: "fixed", top: 0, right: 0, "height": "100%", "width": "100%"}}>
                 <div
                     style={{ "height": "75%", "width": "75%", position: "absolute", top: 0, left: 0}}>
-                    <HeaderBar reset={this.resetGrammar} loadGrammar={this.loadGrammar}
+                    <HeaderBar reset={this.resetGrammar} update={this.updateFromServer}
                                exportList={this.exportList} saveGrammar={this.saveGrammar}
                                systemVars={this.state.system_vars}/>
                     <div className="muwrap">
@@ -604,13 +566,11 @@ YES, in all caps")
 
                 <div style={{"width": "75%", "height": "25%", position: "absolute", bottom: 0, left:0}}>
                     <div className="muwrap">
-                        <RuleBar rules={def_rules} onRuleAdd={this.handleRuleAdd} onRuleClick={this.handleRuleClick}
-                                 name={this.state.current_nonterminal}/>
+                        <RuleBar rules={def_rules} onRuleClick={this.handleRuleClick} nonterminals={this.state.nonterminals}
+                                 name={this.state.current_nonterminal} update={this.handleRuleAddUpdate}/>
                     </div>
                     <FeedbackBar derivation={this.state.expansion_feedback} markup={this.state.markup_feedback}/>
                 </div>
-
-
             </div>
         );
     }

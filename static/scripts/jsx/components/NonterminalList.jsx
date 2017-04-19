@@ -64,7 +64,7 @@ var NonterminalList = React.createClass({
 
             <div>
 
-                <ListGroup>
+                <ListGroup id='nonterminalList'>
                     {total}
                     <ListGroupItem bsSize="xsmall" key="ADDNEW" onClick={this.props.onAddNonterminal}><Glyphicon
                         glyph="plus"/></ListGroupItem>
