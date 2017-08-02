@@ -85,22 +85,18 @@ var Interface = React.createClass({
         this.setState({nonterminals: b})
         this.setState({markups: c})
         this.setState({system_vars: d})
-        console.log($SCRIPT_ROOT)
 
     },
 
-    handleRuleAddUpdate: function(){
+    addNonterminalUpdate: function(nonterminal){
         this.updateFromServer();
-        var lastindex=this.state.nonterminals[this.state.current_nonterminal].rules.length
-        this.setState({current_rule: lastindex})
-        this.updateHistory(this.state.current_nonterminal, lastindex)
+        this.setState({current_nonterminal: nonterminal});
+        this.updateHistory(nonterminal, -1)
     },
 
     //this handles the context switching (what nonterminal are we on)
-    handleNonterminalClick: function (position) {
+    clickNonterminalUpdate: function (position) {
         if (this.state.nonterminals[position]) {
-            console.log("you clicked nonterminal " + this.state.nonterminals[position])
-            console.log(this.state.current_nonterminal)
             this.setState({current_nonterminal: position})
             this.setState({current_rule: -1})
             this.setState({markup_feedback: []})
@@ -159,36 +155,13 @@ var Interface = React.createClass({
         this.setState({expansion_feedback: ""})
         this.updateHistory(tag, index)
     },
-    //this handles the addition of a nonterminal
-    handleNonterminalAdd: function () {
-
-        console.log("add a new nonterminal")
-        var nonterminal = window.prompt("Please enter Nonterminal Name")
-        if (nonterminal != "") {
-            console.log(nonterminal)
-            if (this.state.nonterminals[nonterminal]) {
-                console.log("duplicate nonterminal!")
-            }
-            else {
-                var object = {
-                    "nonterminal": nonterminal
-                }
-                console.log(object)
-                ajax({
-                    url: $SCRIPT_ROOT + '/api/nonterminal/add',
-                    type: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify(object),
-                    async: false,
-                    cache: false
-                })
-                this.setState({current_nonterminal: nonterminal})
-                this.setState({current_rule: -1})
-                this.setState({markup_feedback: []})
-                this.setState({expansion_feedback: ""})
-                this.updateHistory(nonterminal, -1)
-            }
-        }
+    
+    ruleAddUpdate: function (nonterminal) {
+        this.setState({current_nonterminal: nonterminal})
+        this.setState({current_rule: -1})
+        this.setState({markup_feedback: []})
+        this.setState({expansion_feedback: ""})
+        this.updateHistory(nonterminal, -1)
     },
 
     //these handle clicking markup to add it to a nonterminal
@@ -560,14 +533,16 @@ YES, in all caps")
 
                 <div
                     style={{"overflow": "auto", "width": "25%", "height":"100%", position: "absolute", top: 0, right: 0}}>
-                    <NonterminalList nonterminals={this.state.nonterminals} onAddNonterminal={this.handleNonterminalAdd}
-                                     onClickNonterminal={this.handleNonterminalClick}>Test</NonterminalList>
+                    <NonterminalList    nonterminals={this.state.nonterminals} 
+                                        addNonterminalUpdate={this.addNonterminalUpdate}
+                                        clickNonterminalUpdate={this.clickNonterminalUpdate}>
+                    </NonterminalList>
                 </div>
 
                 <div style={{"width": "75%", "height": "25%", position: "absolute", bottom: 0, left:0}}>
                     <div className="muwrap">
                         <RuleBar rules={def_rules} onRuleClick={this.handleRuleClick} nonterminals={this.state.nonterminals}
-                                 name={this.state.current_nonterminal} update={this.handleRuleAddUpdate}/>
+                                 name={this.state.current_nonterminal} ruleAddUpdate={this.ruleAddUpdate}/>
                     </div>
                     <FeedbackBar derivation={this.state.expansion_feedback} markup={this.state.markup_feedback}/>
                 </div>

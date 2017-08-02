@@ -74,7 +74,7 @@ var RuleBar = React.createClass({
                 async: false,
                 cache: false
             })
-            this.props.update()
+            this.props.ruleAddUpdate(this.props.name)
             this.updateRuleExpansionInputVal({'target': {'value': ''}})
             this.closeModal();
         }
