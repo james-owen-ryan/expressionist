@@ -1,0 +1,14 @@
+decorator==4.0.6
+Flask==0.10.1
+ipython==4.1.1
+ipython-genutils==0.1.0
+itsdangerous==0.24
+Jinja2==2.8
+jsontree==0.4.3
+MarkupSafe==0.23
+pexpect==3.3
+pickleshare==0.5
+simplegeneric==0.8.1
+traitlets==4.1.0
+Werkzeug==0.11.3
+wheel==0.29.0
