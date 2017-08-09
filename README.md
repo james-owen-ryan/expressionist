@@ -1,13 +1,20 @@
-# pythonExpressionist
-First commit to an empty repo for Expressionist
+# Expressionist
+An authoring tool for text generation in games
 
 ## Getting Started
-  git clone, then, with npm installed and python version 2.7.10
-  pip install requirements.txt
-  npm install
-  npm run build
-  python \_\_init\_\_.py
-  navigate to localhost:5000, and come on get happy
 
-##To Develop The Front-End
-  Any modifications to .jsx files: `npm run build`
+This project requires `npm` and `python >= 2.7.10`
+
+```bash
+git clone [this repo]
+cd [to/cloned/repo]
+pip install requirements.txt
+npm install
+npm run build
+python __init__.py
+[navigate to localhost:5000]
+```
+
+## To Develop The Front-End
+
+Any modifications to .jsx files: `npm run build`
