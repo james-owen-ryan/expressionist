@@ -218,6 +218,6 @@ def index(path):
 
 if __name__ == '__main__':
     global flask_grammar
-    flask_grammar = PCFG.from_json(str(open('./grammars/load/loot', 'r').read()))
+    flask_grammar = PCFG.from_json(str(open('./grammars/load/example.json', 'r').read()))
     app.debug = debug
     app.run()

@@ -2,4 +2,5 @@ node_modules
 venv
 static/scripts/build
 *.pyc
-grammars
+grammars/load/*
+!grammars/load/example.json
