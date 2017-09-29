@@ -16,21 +16,18 @@ var HeaderBar = React.createClass({
         };
     },
 
-    componentDidMount() {
-        ajax({
-            url: $SCRIPT_ROOT + '/api/grammar/load_dir',
-            type: "GET",
-            cache: false,
-            success: (data) => { this.setState({'grammarFileNames': data.results}) }
-        })
-    },
-
     close(prop) {
         this.setState({[prop]: false});
     },
 
     open(prop) {
         this.setState({[prop]: true});
+        ajax({
+            url: $SCRIPT_ROOT + '/api/grammar/load_dir',
+            type: "GET",
+            cache: false,
+            success: (data) => { this.setState({'grammarFileNames': data.results}) }
+        })
     },
 
     load: function(filename){
