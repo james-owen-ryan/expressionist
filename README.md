@@ -6,7 +6,7 @@ An authoring tool for text generation in games. Currently in pre-release alpha. 
 This project requires `npm` and `python >= 2.7.10`
 
 ```bash
-git clone [this repo]
+git clone [URL of this repo]
 cd [to/cloned/repo]
 pip install -r requirements.txt
 npm install
