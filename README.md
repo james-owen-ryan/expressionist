@@ -8,7 +8,7 @@ This project requires `npm` and `python >= 2.7.10`
 ```bash
 git clone [this repo]
 cd [to/cloned/repo]
-pip install requirements.txt
+pip install -r requirements.txt
 npm install
 npm run build
 python __init__.py
