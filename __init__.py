@@ -1,17 +1,16 @@
 import os
-
 from flask import Flask, render_template, request
 from flask import jsonify
 import webbrowser
-
 import Markups
 import NonterminalSymbol
 from test_gram import test
-
 # from IPython import embed
 import re
 import PCFG
 import threading
+from reductionist import Reductionist
+
 
 app = Flask(__name__)
 debug = False
@@ -68,15 +67,6 @@ def new_grammar():
     return flask_grammar.to_json()
 
 
-@app.route('/api/grammar/export', methods=['GET', 'POST'])
-def export_grammar():
-    filename = ''.join(['grammars/exports/', request.data])
-    print 'Exporting to {}...'.format(filename)
-    flask_grammar.export_all(filename)
-    print 'Finished export.'
-    return "exporting grammar database"
-
-
 @app.route('/api/nonterminal/add', methods=['POST'])
 def add_nt():
     data = request.get_json()
@@ -91,7 +81,7 @@ def rename_nt():
     data = request.get_json()
     old = re.search('[^\[\]]+', data['old']).group(0)
     new = re.search('[^\[\]]+', data['new']).group(0)
-    flask_grammar.modify_tag(old, new) 
+    flask_grammar.modify_tag(old, new)
     return flask_grammar.to_json()
 
 @app.route('/api/nonterminal/delete', methods=['POST'])
@@ -214,6 +204,39 @@ def rename_markuptag():
 def index(path):
     return render_template('index.html')
 
+
+@app.route('/api/grammar/export', methods=['GET', 'POST'])
+def export():
+    """Instantiate a Reductionist object to have it index the grammar and export .grammar and .meanings files."""
+    # Grab the name the user gave for the content bundle
+    content_bundle_name = request.data
+    # Strip off .json, in the case that it was included (otherwise, we will export, e.g., 'myGrammar.json.meanings')
+    if content_bundle_name.endswith('.json'):
+        content_bundle_name = content_bundle_name[:-5]
+    output_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'exports'))
+    output_path_and_filename = "{}/{}".format(output_path, content_bundle_name)
+    # Index the grammar and save out the resulting files (Productionist-format grammar file [.grammar] and
+    # expressible meanings file [.meanings])
+    reductionist = Reductionist(
+        raw_grammar_json=flask_grammar.to_json(to_file=True),  # JOR: I'm not sure what to_file actually does
+        path_to_write_output_files_to=output_path_and_filename,
+        trie_output=False,
+        verbosity=0 if debug is False else 2
+    )
+    if not reductionist.validator.errors:
+        print "\n--Success! Indexed this grammar's {n} generable lines to infer {m} expressible meanings.--".format(
+            n=reductionist.total_generable_outputs,
+            m=len(reductionist.expressible_meanings)
+        )
+    else:
+        print "\n--Errors--"
+        for error_message in reductionist.validator.error_messages:
+            print '\n{msg}'.format(msg=error_message)
+    if reductionist.validator.warnings:
+        print "\n--Warnings--"
+        for warning_message in reductionist.validator.warning_messages:
+            print '\n{msg}'.format(msg=warning_message)
+    return "Indexing grammar..."
 
 
 if __name__ == '__main__':

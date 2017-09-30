@@ -435,7 +435,7 @@ YES, in all caps")
 
     saveGrammar: function () {
 
-        var filename = window.prompt("Enter the Name of file you wish to Save Grammar to")
+        var filename = window.prompt("Enter a filename for your grammar.")
         if (filename != "") {
             ajax({
                 url: $SCRIPT_ROOT + '/api/grammar/save',
@@ -448,8 +448,8 @@ YES, in all caps")
         }
     },
 
-    exportList: function () {
-        var filename = window.prompt("Enter the Name of file you wish to export to")
+    exportGrammar: function () {
+        var filename = window.prompt("Enter a filename for your content bundle.")
         if (filename != "") {
             ajax({
                 url: $SCRIPT_ROOT + '/api/grammar/export',
@@ -515,7 +515,7 @@ YES, in all caps")
                 <div
                     style={{ "height": "75%", "width": "75%", position: "absolute", top: 0, left: 0}}>
                     <HeaderBar reset={this.resetGrammar} update={this.updateFromServer}
-                               exportList={this.exportList} saveGrammar={this.saveGrammar}
+                               exportGrammar={this.exportGrammar} saveGrammar={this.saveGrammar}
                                systemVars={this.state.system_vars}/>
                     <div className="muwrap">
                         <div className="show-y-wrapper">

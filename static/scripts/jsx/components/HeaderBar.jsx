@@ -50,7 +50,7 @@ var HeaderBar = React.createClass({
                     <ButtonGroup>
                         <Button onClick={this.open.bind(this, 'showLoadModal')} bsStyle='primary'>Load</Button>
                         <Button onClick={this.props.saveGrammar} bsStyle='primary'>Save</Button>
-                        <Button onClick={this.open.bind(this, 'showModal')} bsStyle='primary'>Show System Vars</Button>
+                        <Button onClick={this.props.exportGrammar} bsStyle='primary'>Export</Button>
                         <Button onClick={this.props.reset} bsStyle='danger'>Start Over</Button>
                     </ButtonGroup>
                 </ButtonToolbar>
