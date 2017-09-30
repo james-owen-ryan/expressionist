@@ -12,7 +12,7 @@ pip install -r requirements.txt
 npm install
 npm run build
 python __init__.py
-[navigate to localhost:5000 in a web browser]
+[navigate to localhost:5000 with a web browser]
 ```
 
 ## To Develop The Front-End
