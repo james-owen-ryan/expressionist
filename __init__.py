@@ -30,7 +30,7 @@ we don't have nonlocal keywords. Make sure we modify our copy instead of make a 
 
 @app.route('/api/grammar/load_dir', methods=['GET'])
 def load_dir():
-    return jsonify(results=os.listdir(os.path.abspath(os.path.join(os.path.dirname(__file__), 'grammars/load/'))))
+    return jsonify(results=os.listdir(os.path.abspath(os.path.join(os.path.dirname(__file__), 'grammars/'))))
 
 @app.route('/api/grammar/load', methods=['POST'])
 def load_grammar():
@@ -44,7 +44,7 @@ def load_grammar():
 def load_file_grammar():
     global flask_grammar
     grammar_name = request.data
-    user_file = os.path.abspath(os.path.join(os.path.dirname(__file__), ''.join(['grammars/load/', grammar_name])))
+    user_file = os.path.abspath(os.path.join(os.path.dirname(__file__), ''.join(['grammars/', grammar_name])))
     grammar_file = open(user_file, 'r')
     if grammar_file:
         flask_grammar = PCFG.from_json(str(grammar_file.read()))
@@ -54,7 +54,7 @@ def load_file_grammar():
 @app.route('/api/grammar/save', methods=['GET', 'POST'])
 def save_grammar():
     grammar_name = request.data
-    filename = os.path.abspath(os.path.join(os.path.dirname(__file__), ''.join(['grammars/load/', grammar_name])))
+    filename = os.path.abspath(os.path.join(os.path.dirname(__file__), ''.join(['grammars/', grammar_name])))
     outfile = open(filename, 'w+')
     outfile.write(flask_grammar.to_json(to_file=True))
     return "saving new grammar"
@@ -241,6 +241,6 @@ def export():
 
 if __name__ == '__main__':
     global flask_grammar
-    flask_grammar = PCFG.from_json(str(open('./grammars/load/example.json', 'r').read()))
+    flask_grammar = PCFG.from_json(str(open('./grammars/example.json', 'r').read()))
     app.debug = debug
     app.run()
