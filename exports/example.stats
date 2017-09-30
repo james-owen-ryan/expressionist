@@ -1,0 +1,15 @@
+Total outputs	4
+Total expressible meanings	2
+Total terminal expansions of nonterminal symbols
+	i am	4
+	sad feeling	2
+	happy feeling	2
+	START	4
+Total terminal results of production rules
+	[[i am]] --> i am [[happy feeling]]	2
+	[[i am]] --> i am [[sad feeling]]	2
+	[[sad feeling]] --> a bit sad	1
+	[[sad feeling]] --> depressed	1
+	[[happy feeling]] --> ecstatic	1
+	[[happy feeling]] --> a bit happy	1
+	[[START]] --> [[i am]]	4
