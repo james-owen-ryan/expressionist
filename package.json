@@ -4,7 +4,7 @@
   "description": "First commit to an empty repo for Expressionist",
   "main": "index.js",
   "scripts": {
-    "build": "node ./node_modules/webpack/bin/webpack.js"
+    "build": "node ./node_modules/webpack/bin/webpack.js --progress --colors"
   },
   "dependencies": {
     "alt": "^0.18.6",

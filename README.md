@@ -18,3 +18,7 @@ python __init__.py
 ## To Develop The Front-End
 
 Any modifications to .jsx files: `npm run build`
+
+To reduce compile times of .jsx files: `npm run build -- --watch`
+
+(`-- --watch` will leave a daemon running in the background.)
