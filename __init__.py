@@ -33,13 +33,16 @@ we don't have nonlocal keywords. Make sure we modify our copy instead of make a 
 def load_dir():
     return jsonify(results=os.listdir(os.path.abspath(os.path.join(os.path.dirname(__file__), 'grammars/'))))
 
+@app.route('/api/load_bundles', methods=['GET'])
+def load_bundles():
+    return jsonify(results=os.listdir(os.path.abspath(os.path.join(os.path.dirname(__file__), 'exports/'))))
+
 @app.route('/api/grammar/load', methods=['POST'])
 def load_grammar():
     print request
     global flask_grammar
     flask_grammar = PCFG.from_json(str(request.data))
     return flask_grammar.to_json()
-
 
 @app.route('/api/grammar/from_file', methods=['POST'])
 def load_file_grammar():
@@ -50,7 +53,6 @@ def load_file_grammar():
     if grammar_file:
         flask_grammar = PCFG.from_json(str(grammar_file.read()))
     return flask_grammar.to_json()
-
 
 @app.route('/api/grammar/save', methods=['GET', 'POST'])
 def save_grammar():
@@ -244,6 +246,14 @@ def export():
             print '\n{msg}'.format(msg=warning_message)
         return "The grammar was successfully exported, but errors were printed to console."
     return "The grammar failed to export. Please check console for more details."
+
+@app.route('/api/grammar/tagged_content_request', methods=['POST'])
+def tagged_content_request():
+    data = request.data
+    print "--------------"
+    print data
+    print "--------------"
+    return "this is just a test."
 
 
 if __name__ == '__main__':

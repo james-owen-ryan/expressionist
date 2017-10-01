@@ -522,7 +522,7 @@ YES, in all caps")
                     style={{ "height": "75%", "width": "75%", position: "absolute", top: 0, left: 0}}>
                     <HeaderBar reset={this.resetGrammar} update={this.updateFromServer}
                                exportGrammar={this.exportGrammar} saveGrammar={this.saveGrammar}
-                               systemVars={this.state.system_vars}/>
+                               systemVars={this.state.system_vars} markups={this.state.markups}/>
                     <div className="muwrap">
                         <div className="show-y-wrapper">
                             <MarkupBar className="markup-bar" onClickMarkup={this.handleMarkupClick}
