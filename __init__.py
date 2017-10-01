@@ -10,7 +10,9 @@ from test_gram import test
 import re
 import PCFG
 import threading
+import json
 from reductionist import Reductionist
+from productionist import Productionist, ContentRequest
 
 
 app = Flask(__name__)
@@ -247,13 +249,79 @@ def export():
         return "The grammar was successfully exported, but errors were printed to console."
     return "The grammar failed to export. Please check console for more details."
 
+
 @app.route('/api/grammar/tagged_content_request', methods=['POST'])
 def tagged_content_request():
+    """Furnish generated content that satisfies an author-defined content request."""
+    # Receive the raw content request (as JSON data)
     data = request.data
-    print "--------------"
-    print data
-    print "--------------"
-    return "this is just a test."
+    # Parse the raw JSON into a dictionary
+    content_request = json.loads(data)
+    # Grab out everything we need to send to Productionist
+    content_bundle_name = content_request["bundleName"]
+    content_bundle_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), 'exports'))
+    required_tags = {tag["name"] for tag in content_request["tags"] if tag["status"] == "required"}
+    prohibited_tags = {tag["name"] for tag in content_request["tags"] if tag["status"] == "disabled"}
+    scoring_metric = [
+        (tag["name"], int(tag["frequency"])) for tag in content_request["tags"] if tag["status"] == "enabled"
+    ]
+    # Time to generate content -- prepare a Productionist accordingly
+    productionist = Productionist(
+        content_bundle_name=content_bundle_name,
+        content_bundle_directory=content_bundle_directory,
+        probabilistic_mode=True,  # TODO may want to support toggling this on and off in the authoring interface
+        repetition_penalty_mode=False,
+        terse_mode=False,
+        verbosity=0
+    )
+    # Prepare the actual ContentRequest object that Productionist will process
+    content_request = ContentRequest(
+        must_have=required_tags, must_not_have=prohibited_tags, scoring_metric=scoring_metric
+    )
+    if debug:
+        print "\n-- Attempting to fulfill the following content request:\n{}".format(content_request)
+    # Fulfill the content request to generate N outputs (each being an object of the class productionist.Output)
+    output = productionist.fulfill_content_request(content_request=content_request)
+    if debug:
+        print "\n\n-- Successfully fulfilled the content request!"
+    # Send the generated outputs back to the authoring tool as a single JSON package
+    output_as_json_package = json.dumps(output.payload)
+    return output_as_json_package
+    # JOR: Here's how the outputs are displayed in the command-line interface
+    # for i in xrange(len(outputs)):
+    #     output = outputs[i]
+    #     if args.verbosity > 0:
+    #         print "\n\n-- Successfully generated an output:"
+    #         # Print the generated output
+    #         print "\n\t{}".format(output)
+    #         # Print out all the tags attached to the generated output
+    #         print "\nThe following tags are attached to this output:"
+    #         for tag in output.tags:
+    #             print '\t{}'.format(tag)
+    #         # Print the tree expression for the generated output
+    #         print (
+    #             "\n\n-- Here's a tree expression illustrating the series of expansions "
+    #             "that produced this output:"
+    #         )
+    #         print "\n{}".format(output.tree_expression)
+    #         # Print the tagged tree expression for the generated output
+    #         print "\n\n-- Here's a tree expression that shows how the generated content got its tags:"
+    #         print "\n{}".format(output.tree_expression_with_tags)
+    #         # Print the bracketed expression for the generated output
+    #         print (
+    #             "\n\n-- Here's a bracketed expression that more economically illustrates "
+    #             "the derivation of the content:"
+    #         )
+    #         print "\n{}".format(output.bracketed_expression)
+    #         print '\n\n'
+    #     else:
+    #         print "#{n}".format(n=i + 1)
+    #         print "--Output--\n{output}".format(output=str(output))
+    #         # Note: For this one, we must either prevent commas in tag names or use a different delimiter
+    #         print "--Tags--\n{tags}".format(tags=','.join(output.tags))
+    #         print "--Bracketed expression--\n{expression}".format(expression=output.bracketed_expression)
+    #         print "--Tree expression--\n{expression}".format(expression=output.tree_expression)
+    #         print "--Tree expression (with tags)--\n{expression}".format(expression=output.tree_expression_with_tags)
 
 
 if __name__ == '__main__':
