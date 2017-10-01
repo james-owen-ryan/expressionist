@@ -282,11 +282,15 @@ def tagged_content_request():
         print "\n-- Attempting to fulfill the following content request:\n{}".format(content_request)
     # Fulfill the content request to generate N outputs (each being an object of the class productionist.Output)
     output = productionist.fulfill_content_request(content_request=content_request)
+    if output:
+        if debug:
+            print "\n\n-- Successfully fulfilled the content request!"
+        # Send the generated outputs back to the authoring tool as a single JSON package
+        output_as_json_package = json.dumps(output.payload)
+        return output_as_json_package
     if debug:
-        print "\n\n-- Successfully fulfilled the content request!"
-    # Send the generated outputs back to the authoring tool as a single JSON package
-    output_as_json_package = json.dumps(output.payload)
-    return output_as_json_package
+        print "\n\n-- The content request cannot be satisfied by the exported content bundle."
+    return "The content request cannot be satisfied by the exported content bundle."
     # JOR: Here's how the outputs are displayed in the command-line interface
     # for i in xrange(len(outputs)):
     #     output = outputs[i]

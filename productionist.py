@@ -66,31 +66,11 @@ class Productionist(object):
         # rule that increases each time the rule is used and decays as the rule is not used
         self.repetition_penalty_mode = repetition_penalty_mode
         if repetition_penalty_mode:
-            if HAVE_REPETITIONS_FILE_PERSIST_ACROSS_RUNTIME_INSTANCES:
-                # Check to see if a repetitions file has already been generated for this grammar (from a prior
-                # generation instance); repetition files are saved as serialized (pickled) Python dictionaries
-                try:
-                    path_to_repetitions_file = '{path}.repetitions'.format(path=content_bundle_directory[:-5])
-                    repetitions_file = open(path_to_repetitions_file, 'rb')
-                    self.repetition_penalties = pickle.load(repetitions_file)
-                    # Make sure the grammar hasn't been modified since this repetitions file was last saved
-                    assert os.path.getmtime(path_to_repetitions_file) > os.path.getmtime(content_bundle_directory), None
-                    if self.verbosity > 0:
-                        print "Loading repetitions file..."
-                except (IOError, AssertionError):
-                    # Time to initialize a new repetition-penalties dictionary; later, we'll save this so that
-                    # it can persist for use during any subsequent generation instances from this same grammar
-                    self.repetition_penalties = {
-                        str(symbol): 1.0 for symbol in self.grammar.nonterminal_symbols+self.grammar.terminal_symbols
-                    }
-                    if self.verbosity > 0:
-                        print "Could not load repetitions dictionary -- initializing new one..."
-            else:
-                self.repetition_penalties = {
-                    str(symbol): 1.0 for symbol in self.grammar.nonterminal_symbols+self.grammar.terminal_symbols
-                }
-                if self.verbosity > 0:
-                    print "Initializing new repetitions dictionary..."
+            self.repetition_penalties = {
+                str(symbol): 1.0 for symbol in self.grammar.nonterminal_symbols+self.grammar.terminal_symbols
+            }
+            if self.verbosity > 0:
+                print "Initializing new repetitions dictionary..."
         else:
             self.repetition_penalties = {}
         # In terse mode, the system will favor production rules that may produce terser dialogue
@@ -217,10 +197,9 @@ class Productionist(object):
         satisficing_expressible_meanings = self._compile_satisficing_expressible_meanings(
             content_request=content_request
         )
-        # If there's no satisficing content requests, throw an error
-        assert satisficing_expressible_meanings, (
-            "Error: The submitted content request cannot be fulfilled by using this grammar."
-        )
+        # If there's no satisficing content requests, return None
+        if not satisficing_expressible_meanings:
+            return None
         # Select one of these to target for generation, either randomly or by using the scoring metric
         # given in the content request
         selected_expressible_meaning = self._select_expressible_meaning(
