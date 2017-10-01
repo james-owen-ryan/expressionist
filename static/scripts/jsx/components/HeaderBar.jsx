@@ -66,7 +66,7 @@ var HeaderBar = React.createClass({
             return {
                 name: tag,
                 frequency: 1, // Assume the user wants all tags weighted equally.
-                enabled: true
+                status: 'required'
             }
         })
     },
@@ -75,7 +75,7 @@ var HeaderBar = React.createClass({
         this.setState({tags: this.processMarkups(nextProps.markups)})
     },
 
-    toggleTagSetEnabled: function(tagset){
+    toggleTagSetStatus: function(tagset){
         var tagsetTags = this.props.markups[tagset];
         var updated = this.state.tags.map(function (tagObj){
             for (var i = 0; i < tagsetTags.length; i++){
@@ -83,12 +83,12 @@ var HeaderBar = React.createClass({
                     return {
                         name: tagObj.name,
                         frequency: tagObj.frequency,
-                        enabled: !tagObj.enabled
+                        status: this.cycleStatus(tagObj.status)
                     }
                 }
             }
             return tagObj;
-        });
+        }.bind(this));
         this.setState({tags: updated});
     },
 
@@ -98,14 +98,14 @@ var HeaderBar = React.createClass({
                 return {
                     name: tagObj.name,
                     frequency: e.target.value,
-                    enabled: tagObj.enabled
+                    status: tagObj.status
                 }
             }else{ return tagObj; }
         });
         this.setState({tags: updated});
     },
 
-    toggleTagEnabled: function(tag){
+    toggleTagStatus: function(tag){
         // only toggle if the active element is a ListGroupItem.
         if (!document.activeElement.classList.contains("list-group-item")){
             return false;
@@ -115,10 +115,10 @@ var HeaderBar = React.createClass({
                 return {
                     name: tagObj.name,
                     frequency: tagObj.frequency,
-                    enabled: !tagObj.enabled
+                    status: this.cycleStatus(tagObj.status)
                 }
             }else{ return tagObj; }
-        });
+        }.bind(this));
         this.setState({tags: updated});
     },
 
@@ -126,13 +126,52 @@ var HeaderBar = React.createClass({
         return this.state.tags.find(tagObj => { return tagObj.name == tag })[data];
     },
 
+    getTagColorFromStatus: function(currentStatus){
+        if (currentStatus == 'required'){
+            return 'success'
+        }
+        else if (currentStatus == 'enabled'){
+            return 'warning'
+        }
+        // assume currentStatus = 'disabled'
+        return 'danger'
+    },
+
+    cycleStatus: function(currentStatus){
+        if (currentStatus == 'required'){
+            return 'enabled'
+        }
+        else if (currentStatus == 'enabled'){
+            return 'disabled'
+        }
+        // assume currentStatus = 'disabled'
+        return 'required'
+    },
+
     sendTaggedContentRequest: function(){
+        // Productionist requires tags to be formatted as `tagset:tag` strings.
+        // However, this.state.tags is only a list of objects with no ref to their set.
+        var forProductionist = this.state.tags.map(function (tagObj){
+            var tagsets = Object.keys(this.props.markups);
+            for (var i = 0; i < tagsets.length; i++){
+                var tagsetTags = this.props.markups[tagsets[i]]
+                var tagObjIsInTagsetTags = tagsetTags.filter(function(t){ return t == tagObj.name }).length == 1
+                if (tagObjIsInTagsetTags){
+                    return {
+                        name: tagsets[i]+":"+tagObj.name,
+                        frequency: tagObj.frequency,
+                        status: tagObj.status
+                    }
+                }
+            }
+            return "[HeaderBar.sendTaggedContentRequest] A tag was sent without finding its tag set."
+        }.bind(this));
         ajax({
             url: $SCRIPT_ROOT + '/api/grammar/tagged_content_request',
             type: "POST",
             contentType: "application/json",
             data: JSON.stringify({
-                tags: this.state.tags,
+                tags: forProductionist,
                 bundleName: this.state.bundleName
             }),
             async: true,
@@ -203,7 +242,7 @@ var HeaderBar = React.createClass({
                                         <ListGroupItem bsSize="xsmall" key={tagset} style={{border: 'none'}}>
                                             <ListGroupItem  title={tagset}
                                                             bsSize="xsmall"
-                                                            onClick={this.toggleTagSetEnabled.bind(this, tagset)}>
+                                                            onClick={this.toggleTagSetStatus.bind(this, tagset)}>
                                                             {tagset}
                                             </ListGroupItem>
                                             {
@@ -212,14 +251,14 @@ var HeaderBar = React.createClass({
                                                         <div>
                                                             <ListGroupItem  title={tag}
                                                                             bsSize="xsmall"
-                                                                            bsStyle={this.getTagData(tag, "enabled") ? "success" : "danger"}
-                                                                            onClick={this.toggleTagEnabled.bind(this, tag)}>
+                                                                            bsStyle={this.getTagColorFromStatus(this.getTagData(tag, "status"))}
+                                                                            onClick={this.toggleTagStatus.bind(this, tag)}>
                                                                             {tag}
                                                                             <FormControl    type="number"
                                                                                             id={tag}
                                                                                             value={this.getTagData(tag, "frequency")}
                                                                                             onChange={this.updateTagFrequency}
-                                                                                            style={this.getTagData(tag, "enabled") ? {display: 'inline'} : {display: 'none'}}
+                                                                                            style={this.getTagData(tag, "status") == 'enabled' ? {display: 'inline'} : {display: 'none'}}
                                                                             />
                                                             </ListGroupItem>
                                                         </div>
