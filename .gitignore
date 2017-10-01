@@ -2,5 +2,9 @@ node_modules
 venv
 static/scripts/build
 *.pyc
-grammars/load/*
-!grammars/load/example.json
+grammars/*
+!grammars/example.json
+exports/*
+!exports/example.grammar
+!exports/example.meanings
+!exports/example.stats
