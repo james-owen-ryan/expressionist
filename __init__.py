@@ -1,4 +1,5 @@
 import os
+import sys
 from flask import Flask, render_template, request
 from flask import jsonify
 import webbrowser
@@ -54,10 +55,14 @@ def load_file_grammar():
 @app.route('/api/grammar/save', methods=['GET', 'POST'])
 def save_grammar():
     grammar_name = request.data
-    filename = os.path.abspath(os.path.join(os.path.dirname(__file__), ''.join(['grammars/', grammar_name])))
-    outfile = open(filename, 'w+')
-    outfile.write(flask_grammar.to_json(to_file=True))
-    return "saving new grammar"
+    try:
+        filename = os.path.abspath(os.path.join(os.path.dirname(__file__), ''.join(['grammars/', grammar_name])))
+        outfile = open(filename, 'w+')
+        outfile.write(flask_grammar.to_json(to_file=True))
+    except:
+        print sys.exc_info()[0]
+        return "Unable to save the grammar. Please check console for more details."
+    return "The grammar was successfully saved."
 
 
 @app.route('/api/grammar/new', methods=['GET'])
@@ -228,6 +233,7 @@ def export():
             n=reductionist.total_generable_outputs,
             m=len(reductionist.expressible_meanings)
         )
+        return "The grammar was successfully exported."
     else:
         print "\n--Errors--"
         for error_message in reductionist.validator.error_messages:
@@ -236,7 +242,8 @@ def export():
         print "\n--Warnings--"
         for warning_message in reductionist.validator.warning_messages:
             print '\n{msg}'.format(msg=warning_message)
-    return "Indexing grammar..."
+        return "The grammar was successfully exported, but errors were printed to console."
+    return "The grammar failed to export. Please check console for more details."
 
 
 if __name__ == '__main__':

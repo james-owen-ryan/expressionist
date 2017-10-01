@@ -443,7 +443,10 @@ YES, in all caps")
                 contentType: "text/plain",
                 data: filename,
                 async: true,
-                cache: false
+                cache: false,
+                success: function(status){
+                    window.alert(status);
+                }
             })
         }
     },
@@ -457,7 +460,10 @@ YES, in all caps")
                 contentType: "text/plain",
                 data: filename,
                 async: true,
-                cache: false
+                cache: false,
+                success: function(status){
+                    window.alert(status);
+                }
             })
         }
     },
