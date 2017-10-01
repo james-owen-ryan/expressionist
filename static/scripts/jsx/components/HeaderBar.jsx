@@ -65,8 +65,8 @@ var HeaderBar = React.createClass({
         return flattened.map(function (tag){
             return {
                 name: tag,
-                frequency: 1, // Assume the user wants all tags weighted equally.
-                status: 'required'
+                frequency: 0, // Assume the user wants all tags weighted equally.
+                status: 'enabled'
             }
         })
     },
