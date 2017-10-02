@@ -468,6 +468,23 @@ YES, in all caps")
         }
     },
 
+    buildProductionist: function () {
+        var contentBundleName = window.prompt("Enter the name of the content bundle that you'd like to build a generator for.")
+        if (contentBundleName != "") {
+            ajax({
+                url: $SCRIPT_ROOT + '/api/grammar/build',
+                type: "POST",
+                contentType: "text/plain",
+                data: contentBundleName,
+                async: true,
+                cache: false,
+                success: function(status){
+                    window.alert(status);
+                }
+            })
+        }
+    },
+
     getexpansion: function(object) {
         var symbol = object['symbol']
         var index = object['index']
@@ -522,6 +539,7 @@ YES, in all caps")
                     style={{ "height": "75%", "width": "75%", position: "absolute", top: 0, left: 0}}>
                     <HeaderBar reset={this.resetGrammar} update={this.updateFromServer}
                                exportGrammar={this.exportGrammar} saveGrammar={this.saveGrammar}
+                               buildProductionist={this.buildProductionist}
                                systemVars={this.state.system_vars} markups={this.state.markups}/>
                     <div className="muwrap">
                         <div className="show-y-wrapper">

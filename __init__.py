@@ -224,12 +224,12 @@ def export():
         content_bundle_name = content_bundle_name[:-5]
     output_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'exports'))
     output_path_and_filename = "{}/{}".format(output_path, content_bundle_name)
-    # Index the grammar and save out the resulting files (Productionist-format grammar file [.grammar] and
-    # expressible meanings file [.meanings])
+    # Index the grammar and save out the resulting files (Productionist-format grammar file [.grammar],
+    # trie file (.marisa), and expressible meanings file [.meanings])
     reductionist = Reductionist(
         raw_grammar_json=flask_grammar.to_json(to_file=True),  # JOR: I'm not sure what to_file actually does
         path_to_write_output_files_to=output_path_and_filename,
-        trie_output=False,
+        trie_output=True,
         verbosity=0 if debug is False else 2
     )
     if not reductionist.validator.errors:
@@ -247,7 +247,27 @@ def export():
         for warning_message in reductionist.validator.warning_messages:
             print '\n{msg}'.format(msg=warning_message)
         return "The grammar was successfully exported, but errors were printed to console."
-    return "The grammar failed to export. Please check console for more details."
+    return "The grammar failed to export. Please check the console for more details."
+
+
+@app.route('/api/grammar/build', methods=['GET', 'POST'])
+def build_productionist():
+    """Build a Productionist by processing an exported content bundle."""
+    if debug:
+        print "\n-- Building a Productionist..."
+    # Grab the name the user gave for the content bundle
+    content_bundle_name = request.data
+    content_bundle_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), 'exports'))
+    # Keep the Productionist on hand as an attribute of the web-app object
+    app.productionist = Productionist(
+        content_bundle_name=content_bundle_name,
+        content_bundle_directory=content_bundle_directory,
+        probabilistic_mode=True,  # TODO may want to support toggling this on and off in the authoring interface
+        repetition_penalty_mode=False,
+        terse_mode=False,
+        verbosity=0
+    )
+    return "Successfully built a content generator."
 
 
 @app.route('/api/grammar/tagged_content_request', methods=['POST'])
@@ -258,32 +278,19 @@ def tagged_content_request():
     # Parse the raw JSON into a dictionary
     content_request = json.loads(data)
     # Grab out everything we need to send to Productionist
-    content_bundle_name = content_request["bundleName"]
-    content_bundle_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), 'exports'))
     required_tags = {tag["name"] for tag in content_request["tags"] if tag["status"] == "required"}
     prohibited_tags = {tag["name"] for tag in content_request["tags"] if tag["status"] == "disabled"}
     scoring_metric = [
         (tag["name"], int(tag["frequency"])) for tag in content_request["tags"] if tag["status"] == "enabled"
     ]
-    # Time to generate content -- prepare a Productionist accordingly
-    if debug:
-        print "\n-- Building a Productionist..."
-    productionist = Productionist(
-        content_bundle_name=content_bundle_name,
-        content_bundle_directory=content_bundle_directory,
-        probabilistic_mode=True,  # TODO may want to support toggling this on and off in the authoring interface
-        repetition_penalty_mode=False,
-        terse_mode=False,
-        verbosity=0
-    )
-    # Prepare the actual ContentRequest object that Productionist will process
+    # Time to generate content; prepare the actual ContentRequest object that Productionist will process
     content_request = ContentRequest(
         must_have=required_tags, must_not_have=prohibited_tags, scoring_metric=scoring_metric
     )
     if debug:
         print "\n-- Attempting to fulfill the following content request:\n{}".format(content_request)
     # Fulfill the content request to generate N outputs (each being an object of the class productionist.Output)
-    output = productionist.fulfill_content_request(content_request=content_request)
+    output = app.productionist.fulfill_content_request(content_request=content_request)
     if output:
         if debug:
             print "\n\n-- Successfully fulfilled the content request!"
@@ -333,5 +340,6 @@ def tagged_content_request():
 if __name__ == '__main__':
     global flask_grammar
     flask_grammar = PCFG.from_json(str(open('./grammars/example.json', 'r').read()))
+    app.productionist = None  # Gets set upon export
     app.debug = debug
     app.run()
