@@ -233,7 +233,7 @@ class Reductionist(object):
         """Save a built trie to a file."""
         if self.verbosity > 0:
             print "Saving trie..."
-            self.trie.save(trie_file_location)
+        self.trie.save(trie_file_location)
 
     def _construct_expressible_meanings(self):
         """Construct a set of expressible meanings that may be used to drive content generation.
