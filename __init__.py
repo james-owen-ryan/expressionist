@@ -266,6 +266,8 @@ def tagged_content_request():
         (tag["name"], int(tag["frequency"])) for tag in content_request["tags"] if tag["status"] == "enabled"
     ]
     # Time to generate content -- prepare a Productionist accordingly
+    if debug:
+        print "\n-- Building a Productionist..."
     productionist = Productionist(
         content_bundle_name=content_bundle_name,
         content_bundle_directory=content_bundle_directory,
