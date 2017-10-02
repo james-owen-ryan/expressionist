@@ -129,7 +129,7 @@ class Productionist(object):
         for line in f.readlines():
             meaning_id, all_paths_str, all_tags_str = line.strip('\n').split('\t')
             if self.trie:
-                path_trie_keys = [int(path_trie_key) for path_trie_key in all_paths_str.split(',')]
+                path_trie_keys = [int(path_trie_key) for path_trie_key in all_paths_str.split('|')]
                 recipes = [self.trie.restore_key(path_trie_key) for path_trie_key in path_trie_keys]
             else:
                 recipes = []
@@ -362,7 +362,7 @@ class Productionist(object):
         # doesn't pass through any symbols with tags; in this case, Productionist can just select
         # between production rules that are not semantically meaningful until it's ground out into
         # a terminal expansion
-        path = [self.grammar.production_rules[rule_id] for rule_id in recipe.path]
+        path = [self.grammar.production_rules[int(rule_id)] for rule_id in recipe.path.split(',')]
         score = sum(self._score_candidate_production_rule(rule) for rule in path)
         return score
 
@@ -399,7 +399,7 @@ class Productionist(object):
         # doesn't pass through any symbols with tags; in this case, Productionist can just randomly
         # select production rules that are not semantically meaningful until it's ground out into
         # a terminal expansion
-        path = [self.grammar.production_rules[rule_id] for rule_id in recipe.path]
+        path = [self.grammar.production_rules[int(rule_id)] for rule_id in recipe.path.split(',')]
         # Keep this list handy as the list of remaining rules to execute -- we'll
         # be consuming this as we proceed
         self.remaining_path = list(path)

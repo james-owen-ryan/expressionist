@@ -288,11 +288,15 @@ class Reductionist(object):
         """Save a set of constructed expressible meanings to a file."""
         if self.verbosity > 0:
             print "Saving expressible meanings file..."
-        print expressible_meanings_file_location
         f = open(expressible_meanings_file_location, 'w')
         tag_to_id = self.grammar.tag_to_id
         for expressible_meaning in self.expressible_meanings:
-            all_paths_str = '|'.join(expressible_meaning.grammar_paths)
+            if not self.trie_output:
+                all_paths_str = '|'.join(
+                    self.trie.restore_key(path_trie_key) for path_trie_key in expressible_meaning.grammar_paths
+                )
+            else:
+                all_paths_str = '|'.join(str(path_trie_key) for path_trie_key in expressible_meaning.grammar_paths)
             all_tags_str = ','.join(tag_to_id[tag] for tag in expressible_meaning.tags)
             line = "{meaning_id}\t{paths}\t{tags}\n".format(
                 meaning_id=expressible_meaning.id, paths=all_paths_str, tags=all_tags_str
