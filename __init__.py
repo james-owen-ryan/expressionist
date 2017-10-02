@@ -253,8 +253,7 @@ def export():
 @app.route('/api/grammar/build', methods=['GET', 'POST'])
 def build_productionist():
     """Build a Productionist by processing an exported content bundle."""
-    if debug:
-        print "\n-- Building a Productionist..."
+    print "\n-- Building a Productionist..."
     # Grab the name the user gave for the content bundle
     content_bundle_name = request.data
     content_bundle_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), 'exports'))
@@ -287,18 +286,15 @@ def tagged_content_request():
     content_request = ContentRequest(
         must_have=required_tags, must_not_have=prohibited_tags, scoring_metric=scoring_metric
     )
-    if debug:
-        print "\n-- Attempting to fulfill the following content request:\n{}".format(content_request)
+    print "\n-- Attempting to fulfill the following content request:\n{}".format(content_request)
     # Fulfill the content request to generate N outputs (each being an object of the class productionist.Output)
     output = app.productionist.fulfill_content_request(content_request=content_request)
     if output:
-        if debug:
-            print "\n\n-- Successfully fulfilled the content request!"
+        print "\n\n-- Successfully fulfilled the content request!"
         # Send the generated outputs back to the authoring tool as a single JSON package
         output_as_json_package = json.dumps(output.payload)
         return output_as_json_package
-    if debug:
-        print "\n\n-- The content request cannot be satisfied by the exported content bundle."
+    print "\n\n-- The content request cannot be satisfied by the exported content bundle."
     return "The content request cannot be satisfied by the exported content bundle."
     # JOR: Here's how the outputs are displayed in the command-line interface
     # for i in xrange(len(outputs)):
