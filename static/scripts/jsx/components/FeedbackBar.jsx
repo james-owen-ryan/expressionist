@@ -23,12 +23,12 @@ var FeedbackBar = React.createClass({
             <div id="feedback" style={{"height": "75%", "width": "100%"}}>
 
                 <div id="Derivation"
-                     style={{"background-color": "#fff", "border": "5px solid #f2f2f2", "border-right": "0px solid #fff", "border-right": "0px solid #fff", "float": "left", "height": "110%", "width": "50%", "overflow": "auto", "padding": "10px"}}>
+                     style={{"background-color": "#fff", "border": "5px solid #f2f2f2", "border-right": "0px solid #fff", "border-bottom": "0px solid #fff", "float": "left", "height": "110%", "width": "50%", "overflow": "auto", "padding": "10px"}}>
                     {derivation_str}
                 </div>
 
                 <div id="Markup"
-                     style={{"background-color": "#fff", "border": "5px solid #f2f2f2", "border-right": "0px solid #fff", "border-right": "0px solid #fff", "height": "110%", "float": "left", "width": "50%", "overflow": "auto", "padding": "10px"}}>
+                     style={{"background-color": "#fff", "border": "5px solid #f2f2f2", "border-right": "0px solid #fff", "border-bottom": "0px solid #fff", "height": "110%", "float": "left", "width": "50%", "overflow": "auto", "padding": "10px"}}>
                     <p dangerouslySetInnerHTML={{__html: markups_str}}></p>
                 </div>
 
