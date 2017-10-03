@@ -556,7 +556,7 @@ YES, in all caps")
                 </div>
 
                 <div
-                    style={{"overflow": "auto", "width": "25%", "height":"100%", position: "absolute", top: 0, right: 0, "border": "5px solid #f2f2f2", "border-bottom": "0px"}}>
+                    style={{"overflow": "auto", "width": "25%", "height":"100%", position: "absolute", top: 0, right: 0, "border": "10px solid #f2f2f2"}}>
                     <NonterminalList    nonterminals={this.state.nonterminals} 
                                         addNonterminalUpdate={this.addNonterminalUpdate}
                                         clickNonterminalUpdate={this.clickNonterminalUpdate}>
