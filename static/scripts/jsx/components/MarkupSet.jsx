@@ -51,10 +51,10 @@ var MarkupSet = React.createClass({
 
         console.log(this.props)
         out_arr.push(<MenuItem bsStyle='primary' key={total_length+1} eventkey={total_length+1}
-          onClick={this.props.onRenameMarkupSet.bind(null, tagset_rep)}>Rename MarkupSet</MenuItem>);
+          onClick={this.props.onRenameMarkupSet.bind(null, tagset_rep)}>Rename Tagset</MenuItem>);
 
         out_arr.push(<MenuItem bsStyle='primary' key={total_length+2} eventkey={total_length+2}
-          onClick={this.props.onRenameMarkup.bind(null, tagset_rep)}>Rename Tags</MenuItem>);
+          onClick={this.props.onRenameMarkup.bind(null, tagset_rep)}>Rename Tag</MenuItem>);
 
         return (
             <DropdownButton className="grp-button" id={this.props.name} title={this.props.name}
