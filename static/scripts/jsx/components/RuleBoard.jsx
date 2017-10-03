@@ -27,8 +27,7 @@ var RuleBoard = React.createClass({
             symbol = this.props.expansion[i]
             if (symbol.indexOf('[[') != -1) {
                 var tag = symbol.slice(2,-2);
-                //console.log(tag)
-                expansion_arr.push(<span onClick={this.props.onRuleClickThrough.bind(null, symbol.slice(2,-2))}>
+                expansion_arr.push(<span style={{"cursor": "pointer"}} onClick={this.props.onRuleClickThrough.bind(null, symbol.slice(2,-2))}>
                 <b>{symbol}</b></span>)
             }
             else

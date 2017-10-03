@@ -556,14 +556,14 @@ YES, in all caps")
                 </div>
 
                 <div
-                    style={{"overflow": "auto", "width": "25%", "height":"100%", position: "absolute", top: 0, right: 0}}>
+                    style={{"overflow": "auto", "width": "25%", "height":"100%", position: "absolute", top: 0, right: 0, "border": "5px solid #f2f2f2", "border-bottom": "0px"}}>
                     <NonterminalList    nonterminals={this.state.nonterminals} 
                                         addNonterminalUpdate={this.addNonterminalUpdate}
                                         clickNonterminalUpdate={this.clickNonterminalUpdate}>
                     </NonterminalList>
                 </div>
 
-                <div style={{"width": "75%", "height": "25%", position: "absolute", bottom: 0, left:0}}>
+                <div style={{"width": "75%", "height": "40%", position: "absolute", bottom: 0, left:0}}>
                     <div className="muwrap">
                         <RuleBar rules={def_rules} onRuleClick={this.handleRuleClick} nonterminals={this.state.nonterminals}
                                  name={this.state.current_nonterminal} ruleAddUpdate={this.ruleAddUpdate}/>

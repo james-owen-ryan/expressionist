@@ -22,7 +22,7 @@ var MarkupSet = React.createClass({
 
 
         var successStyle = {
-            backgroundColor: "#5cb85c",
+            backgroundColor: "57F7E0",
         }
         var tmp_sort = this.props.current_set
         tmp_sort.sort()

@@ -209,7 +209,9 @@ var HeaderBar = React.createClass({
     render: function () {
         const instructionsPopover = (
             <Popover id="instructions-popover" title="Instructions">
-                Enter a the bundle name of an exported file (the prefix to the three generated files). Select which tags to search for. Adjust the frequency at which these tags are selected.
+                Test your grammar by forming example content requests and carrying out targeted generation.
+                Select which tags are required (green), which tags are prohibited (red), and specify the
+                desirability of the rest (yellow).
             </Popover>
         )
         return (
@@ -220,22 +222,15 @@ var HeaderBar = React.createClass({
                         <Button onClick={this.props.saveGrammar} bsStyle='primary'>Save</Button>
                         <Button onClick={this.props.exportGrammar} bsStyle='primary'>Export</Button>
                         <Button onClick={this.props.buildProductionist} bsStyle='primary'>Build</Button>
-                        <Button onClick={this.openGenerateModal} bsStyle='primary'>Generate</Button>
+                        <Button onClick={this.openGenerateModal} bsStyle='primary'>Test</Button>
                         <Button onClick={this.props.reset} bsStyle='danger'>New</Button>
                     </ButtonGroup>
                 </ButtonToolbar>
                 <Modal show={this.state.showGenerateModal} onHide={this.close.bind(this, 'showGenerateModal')}>
                     <Modal.Header closeButton>
-                        <Modal.Title>Generate Content &emsp; <OverlayTrigger overlay={instructionsPopover}><Glyphicon glyph="info-sign" /></OverlayTrigger></Modal.Title>
+                        <Modal.Title>Targeted Generation &emsp; <OverlayTrigger overlay={instructionsPopover}><Glyphicon glyph="info-sign" /></OverlayTrigger></Modal.Title>
                     </Modal.Header>
                     <div id="tags">
-                        <FormGroup>
-                            &emsp;&ensp;<ControlLabel style={this.state.bundleNameMatches ? {marginTop: '10px', color: "#3c763d"} : {marginTop: '10px', color: "#a94442"} }>Bundle Name</ControlLabel>
-                            <FormControl    type="text"
-                                            value={this.state.bundleName}
-                                            onChange={this.updateBundleName}
-                                            style={{width: '200px', display: 'block', marginLeft: "15px"}}/>
-                        </FormGroup>
                         <ListGroup id='tagsList' style={{marginBottom: '0px'}}>
                             {
                                 Object.keys(this.props.markups).map(function (tagset){
@@ -283,7 +278,7 @@ var HeaderBar = React.createClass({
                         {   this.state.grammarFileNames.map(function (filename) {
                                 return (
                                     <button className='list-group-item list-group-item-xs nonterminal' 
-                                    style={{'margin':'0', 'border':'1px solid #ddd'}} 
+                                    style={{'margin':'0', 'border':'0px solid #ddd'}}
                                     onClick={this.load.bind(this, filename)} key={filename}>{filename}
                                     </button>
                                 )

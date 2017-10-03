@@ -85,7 +85,7 @@ var NonterminalList = React.createClass({
                                 onChange={this.updateList} 
                                 value={this.state.searchVal}
                                 style={{'width': '100%'}}
-                                placeholder='Search for nonterminals by name'/>
+                                placeholder='Filter by symbol name'/>
                     </ListGroupItem>
                     {   nonterminals.map((name) => {
                             var complete = this.props.nonterminals[name].complete;

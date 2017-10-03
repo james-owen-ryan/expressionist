@@ -5,6 +5,7 @@ var Button = require('react-bootstrap').Button
 var ButtonGroup = require('react-bootstrap').ButtonGroup
 var Modal = require('react-bootstrap').Modal
 var ajax = require('jquery').ajax
+var Glyphicon = require('react-bootstrap').Glyphicon
 
 var RuleBar = React.createClass({
     getInitialState() {
@@ -93,20 +94,21 @@ var RuleBar = React.createClass({
             <div>
                 <div className="btn-test">
                     <ButtonGroup>
-                        <Button onClick={this.openModal} key="addnew">Add a Rule!</Button>
+                        <Button onClick={this.openModal} key="addnew"><Glyphicon
+              glyph="plus"/></Button>
                         {rules}
                     </ButtonGroup>
                 </div>
                 <Modal show={this.state.showModal} onHide={this.closeModal}>
                     <Modal.Header closeButton>
-                        <Modal.Title>Add A New Rule</Modal.Title>
+                        <Modal.Title>Rule Definition</Modal.Title>
                     </Modal.Header>
-                    <div id='nonterminalsListModal' style={{'overflowY': 'scroll', 'marginBottom': '15px', 'borderBottomStyle': 'solid', 'height': '400px'}}>
+                    <div id='nonterminalsListModal' style={{'overflowY': 'scroll', 'marginBottom': '15px', 'borderBottomStyle': 'solid', 'height': '200px'}}>
                         {   Object.keys(this.props.nonterminals).map((name) => {
                                 var color = this.props.nonterminals[name].complete ? "success" : "danger" 
                                 return (
                                     <button className={'list-group-item list-group-item-xs nonterminal list-group-item-'.concat(color)} 
-                                    style={{'margin':'0', 'border':'1px solid #ddd'}} 
+                                    style={{'margin':'0', 'border':'0px'}}
                                     onClick={this.addToRuleExpansion.bind(this, name)} key={name}>{name}
                                     </button>
                                 )
@@ -114,13 +116,13 @@ var RuleBar = React.createClass({
                         }
                     </div>
                     <div style={{'textAlign': 'center'}}>
-                        <p style={{'fontWeight': '300', 'fontSize': '16px'}}>Rule Expansion</p> 
+                        <p style={{'fontWeight': '300', 'fontSize': '16px'}}>Rewrite As</p>
                         <input id='ruleExpansionInput' type='text'
                             value={this.state.ruleExpansionInputVal} onChange={this.updateRuleExpansionInputVal}
-                            style={{'width': '90%', 'border': '1px solid #d7d7d7', 'height': '43px', 'marginTop': '10px', 'marginBottom': '15px', 'fontSize': '18px', 'padding': '0 12px'}}/>
+                            style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '43px', 'marginTop': '10px', 'marginBottom': '15px', 'fontSize': '18px', 'padding': '0 12px'}}/>
                         <p style={{'fontWeight': '300', 'fontSize': '16px'}}>Application Rate</p>
                         <input id='appRateModal' type='text' onChange={this.updateApplicationRate} value={this.state.ruleApplicationRate}
-                        style={{'width': '90%', 'border': '1px solid #d7d7d7', 'height': '43px', 'marginBottom': '25px', 'fontSize': '18px', 'padding': '0 12px'}}/>
+                        style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '43px', 'marginBottom': '25px', 'fontSize': '18px', 'padding': '0 12px'}}/>
                         <Button bsStyle="primary" bsSize="large" style={{'marginBottom': '25px'}} onClick={this.addRule}>Add Rule</Button>
                     </div>
                 </Modal>
