@@ -218,12 +218,12 @@ var HeaderBar = React.createClass({
             <div>
                 <ButtonToolbar>
                     <ButtonGroup>
+                        <Button onClick={this.props.reset} bsStyle='danger'>New</Button>
                         <Button onClick={this.open.bind(this, 'showLoadModal')} bsStyle='primary'>Load</Button>
                         <Button onClick={this.props.saveGrammar} bsStyle='primary'>Save</Button>
                         <Button onClick={this.props.exportGrammar} bsStyle='primary'>Export</Button>
                         <Button onClick={this.props.buildProductionist} bsStyle='primary'>Build</Button>
                         <Button onClick={this.openGenerateModal} bsStyle='primary'>Test</Button>
-                        <Button onClick={this.props.reset} bsStyle='danger'>New</Button>
                     </ButtonGroup>
                 </ButtonToolbar>
                 <Modal show={this.state.showGenerateModal} onHide={this.close.bind(this, 'showGenerateModal')}>
