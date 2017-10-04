@@ -19,7 +19,7 @@ var GenerateModal = React.createClass({
             grammarFileNames: [],
             tags: this.processMarkups(this.props.markups),
             bundleName: 'example',
-            bundleNameMatches: true
+            exportsBundleNames: []
         };
     },
 
@@ -41,6 +41,7 @@ var GenerateModal = React.createClass({
                 show: nextProps.show
             }
         )
+        this.setExportsBundleNames();
     },
 
     toggleTagSetStatus: function(tagset){
@@ -150,26 +151,29 @@ var GenerateModal = React.createClass({
         })
     },
 
-    updateBundleName: function(e){
+    setExportsBundleNames: function(){
         ajax({
             url: $SCRIPT_ROOT + '/api/load_bundles',
             type: "GET",
             contentType: "application/json",
             async: false,
             cache: false,
-            success: function(data){
-                var match = false;
-                for (var i = 0; i < data.results.length; i++){
-                    var prefix = data.results[i].substr(0, data.results[i].indexOf('.'));
-                    console.dir(prefix);
-                    if (prefix == e.target.value){
-                        match = true;
+            success: function(files){
+                var prefixes = files.results.map( f => f.substr(0, f.indexOf('.')) );
+                var uniq = prefixes.filter( (p, i) => {
+                    for (var j = 0; j < prefixes.length; j++){
+                        if (i == j){
+                            break; // Don't compare yourself to yourself!
+                        }
+                        if (prefixes[j] == p){
+                            // This filename already exists somewhere else in the array.
+                            // Get rid of this file!
+                            return false
+                        }
                     }
-                }
-                this.setState({
-                    bundleName: e.target.value,
-                    bundleNameMatches: match
-                })
+                    return true; // The filename is unique.
+                });
+                this.setState({exportsBundleNames: uniq})
             }.bind(this)
         });
     },
@@ -180,6 +184,23 @@ var GenerateModal = React.createClass({
                 Enter a the bundle name of an exported file (the prefix to the three generated files). Select which tags to search for. Adjust the frequency at which these tags are selected.
             </Popover>
         )
+        var searchExports = (
+            <Popover id="search-exports" title="Search for Bundle Name">
+                <ListGroup id='bundleList' style={{marginBottom: '0px'}}>
+                {this.state.exportsBundleNames}
+                {
+                    this.state.exportsBundleNames.map( bundleName => {
+                        <ListGroupItem  title={bundleName}
+                                        bsSize="xsmall"
+                                        onClick={this.setState.bind(this, {bundleName: bundleName})}>
+                                        {bundleName}
+                        </ListGroupItem>
+                    }.bind(this))
+                }
+                </ListGroup>
+            </Popover>
+        )
+
         return (
             <Modal show={this.state.show} onHide={this.state.onHide}>
                 <Modal.Header closeButton>
@@ -187,11 +208,12 @@ var GenerateModal = React.createClass({
                 </Modal.Header>
                 <div id="tags">
                     <FormGroup>
-                        &emsp;&ensp;<ControlLabel style={this.state.bundleNameMatches ? {marginTop: '10px', color: "#3c763d"} : {marginTop: '10px', color: "#a94442"} }>Bundle Name</ControlLabel>
+                        <ControlLabel style={{display: 'block', marginLeft: '15px', marginTop: '10px'}}>Bundle Name</ControlLabel>
                         <FormControl    type="text"
                                         value={this.state.bundleName}
                                         onChange={this.updateBundleName}
-                                        style={{width: '200px', display: 'block', marginLeft: "15px"}}/>
+                                        style={{width: '200px', display: 'inline', marginLeft: "15px"}}/>
+                        <OverlayTrigger overlay={searchExports}><Glyphicon glyph="zoom-in" style={{marginLeft: '-30px'}} /></OverlayTrigger>
                     </FormGroup>
                     <ListGroup id='tagsList' style={{marginBottom: '0px'}}>
                         {
