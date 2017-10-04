@@ -11,41 +11,85 @@ var Button = require('react-bootstrap').Button;
 var Modal = require('react-bootstrap').Modal;
 var ajax = require('jquery').ajax;
 
-var GenerateModal = React.createClass({
+var TestModal = React.createClass({
     getInitialState() {
         return {
-            show: this.props.show,
-            onHide: this.props.onHide,
             grammarFileNames: [],
-            tags: this.processMarkups(this.props.markups),
+            markups: this.getMarkupsFromBundle('example'),
+            tags: this.getTagsFromBundle('example'),
             bundleName: 'example',
-            exportsBundleNames: []
+            bundlesList: []
         };
     },
 
-    processMarkups: function(markups){
-        var flattened = Object.values(markups).reduce((a, b) => { return a.concat(b) })
-        return flattened.map(function (tag){
-            return {
-                name: tag,
-                frequency: 1, // Assume the user wants all tags weighted equally.
-                status: 'required'
-            }
+    componentWillMount: function(){
+        console.log('compmounted!')
+        ajax({
+            url: $SCRIPT_ROOT + '/api/load_bundles',
+            type: "GET",
+            async: false,
+            cache: false,
+            success: function(data){
+                this.setState({bundlesList: data.results})
+            }.bind(this)
         })
     },
 
-    componentWillReceiveProps: function (nextProps){
-        this.setState(
-            {
-                tags: this.processMarkups(nextProps.markups),
-                show: nextProps.show
+    getMarkupsFromBundle: function(bundleName){
+        var grammar = null;
+        ajax({
+            url: $SCRIPT_ROOT + '/api/load_bundle',
+            type: "POST",
+            contentType: "application/json",
+            data: bundleName,
+            async: false,
+            cache: false,
+            success: function(data){
+                grammar = JSON.parse(data);
             }
-        )
-        this.setExportsBundleNames();
+        })
+        var tagsets = {}
+        for (var i = 0; i < Object.keys(grammar.id_to_tag).length; i++){
+            var str = grammar.id_to_tag[i];
+            var tagset = str.substr(0,str.indexOf(':'));
+            var tag = str.substr(str.indexOf(':')+1);
+            if (tagsets[tagset] == undefined){
+                tagsets[tagset] = [tag];
+            }else{
+                tagsets[tagset] = tagsets[tagset].concat(tag);
+            }
+        }
+        return tagsets
+    },
+
+    getTagsFromBundle: function(bundleName){
+        var grammar = null;
+        ajax({
+            url: $SCRIPT_ROOT + '/api/load_bundle',
+            type: "POST",
+            contentType: "application/json",
+            data: bundleName,
+            async: false,
+            cache: false,
+            success: function(data){
+                grammar = data;
+            }
+        })
+        grammar = JSON.parse(grammar);
+        var tags = []
+        for (var i = 0; i < Object.keys(grammar.id_to_tag).length; i++){
+            var str = grammar.id_to_tag[i];
+            tags.push({
+                name: str.substr(str.indexOf(':')+1),
+                frequency: 1,
+                status: 'required'
+            });
+        }
+        return tags;
     },
 
     toggleTagSetStatus: function(tagset){
-        var tagsetTags = this.props.markups[tagset];
+        var tagsetTags = this.state.markups[tagset];
         var updated = this.state.tags.map(function (tagObj){
             for (var i = 0; i < tagsetTags.length; i++){
                 if (tagsetTags[i] == tagObj.name){
@@ -121,9 +165,9 @@ var GenerateModal = React.createClass({
         // Productionist requires tags to be formatted as `tagset:tag` strings.
         // However, this.state.tags is only a list of objects with no ref to their set.
         var forProductionist = this.state.tags.map(function (tagObj){
-            var tagsets = Object.keys(this.props.markups);
+            var tagsets = Object.keys(this.state.markups);
             for (var i = 0; i < tagsets.length; i++){
-                var tagsetTags = this.props.markups[tagsets[i]]
+                var tagsetTags = this.state.markups[tagsets[i]]
                 var tagObjIsInTagsetTags = tagsetTags.filter(function(t){ return t == tagObj.name }).length == 1
                 if (tagObjIsInTagsetTags){
                     return {
@@ -147,6 +191,9 @@ var GenerateModal = React.createClass({
             cache: false,
             success: function(data){
                 alert(data);
+            },
+            error: function(err){
+                alert('It seems like you have not built your Productionist grammar into memory yet. See console for more details.');
             }
         })
     },
@@ -184,40 +231,44 @@ var GenerateModal = React.createClass({
                 Enter a the bundle name of an exported file (the prefix to the three generated files). Select which tags to search for. Adjust the frequency at which these tags are selected.
             </Popover>
         )
-        var searchExports = (
+        const searchExports = (
             <Popover id="search-exports" title="Search for Bundle Name">
-                <ListGroup id='bundleList' style={{marginBottom: '0px'}}>
-                {this.state.exportsBundleNames}
+                <ListGroup id='bundlesList' style={{marginBottom: '0px', height: '400px', overflow: 'scroll'}}>
                 {
-                    this.state.exportsBundleNames.map( bundleName => {
-                        <ListGroupItem  title={bundleName}
-                                        bsSize="xsmall"
-                                        onClick={this.setState.bind(this, {bundleName: bundleName})}>
-                                        {bundleName}
-                        </ListGroupItem>
-                    }.bind(this))
+                    this.state.bundlesList
+                        .filter(b => {
+                            return b.includes('grammar')
+                        })
+                        .map( bundleName => {
+                            var noExtension = bundleName.substr(0,bundleName.indexOf('.'))
+                            return <ListGroupItem  title={noExtension}
+                                            bsSize="xsmall"
+                                            onClick={this.setState.bind(this, {bundleName: noExtension})}>
+                                            {noExtension}
+                            </ListGroupItem>
+                        })
                 }
                 </ListGroup>
             </Popover>
         )
 
         return (
-            <Modal show={this.state.show} onHide={this.state.onHide}>
+            <Modal show={this.props.show} onHide={this.props.onHide}>
                 <Modal.Header closeButton>
                     <Modal.Title>Generate Content &emsp; <OverlayTrigger overlay={instructionsPopover}><Glyphicon glyph="info-sign" /></OverlayTrigger></Modal.Title>
                 </Modal.Header>
+                <FormGroup>
+                    <ControlLabel style={{display: 'block', marginLeft: '15px', marginTop: '10px'}}>Bundle Name</ControlLabel>
+                    <FormControl    type="text"
+                                    value={this.state.bundleName}
+                                    onChange={this.updateBundleName}
+                                    style={{width: '200px', display: 'inline', marginLeft: "15px"}}/>
+                    <OverlayTrigger trigger='focus' placement='right' overlay={searchExports}><Glyphicon glyph="zoom-in" tabIndex='-1' style={{marginLeft: '-30px'}} /></OverlayTrigger>
+                </FormGroup>
                 <div id="tags">
-                    <FormGroup>
-                        <ControlLabel style={{display: 'block', marginLeft: '15px', marginTop: '10px'}}>Bundle Name</ControlLabel>
-                        <FormControl    type="text"
-                                        value={this.state.bundleName}
-                                        onChange={this.updateBundleName}
-                                        style={{width: '200px', display: 'inline', marginLeft: "15px"}}/>
-                        <OverlayTrigger overlay={searchExports}><Glyphicon glyph="zoom-in" style={{marginLeft: '-30px'}} /></OverlayTrigger>
-                    </FormGroup>
                     <ListGroup id='tagsList' style={{marginBottom: '0px'}}>
                         {
-                            Object.keys(this.props.markups).map(function (tagset){
+                            Object.keys(this.state.markups).map(function (tagset){
                                 return (
                                     <ListGroupItem bsSize="xsmall" key={tagset} style={{border: 'none'}}>
                                         <ListGroupItem  title={tagset}
@@ -226,7 +277,7 @@ var GenerateModal = React.createClass({
                                                         {tagset}
                                         </ListGroupItem>
                                         {
-                                            this.props.markups[tagset].map(function (tag){
+                                            this.state.markups[tagset].map(function (tag){
                                                 return (
                                                     <div>
                                                         <ListGroupItem  title={tag}
@@ -250,11 +301,11 @@ var GenerateModal = React.createClass({
                             }.bind(this))
                         }
                     </ListGroup>
-                    &emsp;&ensp;<Button onClick={this.sendTaggedContentRequest} bsStyle='primary' style={{marginBottom: '10px'}}>Generate!</Button>
+                    &emsp;&ensp;<Button onClick={this.sendTaggedContentRequest} bsStyle='primary' style={{marginBottom: '10px', marginTop: '10px'}}>Generate!</Button>
                 </div>
             </Modal>
         );
     }
 })
 
-module.exports = GenerateModal
+module.exports = TestModal

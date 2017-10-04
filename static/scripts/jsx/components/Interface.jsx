@@ -187,7 +187,6 @@ var Interface = React.createClass({
     },
 
     resetGrammar: function () {
-
         ajax({
             url: $SCRIPT_ROOT + '/api/grammar/new',
             type: 'GET',
@@ -468,6 +467,23 @@ YES, in all caps")
         }
     },
 
+    buildProductionist: function () {
+        var contentBundleName = window.prompt("Enter the name of the content bundle that you'd like to build a generator for.")
+        if (contentBundleName != "") {
+            ajax({
+                url: $SCRIPT_ROOT + '/api/grammar/build',
+                type: "POST",
+                contentType: "text/plain",
+                data: contentBundleName,
+                async: true,
+                cache: false,
+                success: function(status){
+                    window.alert(status);
+                }
+            })
+        }
+    },
+
     getexpansion: function(object) {
         var symbol = object['symbol']
         var index = object['index']
@@ -522,6 +538,7 @@ YES, in all caps")
                     style={{ "height": "75%", "width": "75%", position: "absolute", top: 0, left: 0}}>
                     <HeaderBar reset={this.resetGrammar} update={this.updateFromServer}
                                exportGrammar={this.exportGrammar} saveGrammar={this.saveGrammar}
+                               buildProductionist={this.buildProductionist}
                                systemVars={this.state.system_vars} markups={this.state.markups}/>
                     <div className="muwrap">
                         <div className="show-y-wrapper">
@@ -538,14 +555,14 @@ YES, in all caps")
                 </div>
 
                 <div
-                    style={{"overflow": "auto", "width": "25%", "height":"100%", position: "absolute", top: 0, right: 0}}>
+                    style={{"overflow": "auto", "width": "25%", "height":"100%", position: "absolute", top: 0, right: 0, "border": "10px solid #f2f2f2"}}>
                     <NonterminalList    nonterminals={this.state.nonterminals} 
                                         addNonterminalUpdate={this.addNonterminalUpdate}
                                         clickNonterminalUpdate={this.clickNonterminalUpdate}>
                     </NonterminalList>
                 </div>
 
-                <div style={{"width": "75%", "height": "25%", position: "absolute", bottom: 0, left:0}}>
+                <div style={{"width": "75%", "height": "40%", position: "absolute", bottom: 0, left:0}}>
                     <div className="muwrap">
                         <RuleBar rules={def_rules} onRuleClick={this.handleRuleClick} nonterminals={this.state.nonterminals}
                                  name={this.state.current_nonterminal} ruleAddUpdate={this.ruleAddUpdate}/>

@@ -31,11 +31,11 @@ var NonterminalBoard = React.createClass({
             var name = this.props.name
             var deep_str = ""
             if (this.props.nonterminal && this.props.nonterminal.deep) {
-                deep_str = name + " is a deep representation"
+                deep_str = "Toggle Top-Level"
                 glyph_nt = <Glyphicon glyph="asterisk"/>
             }
             else {
-                deep_str = name + " is NOT a deep representation"
+                deep_str = "Toggle Top-Level"
                 glyph_nt = <Glyphicon glyph="remove"/>
             }
             //console.log(this.props.referents)
@@ -46,19 +46,23 @@ var NonterminalBoard = React.createClass({
 
         return (
             <div>
-                <div style={{"width": "40%", "margin": "0 auto", "float":"left"}}>
-                    <h1><Button bsStyle={this.props.nonterminal.deep ? "success" : "danger" }
+                <div style={{"width": "70%", "margin": "0 auto", "float": "center"}}>
+                    <h1>
+                    <span style={{"padding": "5px"}}>{name}</span>
+                    <br></br>
+                    <Button bsStyle={this.props.nonterminal.deep ? "success" : "danger" }
                                          onClick={this.props.setDeep} title={deep_str}>{glyph_nt}</Button>
-                    {name}<Button onClick={this.props.expand} title="Expand This"><Glyphicon
+                    <Button onClick={this.props.expand} title="Test"><Glyphicon
                         glyph="resize-full"/></Button>
-                    <Button onClick={this.props.rename} title="Rename Nonterminal">
+                    <Button onClick={this.props.rename} title="Rename">
                         Rename</Button>
                     <Button onClick={this.props.delete_nt}
-                            title="Delete"> Delete</Button></h1>
+                            title="Delete"> Delete</Button>
+                    </h1>
                 </div>
 
-                <div style={{"width": "60%", "float": "left"}}>
-                    <Panel header="Present In" >
+                <div style={{"width": "70%", "float": "left"}}>
+                    <Panel>
                         <ListGroup style={{"maxHeight": "320", "overflowY": "auto"}}>
                             {referents}
                         </ListGroup>

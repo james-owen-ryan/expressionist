@@ -10,24 +10,16 @@ from test_gram import test
 import re
 import PCFG
 import threading
+import json
 from reductionist import Reductionist
-
+from productionist import Productionist, ContentRequest
 
 app = Flask(__name__)
 debug = False
 
-
-
-
 @app.route('/api/default', methods=['GET'])
 def default():
-    return flask_grammar.to_json()
-
-
-"""
-globals are horrible in these two, but because we're not in python 3.x
-we don't have nonlocal keywords. Make sure we modify our copy instead of make a new one this way
-"""
+    return app.flask_grammar.to_json()
 
 @app.route('/api/grammar/load_dir', methods=['GET'])
 def load_dir():
@@ -37,22 +29,30 @@ def load_dir():
 def load_bundles():
     return jsonify(results=os.listdir(os.path.abspath(os.path.join(os.path.dirname(__file__), 'exports/'))))
 
+@app.route('/api/load_bundle', methods=['POST'])
+def load_bundle():
+    bundle_name = request.data
+    try:
+        user_file = os.path.abspath(os.path.join(os.path.dirname(__file__), ''.join(['exports/', bundle_name, '.grammar'])))
+        grammar_file = open(user_file, 'r')
+    except Exception as error:
+        print repr(error)
+    return str(grammar_file.read())
+
 @app.route('/api/grammar/load', methods=['POST'])
 def load_grammar():
     print request
-    global flask_grammar
-    flask_grammar = PCFG.from_json(str(request.data))
-    return flask_grammar.to_json()
+    app.flask_grammar = PCFG.from_json(str(request.data))
+    return app.flask_grammar.to_json()
 
 @app.route('/api/grammar/from_file', methods=['POST'])
 def load_file_grammar():
-    global flask_grammar
     grammar_name = request.data
     user_file = os.path.abspath(os.path.join(os.path.dirname(__file__), ''.join(['grammars/', grammar_name])))
     grammar_file = open(user_file, 'r')
     if grammar_file:
-        flask_grammar = PCFG.from_json(str(grammar_file.read()))
-    return flask_grammar.to_json()
+        app.flask_grammar = PCFG.from_json(str(grammar_file.read()))
+    return app.flask_grammar.to_json()
 
 @app.route('/api/grammar/save', methods=['GET', 'POST'])
 def save_grammar():
@@ -60,18 +60,17 @@ def save_grammar():
     try:
         filename = os.path.abspath(os.path.join(os.path.dirname(__file__), ''.join(['grammars/', grammar_name])))
         outfile = open(filename, 'w+')
-        outfile.write(flask_grammar.to_json(to_file=True))
-    except:
-        print sys.exc_info()[0]
+        outfile.write(app.flask_grammar.to_json(to_file=True))
+    except Exception as error:
+        print repr(error)
         return "Unable to save the grammar. Please check console for more details."
     return "The grammar was successfully saved."
 
 
 @app.route('/api/grammar/new', methods=['GET'])
 def new_grammar():
-    global flask_grammar
-    flask_grammar = PCFG.PCFG()
-    return flask_grammar.to_json()
+    app.flask_grammar = PCFG.PCFG()
+    return app.flask_grammar.to_json()
 
 
 @app.route('/api/nonterminal/add', methods=['POST'])
@@ -79,8 +78,8 @@ def add_nt():
     data = request.get_json()
     # Strip off excess brackets
     data['nonterminal'] = re.search('[^\[\]]+', data['nonterminal']).group(0)
-    flask_grammar.add_nonterminal(NonterminalSymbol.NonterminalSymbol(data['nonterminal']))
-    return flask_grammar.to_json()
+    app.flask_grammar.add_nonterminal(NonterminalSymbol.NonterminalSymbol(data['nonterminal']))
+    return app.flask_grammar.to_json()
 
 
 @app.route('/api/nonterminal/rename', methods=['POST'])
@@ -88,27 +87,27 @@ def rename_nt():
     data = request.get_json()
     old = re.search('[^\[\]]+', data['old']).group(0)
     new = re.search('[^\[\]]+', data['new']).group(0)
-    flask_grammar.modify_tag(old, new)
-    return flask_grammar.to_json()
+    app.flask_grammar.modify_tag(old, new)
+    return app.flask_grammar.to_json()
 
 @app.route('/api/nonterminal/delete', methods=['POST'])
 def delete_nt():
     data = request.get_json()
     nonterminal = re.search('[^\[\]]+', data['nonterminal']).group(0)
-    flask_grammar.delete_nonterminal(nonterminal)
-    return flask_grammar.to_json()
+    app.flask_grammar.delete_nonterminal(nonterminal)
+    return app.flask_grammar.to_json()
 
 @app.route('/api/nonterminal/deep', methods=['POST'])
 def set_deep():
     data = request.get_json()
-    nonterminal = flask_grammar.nonterminals.get(data["nonterminal"])
+    nonterminal = app.flask_grammar.nonterminals.get(data["nonterminal"])
     if nonterminal:
         if nonterminal.deep:
             nonterminal.deep = False
         else:
             nonterminal.deep = True
 
-    return flask_grammar.to_json()
+    return app.flask_grammar.to_json()
 
 
 @app.route('/api/nonterminal/expand', methods=['POST', 'GET'])
@@ -120,7 +119,7 @@ def expand_nt():
 @app.route('/api/rule/expand', methods=['POST', 'GET'])
 def expand_rule():
     data = request.get_json()
-    return flask_grammar.expand_rule(data['nonterminal'], int(data['index']) ).to_json()
+    return app.flask_grammar.expand_rule(data['nonterminal'], int(data['index']) ).to_json()
 
 @app.route('/api/rule/swap', methods=['POST'])
 def swap_rule():
@@ -128,8 +127,8 @@ def swap_rule():
     index = int(data['index'])
     original = re.search('[^\[\]]+', data['original']).group(0)
     new = re.search('[^\[\]]+', data['new']).group(0)
-    flask_grammar.copy_rule(original, index, new)
-    return flask_grammar.to_json()
+    app.flask_grammar.copy_rule(original, index, new)
+    return app.flask_grammar.to_json()
 
 @app.route('/api/rule/add', methods=['POST'])
 def add_rule():
@@ -137,8 +136,8 @@ def add_rule():
     rule = data['rule']
     app_rate = int(data['app_rate'])
     nonterminal = NonterminalSymbol.NonterminalSymbol(data["nonterminal"])
-    flask_grammar.add_rule(nonterminal, PCFG.parse_rule(rule), app_rate)
-    return flask_grammar.to_json()
+    app.flask_grammar.add_rule(nonterminal, PCFG.parse_rule(rule), app_rate)
+    return app.flask_grammar.to_json()
 
 
 @app.route('/api/rule/delete', methods=['POST'])
@@ -146,8 +145,8 @@ def del_rule():
     data = request.get_json()
     rule = int(data['rule'])
     nonterminal = data['nonterminal']
-    flask_grammar.remove_rule_by_index(NonterminalSymbol.NonterminalSymbol(nonterminal), rule)
-    return flask_grammar.to_json()
+    app.flask_grammar.remove_rule_by_index(NonterminalSymbol.NonterminalSymbol(nonterminal), rule)
+    return app.flask_grammar.to_json()
 
 
 @app.route('/api/rule/set_app', methods=['POST'])
@@ -156,8 +155,8 @@ def set_app():
     rule = data['rule']
     nonterminal = data['nonterminal']
     app_rate = int(data['app_rate'])
-    flask_grammar.modify_application_rate(NonterminalSymbol.NonterminalSymbol(nonterminal), rule, app_rate)
-    return flask_grammar.to_json()
+    app.flask_grammar.modify_application_rate(NonterminalSymbol.NonterminalSymbol(nonterminal), rule, app_rate)
+    return app.flask_grammar.to_json()
 
 
 @app.route('/api/markup/addtag', methods=['POST'])
@@ -165,16 +164,16 @@ def add_tag():
     data = request.get_json()
     markupSet = Markups.MarkupSet(data['markupSet'])
     markup = Markups.Markup(data['tag'], markupSet)
-    flask_grammar.add_unused_markup(markup)
-    return flask_grammar.to_json()
+    app.flask_grammar.add_unused_markup(markup)
+    return app.flask_grammar.to_json()
 
 
 @app.route('/api/markup/addtagset', methods=['POST'])
 def add_tagset():
     data = request.get_json()
     markupSet = Markups.MarkupSet(data["markupSet"])
-    flask_grammar.add_new_markup_set(markupSet)
-    return flask_grammar.to_json()
+    app.flask_grammar.add_new_markup_set(markupSet)
+    return app.flask_grammar.to_json()
 
 
 @app.route('/api/markup/toggle', methods=['POST'])
@@ -185,17 +184,17 @@ def toggle_tag():
     markupSet = Markups.MarkupSet(data['markupSet'])
     markup = Markups.Markup(data['tag'], markupSet)
     print("nonterminal")
-    flask_grammar.toggle_markup(nonterminal, markup)
+    app.flask_grammar.toggle_markup(nonterminal, markup)
 
-    return flask_grammar.to_json()
+    return app.flask_grammar.to_json()
 
 @app.route('/api/markup/renameset', methods=['POST'])
 def rename_markupset():
     data = request.get_json()
     oldset = data['oldset']
     newset = data['newset']
-    flask_grammar.modify_markupset(oldset, newset)
-    return flask_grammar.to_json()
+    app.flask_grammar.modify_markupset(oldset, newset)
+    return app.flask_grammar.to_json()
 
 @app.route('/api/markup/renametag', methods=['POST'])
 def rename_markuptag():
@@ -203,8 +202,8 @@ def rename_markuptag():
     markupset = data['markupset']
     oldtag = data['oldtag']
     newtag = data['newtag']
-    flask_grammar.modify_markup(markupset, oldtag, newtag)
-    return flask_grammar.to_json()
+    app.flask_grammar.modify_markup(markupset, oldtag, newtag)
+    return app.flask_grammar.to_json()
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
@@ -222,12 +221,12 @@ def export():
         content_bundle_name = content_bundle_name[:-5]
     output_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'exports'))
     output_path_and_filename = "{}/{}".format(output_path, content_bundle_name)
-    # Index the grammar and save out the resulting files (Productionist-format grammar file [.grammar] and
-    # expressible meanings file [.meanings])
+    # Index the grammar and save out the resulting files (Productionist-format grammar file [.grammar],
+    # trie file (.marisa), and expressible meanings file [.meanings])
     reductionist = Reductionist(
-        raw_grammar_json=flask_grammar.to_json(to_file=True),  # JOR: I'm not sure what to_file actually does
+        raw_grammar_json=app.flask_grammar.to_json(to_file=True),  # JOR: I'm not sure what to_file actually does
         path_to_write_output_files_to=output_path_and_filename,
-        trie_output=False,
+        trie_output=True,
         verbosity=0 if debug is False else 2
     )
     if not reductionist.validator.errors:
@@ -245,19 +244,95 @@ def export():
         for warning_message in reductionist.validator.warning_messages:
             print '\n{msg}'.format(msg=warning_message)
         return "The grammar was successfully exported, but errors were printed to console."
-    return "The grammar failed to export. Please check console for more details."
+    return "The grammar failed to export. Please check the console for more details."
+
+
+@app.route('/api/grammar/build', methods=['GET', 'POST'])
+def build_productionist():
+    """Build a Productionist by processing an exported content bundle."""
+    print "\n-- Building a Productionist..."
+    # Grab the name the user gave for the content bundle
+    content_bundle_name = request.data
+    content_bundle_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), 'exports'))
+    # Keep the Productionist on hand as an attribute of the web-app object
+    app.productionist = Productionist(
+        content_bundle_name=content_bundle_name,
+        content_bundle_directory=content_bundle_directory,
+        probabilistic_mode=True,  # TODO may want to support toggling this on and off in the authoring interface
+        repetition_penalty_mode=False,
+        terse_mode=False,
+        verbosity=0
+    )
+    return "Successfully built a content generator."
+
 
 @app.route('/api/grammar/tagged_content_request', methods=['POST'])
 def tagged_content_request():
+    """Furnish generated content that satisfies an author-defined content request."""
+    # Receive the raw content request (as JSON data)
     data = request.data
-    print "--------------"
-    print data
-    print "--------------"
-    return "this is just a test."
+    # Parse the raw JSON into a dictionary
+    content_request = json.loads(data)
+    # Grab out everything we need to send to Productionist
+    required_tags = {tag["name"] for tag in content_request["tags"] if tag["status"] == "required"}
+    prohibited_tags = {tag["name"] for tag in content_request["tags"] if tag["status"] == "disabled"}
+    scoring_metric = [
+        (tag["name"], int(tag["frequency"])) for tag in content_request["tags"] if tag["status"] == "enabled"
+    ]
+    # Time to generate content; prepare the actual ContentRequest object that Productionist will process
+    content_request = ContentRequest(
+        must_have=required_tags, must_not_have=prohibited_tags, scoring_metric=scoring_metric
+    )
+    print "\n-- Attempting to fulfill the following content request:\n{}".format(content_request)
+    # Fulfill the content request to generate N outputs (each being an object of the class productionist.Output)
+    output = app.productionist.fulfill_content_request(content_request=content_request)
+    if output:
+        print "\n\n-- Successfully fulfilled the content request!"
+        # Send the generated outputs back to the authoring tool as a single JSON package
+        output_as_json_package = json.dumps(output.payload)
+        print output_as_json_package
+        return output_as_json_package
+    print "\n\n-- The content request cannot be satisfied by the exported content bundle."
+    return "The content request cannot be satisfied by the exported content bundle."
+    # JOR: Here's how the outputs are displayed in the command-line interface
+    # for i in xrange(len(outputs)):
+    #     output = outputs[i]
+    #     if args.verbosity > 0:
+    #         print "\n\n-- Successfully generated an output:"
+    #         # Print the generated output
+    #         print "\n\t{}".format(output)
+    #         # Print out all the tags attached to the generated output
+    #         print "\nThe following tags are attached to this output:"
+    #         for tag in output.tags:
+    #             print '\t{}'.format(tag)
+    #         # Print the tree expression for the generated output
+    #         print (
+    #             "\n\n-- Here's a tree expression illustrating the series of expansions "
+    #             "that produced this output:"
+    #         )
+    #         print "\n{}".format(output.tree_expression)
+    #         # Print the tagged tree expression for the generated output
+    #         print "\n\n-- Here's a tree expression that shows how the generated content got its tags:"
+    #         print "\n{}".format(output.tree_expression_with_tags)
+    #         # Print the bracketed expression for the generated output
+    #         print (
+    #             "\n\n-- Here's a bracketed expression that more economically illustrates "
+    #             "the derivation of the content:"
+    #         )
+    #         print "\n{}".format(output.bracketed_expression)
+    #         print '\n\n'
+    #     else:
+    #         print "#{n}".format(n=i + 1)
+    #         print "--Output--\n{output}".format(output=str(output))
+    #         # Note: For this one, we must either prevent commas in tag names or use a different delimiter
+    #         print "--Tags--\n{tags}".format(tags=','.join(output.tags))
+    #         print "--Bracketed expression--\n{expression}".format(expression=output.bracketed_expression)
+    #         print "--Tree expression--\n{expression}".format(expression=output.tree_expression)
+    #         print "--Tree expression (with tags)--\n{expression}".format(expression=output.tree_expression_with_tags)
 
 
 if __name__ == '__main__':
-    global flask_grammar
-    flask_grammar = PCFG.from_json(str(open('./grammars/example.json', 'r').read()))
+    app.flask_grammar = PCFG.from_json(str(open('./grammars/example.json', 'r').read()))
+    app.productionist = None  # Gets set upon export
     app.debug = debug
     app.run()
