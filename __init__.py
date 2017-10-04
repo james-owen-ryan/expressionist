@@ -113,8 +113,7 @@ def set_deep():
 @app.route('/api/nonterminal/expand', methods=['POST', 'GET'])
 def expand_nt():
     data = request.get_json()
-    return flask_grammar.expand(NonterminalSymbol.NonterminalSymbol(data['nonterminal'])).to_json()
-
+    return app.flask_grammar.expand(NonterminalSymbol.NonterminalSymbol(data['nonterminal'])).to_json()
 
 @app.route('/api/rule/expand', methods=['POST', 'GET'])
 def expand_rule():
@@ -263,7 +262,7 @@ def build_productionist():
         terse_mode=False,
         verbosity=0
     )
-    return "Successfully built a content generator."
+    return jsonify({'status': "Successfully built a content generator.", 'bundleName': content_bundle_name})
 
 
 @app.route('/api/grammar/tagged_content_request', methods=['POST'])

@@ -15,24 +15,25 @@ var TestModal = React.createClass({
     getInitialState() {
         return {
             grammarFileNames: [],
-            markups: this.getMarkupsFromBundle('example'),
-            tags: this.getTagsFromBundle('example'),
-            bundleName: 'example',
+            markups: {},
+            tags: [],
+            bundleName: '',
             bundlesList: []
         };
     },
 
-    componentWillMount: function(){
-        console.log('compmounted!')
-        ajax({
-            url: $SCRIPT_ROOT + '/api/load_bundles',
-            type: "GET",
-            async: false,
-            cache: false,
-            success: function(data){
-                this.setState({bundlesList: data.results})
-            }.bind(this)
-        })
+    componentWillReceiveProps: function(nextProps){
+        if (nextProps.bundleName != ''){
+            this.setState({
+                bundleName: nextProps.bundleName,
+                markups: this.getMarkupsFromBundle(nextProps.bundleName),
+                tags: this.getTagsFromBundle(nextProps.bundleName)
+            })
+        }else{
+            this.setState({
+                bundleName: nextProps.bundleName,
+            })
+        }
     },
 
     getMarkupsFromBundle: function(bundleName){
@@ -198,72 +199,23 @@ var TestModal = React.createClass({
         })
     },
 
-    setExportsBundleNames: function(){
-        ajax({
-            url: $SCRIPT_ROOT + '/api/load_bundles',
-            type: "GET",
-            contentType: "application/json",
-            async: false,
-            cache: false,
-            success: function(files){
-                var prefixes = files.results.map( f => f.substr(0, f.indexOf('.')) );
-                var uniq = prefixes.filter( (p, i) => {
-                    for (var j = 0; j < prefixes.length; j++){
-                        if (i == j){
-                            break; // Don't compare yourself to yourself!
-                        }
-                        if (prefixes[j] == p){
-                            // This filename already exists somewhere else in the array.
-                            // Get rid of this file!
-                            return false
-                        }
-                    }
-                    return true; // The filename is unique.
-                });
-                this.setState({exportsBundleNames: uniq})
-            }.bind(this)
-        });
-    },
-
     render: function(){
         const instructionsPopover = (
             <Popover id="instructions-popover" title="Instructions">
-                Enter a the bundle name of an exported file (the prefix to the three generated files). Select which tags to search for. Adjust the frequency at which these tags are selected.
+                This is the bundle name that you typed into the Build window.
             </Popover>
         )
-        const searchExports = (
-            <Popover id="search-exports" title="Search for Bundle Name">
-                <ListGroup id='bundlesList' style={{marginBottom: '0px', height: '400px', overflow: 'scroll'}}>
-                {
-                    this.state.bundlesList
-                        .filter(b => {
-                            return b.includes('grammar')
-                        })
-                        .map( bundleName => {
-                            var noExtension = bundleName.substr(0,bundleName.indexOf('.'))
-                            return <ListGroupItem  title={noExtension}
-                                            bsSize="xsmall"
-                                            onClick={this.setState.bind(this, {bundleName: noExtension})}>
-                                            {noExtension}
-                            </ListGroupItem>
-                        })
-                }
-                </ListGroup>
-            </Popover>
-        )
-
         return (
             <Modal show={this.props.show} onHide={this.props.onHide}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Generate Content &emsp; <OverlayTrigger overlay={instructionsPopover}><Glyphicon glyph="info-sign" /></OverlayTrigger></Modal.Title>
+                    <Modal.Title>Generate Content</Modal.Title>
                 </Modal.Header>
                 <FormGroup>
                     <ControlLabel style={{display: 'block', marginLeft: '15px', marginTop: '10px'}}>Bundle Name</ControlLabel>
                     <FormControl    type="text"
                                     value={this.state.bundleName}
-                                    onChange={this.updateBundleName}
-                                    style={{width: '200px', display: 'inline', marginLeft: "15px"}}/>
-                    <OverlayTrigger trigger='focus' placement='right' overlay={searchExports}><Glyphicon glyph="zoom-in" tabIndex='-1' style={{marginLeft: '-30px'}} /></OverlayTrigger>
+                                    style={{width: '200px', display: 'inline', marginLeft: "15px"}}
+                                    readOnly={true}/>
                 </FormGroup>
                 <div id="tags">
                     <ListGroup id='tagsList' style={{marginBottom: '0px'}}>

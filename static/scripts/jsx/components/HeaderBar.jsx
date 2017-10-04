@@ -12,7 +12,8 @@ var HeaderBar = React.createClass({
             showModal: false,
             showLoadModal: false,
             showTestModal: false,
-            grammarFileNames: []
+            grammarFileNames: [],
+            bundleName: ''
         };
     },
 
@@ -43,6 +44,24 @@ var HeaderBar = React.createClass({
         this.setState({showLoadModal: false})
     },
 
+    buildProductionist: function () {
+        var contentBundleName = window.prompt("Enter the name of the content bundle that you'd like to build a generator for.")
+        if (contentBundleName != "") {
+            ajax({
+                url: $SCRIPT_ROOT + '/api/grammar/build',
+                type: "POST",
+                contentType: "text/plain",
+                data: contentBundleName,
+                async: true,
+                cache: false,
+                success: function(data){
+                    window.alert(data.status);
+                    this.setState({bundleName: data.bundleName})
+                }.bind(this)
+            })
+        }
+    },
+
     openTestModal: function(){
         this.setState({showTestModal: true}) 
     },
@@ -56,12 +75,13 @@ var HeaderBar = React.createClass({
                         <Button onClick={this.open.bind(this, 'showLoadModal')} bsStyle='primary'>Load</Button>
                         <Button onClick={this.props.saveGrammar} bsStyle='primary'>Save</Button>
                         <Button onClick={this.props.exportGrammar} bsStyle='primary'>Export</Button>
-                        <Button onClick={this.props.buildProductionist} bsStyle='primary'>Build</Button>
+                        <Button onClick={this.buildProductionist} bsStyle='primary'>Build</Button>
                         <Button onClick={this.openTestModal} bsStyle='primary'>Test</Button>
                     </ButtonGroup>
                 </ButtonToolbar>
                 <TestModal  show={this.state.showTestModal} 
-                            onHide={this.close.bind(this, 'showTestModal')}>
+                            onHide={this.close.bind(this, 'showTestModal')}
+                            bundleName={this.state.bundleName}>
                 </TestModal>
                 <Modal show={this.state.showLoadModal} onHide={this.close.bind(this, 'showLoadModal')}>
                     <Modal.Header closeButton>
