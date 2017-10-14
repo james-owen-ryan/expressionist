@@ -1,28 +1,37 @@
 var React = require('react')
-var ListGroupItem = require('react-bootstrap').ListGroupItem;
-var ListGroup = require('react-bootstrap').ListGroup;
-var Glyphicon = require('react-bootstrap').Glyphicon;
-var OverlayTrigger = require('react-bootstrap').OverlayTrigger;
-var Popover = require('react-bootstrap').Popover;
-var FormControl = require('react-bootstrap').FormControl;
-var FormGroup = require('react-bootstrap').FormGroup;
-var ControlLabel = require('react-bootstrap').ControlLabel;
-var Button = require('react-bootstrap').Button;
-var Modal = require('react-bootstrap').Modal;
-var ajax = require('jquery').ajax;
+var ListGroupItem = require('react-bootstrap').ListGroupItem
+var ListGroup = require('react-bootstrap').ListGroup
+var Glyphicon = require('react-bootstrap').Glyphicon
+var OverlayTrigger = require('react-bootstrap').OverlayTrigger
+var Popover = require('react-bootstrap').Popover
+var FormControl = require('react-bootstrap').FormControl
+var FormGroup = require('react-bootstrap').FormGroup
+var ControlLabel = require('react-bootstrap').ControlLabel
+var Button = require('react-bootstrap').Button
+var Modal = require('react-bootstrap').Modal
+var ajax = require('jquery').ajax
 
-var TestModal = React.createClass({
-    getInitialState() {
-        return {
+class TestModal extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.toggleTagSetStatus = this.toggleTagSetStatus.bind(this);
+        this.updateTagFrequency = this.updateTagFrequency.bind(this);
+        this.toggleTagStatus = this.toggleTagStatus.bind(this);
+        this.getTagData = this.getTagData.bind(this);
+        this.getTagColorFromStatus = this.getTagColorFromStatus.bind(this);
+        this.cycleStatus = this.cycleStatus.bind(this);
+        this.sendTaggedContentRequest = this.sendTaggedContentRequest.bind(this);
+        this.state = {
             grammarFileNames: [],
             markups: {},
             tags: [],
             bundleName: '',
             bundlesList: []
         };
-    },
+    }
 
-    componentWillReceiveProps: function(nextProps){
+    componentWillReceiveProps(nextProps) {
         if (nextProps.bundleName != ''){
             this.setState({
                 bundleName: nextProps.bundleName,
@@ -34,9 +43,9 @@ var TestModal = React.createClass({
                 bundleName: nextProps.bundleName,
             })
         }
-    },
+    }
 
-    getMarkupsFromBundle: function(bundleName){
+    getMarkupsFromBundle(bundleName) {
         var grammar = null;
         ajax({
             url: $SCRIPT_ROOT + '/api/load_bundle',
@@ -61,9 +70,9 @@ var TestModal = React.createClass({
             }
         }
         return tagsets
-    },
+    }
 
-    getTagsFromBundle: function(bundleName){
+    getTagsFromBundle(bundleName) {
         var grammar = null;
         ajax({
             url: $SCRIPT_ROOT + '/api/load_bundle',
@@ -87,9 +96,9 @@ var TestModal = React.createClass({
             });
         }
         return tags;
-    },
+    }
 
-    toggleTagSetStatus: function(tagset){
+    toggleTagSetStatus(tagset) {
         var tagsetTags = this.state.markups[tagset];
         var updated = this.state.tags.map(function (tagObj){
             for (var i = 0; i < tagsetTags.length; i++){
@@ -104,9 +113,9 @@ var TestModal = React.createClass({
             return tagObj;
         }.bind(this));
         this.setState({tags: updated});
-    },
+    }
 
-    updateTagFrequency: function(e){
+    updateTagFrequency(e) {
         var updated = this.state.tags.map(tagObj => {
             if (tagObj.name == e.target.id){
                 return {
@@ -117,9 +126,9 @@ var TestModal = React.createClass({
             }else{ return tagObj; }
         });
         this.setState({tags: updated});
-    },
+    }
 
-    toggleTagStatus: function(tag){
+    toggleTagStatus(tag) {
         // only toggle if the active element is a ListGroupItem.
         if (!document.activeElement.classList.contains("list-group-item")){
             return false;
@@ -134,13 +143,13 @@ var TestModal = React.createClass({
             }else{ return tagObj; }
         }.bind(this));
         this.setState({tags: updated});
-    },
+    }
 
-    getTagData: function(tag, data){
+    getTagData(tag, data) {
         return this.state.tags.find(tagObj => { return tagObj.name == tag })[data];
-    },
+    }
 
-    getTagColorFromStatus: function(currentStatus){
+    getTagColorFromStatus(currentStatus) {
         if (currentStatus == 'required'){
             return 'success'
         }
@@ -149,9 +158,9 @@ var TestModal = React.createClass({
         }
         // assume currentStatus = 'disabled'
         return 'danger'
-    },
+    }
 
-    cycleStatus: function(currentStatus){
+    cycleStatus(currentStatus) {
         if (currentStatus == 'required'){
             return 'enabled'
         }
@@ -160,9 +169,9 @@ var TestModal = React.createClass({
         }
         // assume currentStatus = 'disabled'
         return 'required'
-    },
+    }
 
-    sendTaggedContentRequest: function(){
+    sendTaggedContentRequest() {
         // Productionist requires tags to be formatted as `tagset:tag` strings.
         // However, this.state.tags is only a list of objects with no ref to their set.
         var forProductionist = this.state.tags.map(function (tagObj){
@@ -197,9 +206,9 @@ var TestModal = React.createClass({
                 alert('It seems like you have not built your Productionist grammar into memory yet. See console for more details.');
             }
         })
-    },
+    }
 
-    render: function(){
+    render() {
         const instructionsPopover = (
             <Popover id="instructions-popover" title="Instructions">
                 This is the bundle name that you typed into the Build window.
@@ -231,7 +240,7 @@ var TestModal = React.createClass({
                                         {
                                             this.state.markups[tagset].map(function (tag){
                                                 return (
-                                                    <div>
+                                                    <div key={tag}>
                                                         <ListGroupItem  title={tag}
                                                                         bsSize="xsmall"
                                                                         bsStyle={this.getTagColorFromStatus(this.getTagData(tag, "status"))}
@@ -258,6 +267,6 @@ var TestModal = React.createClass({
             </Modal>
         );
     }
-})
+}
 
-module.exports = TestModal
+module.exports = TestModal;

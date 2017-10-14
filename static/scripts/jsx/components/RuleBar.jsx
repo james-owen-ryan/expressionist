@@ -1,5 +1,3 @@
-{/* This is responsible for rendering the Rule Bar, which is attached directly to the Main interface*/
-}
 var React = require('react')
 var Button = require('react-bootstrap').Button
 var ButtonGroup = require('react-bootstrap').ButtonGroup
@@ -7,47 +5,46 @@ var Modal = require('react-bootstrap').Modal
 var ajax = require('jquery').ajax
 var Glyphicon = require('react-bootstrap').Glyphicon
 
-var RuleBar = React.createClass({
-    getInitialState() {
-        return {
+class RuleBar extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.openModal = this.openModal.bind(this);
+        this.closeModal = this.closeModal.bind(this);
+        this.handleRuleClick = this.handleRuleClick.bind(this);
+        this.addToRuleExpansion = this.addToRuleExpansion.bind(this);
+        this.updateRuleExpansionInputVal = this.updateRuleExpansionInputVal.bind(this);
+        this.updateApplicationRate = this.updateApplicationRate.bind(this);
+        this.addRule = this.addRule.bind(this);
+        this.state = {
             showModal: false,
             ruleExpansionInputVal: '',
             ruleApplicationRate: 1
-        };
-    },
-
-    propTypes: {
-        name: React.PropTypes.string,
-        rules: React.PropTypes.arrayOf(React.PropTypes.shape({
-                expansion: React.PropTypes.array,
-                app_rate: React.PropTypes.number
-            })
-        ).isRequired,
-        onRuleClick: React.PropTypes.func,
-        onRuleAdd: React.PropTypes.func
-    },
-
-    previousRules() {
-    },
-
-    nextRules() {
-    },
-
-    closeModal() { this.setState({showModal: false}) },
+        }
+    }
 
     openModal() {
-        this.setState({showModal: true})
-    },
+        this.setState({showModal: true});
+    }
 
-    toExpressionistSyntax(nonterminalName) { return "[[" + nonterminalName + "]]" },
+    closeModal() {
+        this.setState({showModal: false});
+    }
+
+    toExpressionistSyntax(nonterminalName) { return "[[" + nonterminalName + "]]" }
+
+    handleRuleClick(index) {
+        this.props.updateCurrentRule(index)
+        this.props.updateHistory(this.props.name, index)
+    }
 
     addToRuleExpansion(nonterminalName) {
         var exp = this.toExpressionistSyntax(nonterminalName);
         var res = this.state.ruleExpansionInputVal.concat(exp);
         this.setState({ruleExpansionInputVal: res})
-    },
+    }
 
-    updateRuleExpansionInputVal(e) { this.setState({ruleExpansionInputVal: e.target.value}) },
+    updateRuleExpansionInputVal(e) { this.setState({ruleExpansionInputVal: e.target.value}) }
 
     updateApplicationRate(e) { 
         if (!isNaN(e.target.value)){
@@ -55,9 +52,9 @@ var RuleBar = React.createClass({
         }else{
             this.setState({ruleApplicationRate: 1})
         }
-    },
+    }
 
-    addRule(){
+    addRule() {
         var appRate = this.state.ruleApplicationRate
         var expansion = this.state.ruleExpansionInputVal
 
@@ -75,18 +72,21 @@ var RuleBar = React.createClass({
                 async: false,
                 cache: false
             })
-            this.props.ruleAddUpdate(this.props.name)
+            this.props.updateCurrentNonterminal(nonterminal);
+            this.props.updateCurrentRule(-1);
+            this.props.updateMarkupFeedback([]);
+            this.props.updateExpansionFeedback('');
+            this.props.updateHistory(nonterminal, -1);
             this.updateRuleExpansionInputVal({'target': {'value': ''}})
-            this.closeModal();
+            this.setState({showModal: false})
         }
-    },
+    }
 
-    render: function () {
+    render() {
         var rules = []
         this.props.rules.forEach(function (rule, i) {
-            //console.log(rules)
             var shortened = rule.expansion.join('').substring(0, 10);
-            rules.push(<Button onClick={this.props.onRuleClick.bind(null, i)}
+            rules.push(<Button onClick={this.handleRuleClick.bind(this, i)}
                                title={rule.expansion.join('')}
                                key={rule.expansion.join('') + this.props.name}>{shortened}</Button>);
         }, this)
@@ -129,6 +129,6 @@ var RuleBar = React.createClass({
             </div>
         );
     }
-});
+}
 
-module.exports = RuleBar
+module.exports = RuleBar;

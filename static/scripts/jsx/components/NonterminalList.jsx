@@ -1,20 +1,44 @@
-var React = require('react');
-var Nonterminal = require('./Nonterminal.jsx');
-var ListGroupItem = require('react-bootstrap').ListGroupItem;
-var ListGroup = require('react-bootstrap').ListGroup;
-var Glyphicon = require('react-bootstrap').Glyphicon;
+var React = require('react')
+var Nonterminal = require('./Nonterminal.jsx')
+var ListGroupItem = require('react-bootstrap').ListGroupItem
+var ListGroup = require('react-bootstrap').ListGroup
+var Glyphicon = require('react-bootstrap').Glyphicon
 var ajax = require('jquery').ajax
 
-var NonterminalList = React.createClass({
-    getInitialState() {
-        return {
+class NonterminalList extends React.Component {
+    
+    constructor(props) {
+        super(props);
+        this.addNonterminalUpdate = this.addNonterminalUpdate.bind(this);
+        this.clickNonterminalUpdate = this.clickNonterminalUpdate.bind(this);
+        this.updateList = this.updateList.bind(this);
+        this.getList = this.getList.bind(this);
+        this.formatList = this.formatList.bind(this);
+        this.addNonterminal = this.addNonterminal.bind(this);
+        this.state = {
             searchVal: ''
-        };
-    },
+        }
+    }
+
+    addNonterminalUpdate(nonterminal){
+        this.props.updateFromServer();
+        this.props.updateCurrentNonterminal(nonterminal);
+        this.props.updateHistory(nonterminal, -1);
+    }
+
+    clickNonterminalUpdate(position) {
+        if (this.props.nonterminals[position]) {
+            this.props.updateCurrentNonterminal(position);
+            this.props.updateCurrentRule(-1);
+            this.props.updateMarkupFeedback([]);
+            this.props.updateExpansionFeedback("");
+            this.props.updateHistory(position, -1);
+        }
+    }
 
     updateList(e) {
         this.setState({'searchVal': e.target.value})
-    },
+    }
 
     // returns an array of nonterminal names that match state.searchVal.
     getList() {
@@ -32,7 +56,7 @@ var NonterminalList = React.createClass({
             if (res != -1){ return true; }
             return false;
         })
-    },
+    }
 
     // returns a sorted array of nonterminal names.
     formatList(nonterminals) { // nonterminals = array of nonterminal names
@@ -53,7 +77,7 @@ var NonterminalList = React.createClass({
             }
         }
         return deeps.concat(nonterminals);
-    },
+    }
 
     addNonterminal() {
         var nonterminal = window.prompt("Please enter Nonterminal Name")
@@ -71,10 +95,10 @@ var NonterminalList = React.createClass({
             async: false,
             cache: false
         })
-        this.props.addNonterminalUpdate(nonterminal);
-    },
+        this.addNonterminalUpdate(nonterminal);
+    }
 
-    render: function () {
+    render() {
         var nonterminals = this.formatList(this.getList());
         return (
             <div>
@@ -94,10 +118,7 @@ var NonterminalList = React.createClass({
                                 <Nonterminal    name={name}
                                                 complete={complete}
                                                 deep={deep} 
-                                                onClick={
-                                                            this.props.clickNonterminalUpdate
-                                                            .bind(null, name)
-                                                        } 
+                                                onClick={this.clickNonterminalUpdate.bind(this, name)} 
                                                 key={name}>
                                     {name}
                                 </Nonterminal>
@@ -112,6 +133,6 @@ var NonterminalList = React.createClass({
             </div>
         );
     }
-});
+}
 
-module.exports = NonterminalList
+module.exports = NonterminalList;

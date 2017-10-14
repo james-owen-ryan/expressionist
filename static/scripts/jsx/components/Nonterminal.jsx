@@ -5,15 +5,9 @@ var ListGroupItem = require('react-bootstrap').ListGroupItem
 var Glyphicon = require('react-bootstrap').Glyphicon
 var LinkContainer = require('react-router-bootstrap').LinkContainer
 
-var Nonterminal = React.createClass({
-    propTypes: {
-        name: React.PropTypes.string.isRequired,
-        complete: React.PropTypes.bool.isRequired,
-        onClick: React.PropTypes.func,
-        deep: React.PropTypes.bool
-    },
+class Nonterminal extends React.Component {
 
-    render: function () {
+    render() {
         var deep_glyph = ""
         if (this.props.deep === true)
             deep_glyph = <Glyphicon glyph="asterisk"/>
@@ -25,8 +19,6 @@ var Nonterminal = React.createClass({
                        onClick={this.props.onClick}>{deep_glyph} {this.props.name}</ListGroupItem>
         );
     }
+}
 
-
-});
-
-module.exports = Nonterminal
+module.exports = Nonterminal;

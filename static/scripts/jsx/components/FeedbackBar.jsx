@@ -1,14 +1,8 @@
-{/* This is responsible for producing the feedback for any given Nonterminal or Rule expansion. Contains the text box for the expansion and for the Markup */
-}
 var React = require('react')
-var FeedbackBar = React.createClass({
 
-    propTypes: {
-        derivation: React.PropTypes.string,
-        markup: React.PropTypes.array
-    },
+class FeedbackBar extends React.Component {
 
-    render: function () {
+    render() {
         var derivation_str = ""
         if (this.props.derivation) {
             derivation_str = this.props.derivation
@@ -36,6 +30,6 @@ var FeedbackBar = React.createClass({
 
         );
     }
-});
+}
 
-module.exports = FeedbackBar
+module.exports = FeedbackBar;
