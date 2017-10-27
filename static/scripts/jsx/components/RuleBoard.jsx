@@ -18,7 +18,7 @@ class RuleBoard extends React.Component {
             url: $SCRIPT_ROOT + '/api/rule/expand',
             type: 'POST',
             contentType: "application/json",
-            data: JSON.stringify({"nonterminal": this.props.name,"index": this.props.currentRule}),
+            data: JSON.stringify({"nonterminal": this.props.name, "index": this.props.currentRule}),
             dataType: 'json',
             async: true,
             cache: false,
@@ -60,8 +60,8 @@ class RuleBoard extends React.Component {
 
 
     handleAppModify() {
-        var index = this.props.currentRule
-        var app_rate = window.prompt("Please enter new application rate")
+        var index = this.props.currentRule;
+        var app_rate = window.prompt("Please enter new application rate");
         if (!isNaN(app_rate)) {
             var object = {"rule": index, "nonterminal": this.props.name, "app_rate": app_rate}
             ajax({
