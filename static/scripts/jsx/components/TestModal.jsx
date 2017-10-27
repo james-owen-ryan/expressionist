@@ -91,7 +91,7 @@ class TestModal extends React.Component {
             var str = grammar.id_to_tag[i];
             tags.push({
                 name: str.substr(str.indexOf(':')+1),
-                frequency: 1,
+                frequency: 0,
                 status: 'required'
             });
         }
