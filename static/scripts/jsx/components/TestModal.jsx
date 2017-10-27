@@ -92,7 +92,7 @@ class TestModal extends React.Component {
             tags.push({
                 name: str.substr(str.indexOf(':')+1),
                 frequency: 0,
-                status: 'required'
+                status: 'enabled'
             });
         }
         return tags;
