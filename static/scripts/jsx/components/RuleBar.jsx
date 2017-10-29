@@ -72,13 +72,14 @@ class RuleBar extends React.Component {
                 async: false,
                 cache: false
             })
-            this.props.updateCurrentNonterminal(nonterminal);
+            this.props.updateCurrentNonterminal(this.props.name);
             this.props.updateCurrentRule(-1);
             this.props.updateMarkupFeedback([]);
             this.props.updateExpansionFeedback('');
-            this.props.updateHistory(nonterminal, -1);
+            this.props.updateHistory(this.props.name, -1);
             this.updateRuleExpansionInputVal({'target': {'value': ''}})
             this.setState({showModal: false})
+            this.props.updateFromServer()
         }
     }
 

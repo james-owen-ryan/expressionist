@@ -156,6 +156,8 @@ class Interface extends React.Component {
             }
             else {
                 board = <RuleBoard  name={this.state.current_nonterminal}
+                                    currentRule={this.state.current_rule}
+                                    updateFromServer={this.updateFromServer}
                                     updateCurrentNonterminal={this.updateCurrentNonterminal}
                                     updateCurrentRule={this.updateCurrentRule}
                                     updateMarkupFeedback={this.updateMarkupFeedback}
@@ -203,7 +205,8 @@ class Interface extends React.Component {
 
                 <div style={{"width": "75%", "height": "40%", position: "absolute", bottom: 0, left:0}}>
                     <div className="muwrap">
-                        <RuleBar    rules={def_rules} 
+                        <RuleBar    rules={def_rules}
+                                    updateFromServer={this.updateFromServer}
                                     nonterminals={this.state.nonterminals}
                                     name={this.state.current_nonterminal}
                                     updateCurrentNonterminal={this.updateCurrentNonterminal}

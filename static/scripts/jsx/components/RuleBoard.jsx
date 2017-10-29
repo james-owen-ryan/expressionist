@@ -40,9 +40,9 @@ class RuleBoard extends React.Component {
         this.props.updateHistory(tag, -1);
     }
 
-    onRuleDelete(index) {
+    onRuleDelete() {
         var object = {
-            "rule": this.props.name,
+            "rule": this.props.currentRule,
             "nonterminal": this.props.name
         }
         ajax({
@@ -101,7 +101,7 @@ class RuleBoard extends React.Component {
 
                 <div>
                     <h3>{this.props.name} -> {expansion_arr}</h3><Button bsStyle="danger" title="Delete Rule"
-                                                                                onClick={this.onDeleteRule}><Glyphicon
+                                                                                onClick={this.onRuleDelete}><Glyphicon
                     glyph="warning-sign"/>Delete</Button>
                 </div>
 

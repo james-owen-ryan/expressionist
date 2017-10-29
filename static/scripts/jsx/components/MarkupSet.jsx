@@ -93,7 +93,7 @@ class MarkupSet extends React.Component {
                 async: true,
                 cache: false
             })
-            this.updateFromServer()
+            this.props.updateFromServer()
         }
     }
 
