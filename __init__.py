@@ -76,8 +76,6 @@ def new_grammar():
 @app.route('/api/nonterminal/add', methods=['POST'])
 def add_nt():
     data = request.get_json()
-    # Strip off excess brackets
-    data['nonterminal'] = re.search('[^\[\]]+', data['nonterminal']).group(0)
     app.flask_grammar.add_nonterminal(NonterminalSymbol.NonterminalSymbol(data['nonterminal']))
     return app.flask_grammar.to_json()
 
@@ -85,8 +83,8 @@ def add_nt():
 @app.route('/api/nonterminal/rename', methods=['POST'])
 def rename_nt():
     data = request.get_json()
-    old = re.search('[^\[\]]+', data['old']).group(0)
-    new = re.search('[^\[\]]+', data['new']).group(0)
+    old = data['old']
+    new = data['new']
     app.flask_grammar.modify_tag(old, new)
     return app.flask_grammar.to_json()
 

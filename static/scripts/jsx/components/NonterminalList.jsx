@@ -9,21 +9,17 @@ class NonterminalList extends React.Component {
     
     constructor(props) {
         super(props);
-        this.addNonterminalUpdate = this.addNonterminalUpdate.bind(this);
         this.clickNonterminalUpdate = this.clickNonterminalUpdate.bind(this);
         this.updateList = this.updateList.bind(this);
         this.getList = this.getList.bind(this);
         this.formatList = this.formatList.bind(this);
         this.addNonterminal = this.addNonterminal.bind(this);
+        var nonterminals = Object.keys(this.props.nonterminals)
+        var numOfNewNT = nonterminals.filter((name) => name.indexOf('new nonterminal') != -1).length
         this.state = {
-            searchVal: ''
+            searchVal: '',
+            newNTNumber: numOfNewNT
         }
-    }
-
-    addNonterminalUpdate(nonterminal){
-        this.props.updateFromServer();
-        this.props.updateCurrentNonterminal(nonterminal);
-        this.props.updateHistory(nonterminal, -1);
     }
 
     clickNonterminalUpdate(position) {
@@ -62,6 +58,7 @@ class NonterminalList extends React.Component {
     formatList(nonterminals) { // nonterminals = array of nonterminal names
         var anyDeepTerminals = nonterminals.filter((name) => this.props.nonterminals[name].deep == true);
         if (!anyDeepTerminals || this.state.searchVal == '*'){
+            // put new nonterminals at the bottom of the list.
             return nonterminals.sort();
         }
         // remove deep nonterminals
@@ -71,31 +68,32 @@ class NonterminalList extends React.Component {
         var propsNonterminals = Object.values(this.props.nonterminals);
         for (var i = 0; i < propsNonterminals.length; i++){
             var name = Object.keys(this.props.nonterminals)[i];
-            // only keep nonterminals that are deep and are being searched for.
+            // keep nonterminals that are deep and are being searched for.
             if (propsNonterminals[i].deep == true && name.indexOf(this.state.searchVal) != -1){
                 deeps.push(Object.keys(this.props.nonterminals)[i]);
             }
+        }
+        // add new nonterminals to the end of the list -- a new nonterminal contains the substring 'new nonterminal'
+        var newNT = nonterminals.filter((name) => name.indexOf('new nonterminal') != -1)
+        nonterminals = nonterminals.filter((name) => name.indexOf('new nonterminal') == -1)
+        for (var i in newNT){
+            nonterminals.push(newNT[i]);
         }
         return deeps.concat(nonterminals);
     }
 
     addNonterminal() {
-        var nonterminal = window.prompt("Please enter Nonterminal Name")
-        if (nonterminal == '') {
-            return window.alert('Please enter a name for the new nonterminal.')
-        }
-        else if (this.props.nonterminals[nonterminal]) {
-            return window.alert('No duplicate names for nonterminals.')
-        }
+        var newNTName = 'new nonterminal ' + this.state.newNTNumber
         ajax({
             url: $SCRIPT_ROOT + '/api/nonterminal/add',
             type: "POST",
             contentType: "application/json",
-            data: JSON.stringify({'nonterminal': nonterminal}),
+            data: JSON.stringify({'nonterminal': newNTName}),
             async: false,
             cache: false
         })
-        this.addNonterminalUpdate(nonterminal);
+        this.setState({'newNameVal': this.state.newNTNumber += 1})
+        this.props.updateFromServer();
     }
 
     render() {
@@ -114,13 +112,22 @@ class NonterminalList extends React.Component {
                     {   nonterminals.map((name) => {
                             var complete = this.props.nonterminals[name].complete;
                             var deep = this.props.nonterminals[name].deep;
+                            var newNT = false
+                            if (name.indexOf('new nonterminal') != -1){
+                                newNT = true
+                            }
                             return (
                                 <Nonterminal    name={name}
                                                 complete={complete}
                                                 deep={deep} 
                                                 onClick={this.clickNonterminalUpdate.bind(this, name)} 
-                                                key={name}>
-                                    {name}
+                                                key={name}
+                                                new={newNT}
+                                                other_names={this.props.nonterminals}
+                                                updateFromServer={this.props.updateFromServer}
+                                                updateCurrentNonterminal={this.props.updateCurrentNonterminal}
+                                                updateHistory={this.props.updateHistory}
+                                                currentRule={this.props.currentRule}>
                                 </Nonterminal>
                             )
                         })
