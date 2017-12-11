@@ -14,11 +14,8 @@ class NonterminalList extends React.Component {
         this.getList = this.getList.bind(this);
         this.formatList = this.formatList.bind(this);
         this.addNonterminal = this.addNonterminal.bind(this);
-        var nonterminals = Object.keys(this.props.nonterminals)
-        var numOfNewNT = nonterminals.filter((name) => name.indexOf('new nonterminal') != -1).length
         this.state = {
             searchVal: '',
-            newNTNumber: numOfNewNT
         }
     }
 

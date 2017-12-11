@@ -174,6 +174,11 @@ class PCFG(object):
             for tags in markupSet.markups:
                 self.add_unused_markup(tags)
 
+    def delete_tagset(self, tagsetName):
+        exists = self.markup_class
+        if tagsetName in self.markup_class:
+            self.markup_class.pop(tagsetName, None)
+
     def monte_carlo_export(self, nonterminal, filename, samplesscalar=1, ):
         """
         returns a tab seperated value list of productions, duplicates removed.

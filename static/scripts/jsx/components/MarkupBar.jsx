@@ -15,7 +15,8 @@ class MarkupBar extends React.Component {
             presentMarkups = props.nonterminals[props.current_nonterminal].markup
         }
         this.state = {
-            present: presentMarkups
+            present: presentMarkups,
+            newMarkupSets: Object.keys(this.props.total).length
         }
     }
 
@@ -30,9 +31,10 @@ class MarkupBar extends React.Component {
     }
 
     handleMarkupSetAdd() {
-        var markupTag = window.prompt("Please enter MarkupSet")
-        if (markupTag != "") {
-            var object = {"markupSet": markupTag}
+        // var markupTag = window.prompt("Please enter MarkupSet")
+        // if (markupTag != "") {
+            var newMarkupSetName = '/this is a new markupset/' + Object.keys(this.props.total).length
+            var object = {"markupSet": newMarkupSetName}
             ajax({
                 url: $SCRIPT_ROOT + '/api/markup/addtagset',
                 type: "POST",
@@ -42,7 +44,7 @@ class MarkupBar extends React.Component {
                 cache: false
             })
             this.props.updateFromServer()
-        }
+        // }
     }
 
     render() {
@@ -70,7 +72,7 @@ class MarkupBar extends React.Component {
         }
         return(
             <ButtonGroup className="btn-test">
-                <Button className="grp_button" onClick={this.handleMarkupSetAdd} key="addnew">
+                <Button className="grp_button" onClick={this.handleMarkupSetAdd} key="addnew"  style={{height: '38px'}}>
                     <Glyphicon glyph="plus"/>
                 </Button>
             {output}

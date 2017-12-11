@@ -172,7 +172,6 @@ def add_tagset():
     app.flask_grammar.add_new_markup_set(markupSet)
     return app.flask_grammar.to_json()
 
-
 @app.route('/api/markup/toggle', methods=['POST'])
 def toggle_tag():
     data = request.get_json()
@@ -200,6 +199,13 @@ def rename_markuptag():
     oldtag = data['oldtag']
     newtag = data['newtag']
     app.flask_grammar.modify_markup(markupset, oldtag, newtag)
+    return app.flask_grammar.to_json()
+
+@app.route('/api/markup/deletetagset', methods=['POST'])
+def delete_tagset():
+    name = request.get_json()['tagsetName']
+    print 'Deleting tagset: '+name
+    app.flask_grammar.delete_tagset(name)
     return app.flask_grammar.to_json()
 
 @app.route('/', defaults={'path': ''})
