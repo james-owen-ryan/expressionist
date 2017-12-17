@@ -5,6 +5,7 @@ var ButtonToolbar = require('react-bootstrap').ButtonToolbar
 var Modal = require('react-bootstrap').Modal
 var ajax = require('jquery').ajax
 var TestModal = require('./TestModal.jsx')
+var FileList = require('./FileList.jsx')
 
 class HeaderBar extends React.Component {
 
@@ -22,19 +23,12 @@ class HeaderBar extends React.Component {
         this.state = {
             showLoadModal: false,
             showTestModal: false,
-            grammarFileNames: [],
             bundleName: ''
         }
     }
 
     openLoadModal() {
         this.setState({showLoadModal: true});
-        ajax({
-            url: $SCRIPT_ROOT + '/api/grammar/load_dir',
-            type: "GET",
-            cache: false,
-            success: (data) => { this.setState({'grammarFileNames': data.results}) }
-        })
     }
 
     openTestModal() {
@@ -153,17 +147,7 @@ class HeaderBar extends React.Component {
                     <Modal.Header closeButton>
                         <Modal.Title>Load A Grammar</Modal.Title>
                     </Modal.Header>
-                    <div id='grammarFiles' style={{'overflowY': 'scroll', 'height':'400px'}}>
-                        {   this.state.grammarFileNames.map(function (filename) {
-                                return (
-                                    <button className='list-group-item list-group-item-xs nonterminal' 
-                                    style={{'margin':'0', 'border':'0px solid #ddd'}}
-                                    onClick={this.load.bind(this, filename)} key={filename}>{filename}
-                                    </button>
-                                )
-                            }.bind(this))
-                        }
-                    </div>
+                    <FileList onFileClick={this.load}></FileList>
                 </Modal>
             </div>
         );
