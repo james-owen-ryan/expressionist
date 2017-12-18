@@ -1,6 +1,6 @@
 import json
 
-from Markups import Markup
+from tags import Markup
 
 
 class IntermediateDeriv(object):

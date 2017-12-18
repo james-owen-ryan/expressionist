@@ -42,7 +42,7 @@ class MarkupSet extends React.Component {
     }
 
     handleMarkupAdd(set) {
-        var markupTag = window.prompt("Please enter Markup Tag")
+        var markupTag = window.prompt("Enter tag name.")
         if (markupTag != "") {
             //ensure tag does not exist in tagset
             if (this.props.markups[set].indexOf(markupTag) === -1) {
@@ -83,8 +83,8 @@ class MarkupSet extends React.Component {
     }
 
     handleMarkupRename(set) {
-        var oldTag = window.prompt("Please Enter the name of the original Markup")
-        var markupTag = window.prompt("Please enter New Markup Tag")
+        var oldTag = window.prompt("Please enter the original tag name.")
+        var markupTag = window.prompt("Please enter the new tag name.")
         if ( markupTag != "" && oldTag != "" ){
             var object = {
                 "markupset": set,
@@ -108,7 +108,7 @@ class MarkupSet extends React.Component {
     }
 
     handleTagsetDelete(){
-        var prompt = window.prompt("Type YES to delete this markup set.")
+        var prompt = window.prompt("Type 'YES' to delete this tagset.")
         if (prompt != "YES"){
             return false;
         }
@@ -175,7 +175,7 @@ class MarkupSet extends React.Component {
         if (this.props.name.indexOf('/this is a new markupset/') != -1){
             return(
                 <ButtonGroup title={this.props.name} style={{padding: '5px', backgroundColor: '#F2F2F2'}}>
-                    <input type='text' onChange={this.handleNewNameValueChange} value={this.state.newNameVal} style={{height: '20px', backgroundColor: 'white', padding: '5px', width: '175px', marginRight: '5px'}} placeholder='A new markup set name.'/>
+                    <input type='text' onChange={this.handleNewNameValueChange} value={this.state.newNameVal} style={{height: '20px', backgroundColor: 'white', padding: '5px', width: '175px', marginRight: '5px'}} placeholder='Enter tagset name.'/>
                     <div style={{'display': 'inline'}}>
                         <Button onClick={this.handleMarkupSetRename} title="new markup set" bsSize="small" bsStyle="success" style={{marginRight: '5px'}} disabled={this.disableNewNameValue()}><Glyphicon glyph="ok"/></Button>
                         <Button onClick={this.handleTagsetDelete} title="delete markup set" bsSize="small" bsStyle="danger"><Glyphicon glyph="remove"/></Button>

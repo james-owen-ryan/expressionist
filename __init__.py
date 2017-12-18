@@ -3,12 +3,12 @@ import sys
 from flask import Flask, render_template, request
 from flask import jsonify
 import webbrowser
-import Markups
-import NonterminalSymbol
+import tags
+import nonterminal_symbol
 from test_gram import test
 # from IPython import embed
 import re
-import PCFG
+import grammar
 import threading
 import json
 from reductionist import Reductionist
@@ -42,7 +42,7 @@ def load_bundle():
 @app.route('/api/grammar/load', methods=['POST'])
 def load_grammar():
     print request
-    app.flask_grammar = PCFG.from_json(str(request.data))
+    app.flask_grammar = grammar.from_json(str(request.data))
     return app.flask_grammar.to_json()
 
 @app.route('/api/grammar/from_file', methods=['POST'])
@@ -51,7 +51,7 @@ def load_file_grammar():
     user_file = os.path.abspath(os.path.join(os.path.dirname(__file__), ''.join(['grammars/', grammar_name])))
     grammar_file = open(user_file, 'r')
     if grammar_file:
-        app.flask_grammar = PCFG.from_json(str(grammar_file.read()))
+        app.flask_grammar = grammar.from_json(str(grammar_file.read()))
     return app.flask_grammar.to_json()
 
 @app.route('/api/grammar/save', methods=['GET', 'POST'])
@@ -69,14 +69,14 @@ def save_grammar():
 
 @app.route('/api/grammar/new', methods=['GET'])
 def new_grammar():
-    app.flask_grammar = PCFG.PCFG()
+    app.flask_grammar = grammar.PCFG()
     return app.flask_grammar.to_json()
 
 
 @app.route('/api/nonterminal/add', methods=['POST'])
 def add_nt():
     data = request.get_json()
-    app.flask_grammar.add_nonterminal(NonterminalSymbol.NonterminalSymbol(data['nonterminal']))
+    app.flask_grammar.add_nonterminal(nonterminal_symbol.NonterminalSymbol(data['nonterminal']))
     return app.flask_grammar.to_json()
 
 
@@ -111,7 +111,7 @@ def set_deep():
 @app.route('/api/nonterminal/expand', methods=['POST', 'GET'])
 def expand_nt():
     data = request.get_json()
-    return app.flask_grammar.expand(NonterminalSymbol.NonterminalSymbol(data['nonterminal'])).to_json()
+    return app.flask_grammar.expand(nonterminal_symbol.NonterminalSymbol(data['nonterminal'])).to_json()
 
 @app.route('/api/rule/expand', methods=['POST', 'GET'])
 def expand_rule():
@@ -132,8 +132,8 @@ def add_rule():
     data = request.get_json()
     rule = data['rule']
     app_rate = int(data['app_rate'])
-    nonterminal = NonterminalSymbol.NonterminalSymbol(data["nonterminal"])
-    app.flask_grammar.add_rule(nonterminal, PCFG.parse_rule(rule), app_rate)
+    nonterminal = nonterminal_symbol.NonterminalSymbol(data["nonterminal"])
+    app.flask_grammar.add_rule(nonterminal, grammar.parse_rule(rule), app_rate)
     return app.flask_grammar.to_json()
 
 
@@ -142,7 +142,7 @@ def del_rule():
     data = request.get_json()
     rule = int(data['rule'])
     nonterminal = data['nonterminal']
-    app.flask_grammar.remove_rule_by_index(NonterminalSymbol.NonterminalSymbol(nonterminal), rule)
+    app.flask_grammar.remove_rule_by_index(nonterminal_symbol.NonterminalSymbol(nonterminal), rule)
     return app.flask_grammar.to_json()
 
 
@@ -152,15 +152,15 @@ def set_app():
     rule = data['rule']
     nonterminal = data['nonterminal']
     app_rate = int(data['app_rate'])
-    app.flask_grammar.modify_application_rate(NonterminalSymbol.NonterminalSymbol(nonterminal), rule, app_rate)
+    app.flask_grammar.modify_application_rate(nonterminal_symbol.NonterminalSymbol(nonterminal), rule, app_rate)
     return app.flask_grammar.to_json()
 
 
 @app.route('/api/markup/addtag', methods=['POST'])
 def add_tag():
     data = request.get_json()
-    markupSet = Markups.MarkupSet(data['markupSet'])
-    markup = Markups.Markup(data['tag'], markupSet)
+    markupSet = tags.MarkupSet(data['markupSet'])
+    markup = tags.Markup(data['tag'], markupSet)
     app.flask_grammar.add_unused_markup(markup)
     return app.flask_grammar.to_json()
 
@@ -168,7 +168,7 @@ def add_tag():
 @app.route('/api/markup/addtagset', methods=['POST'])
 def add_tagset():
     data = request.get_json()
-    markupSet = Markups.MarkupSet(data["markupSet"])
+    markupSet = tags.MarkupSet(data["markupSet"])
     app.flask_grammar.add_new_markup_set(markupSet)
     return app.flask_grammar.to_json()
 
@@ -176,9 +176,9 @@ def add_tagset():
 def toggle_tag():
     data = request.get_json()
     print data
-    nonterminal = NonterminalSymbol.NonterminalSymbol(data["nonterminal"])
-    markupSet = Markups.MarkupSet(data['markupSet'])
-    markup = Markups.Markup(data['tag'], markupSet)
+    nonterminal = nonterminal_symbol.NonterminalSymbol(data["nonterminal"])
+    markupSet = tags.MarkupSet(data['markupSet'])
+    markup = tags.Markup(data['tag'], markupSet)
     print("nonterminal")
     app.flask_grammar.toggle_markup(nonterminal, markup)
 
@@ -335,7 +335,7 @@ def tagged_content_request():
 
 
 if __name__ == '__main__':
-    app.flask_grammar = PCFG.from_json(str(open('./grammars/example.json', 'r').read()))
+    app.flask_grammar = grammar.from_json(str(open('./grammars/example.json', 'r').read()))
     app.productionist = None  # Gets set upon export
     app.debug = debug
     app.run()
