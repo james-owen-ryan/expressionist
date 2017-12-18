@@ -4,6 +4,7 @@ import json  # Used to generate JSON grammar files in the Productionist format
 import operator  # Used to determine total number of generable lines of dialogue for a symbol/rule/grammar
 import itertools  # Used to efficiently compute combinatorics when deriving grammar paths
 import marisa_trie  # Used to build a trie data structure efficiently storing all the paths through the grammar
+from config import *
 
 
 class Reductionist(object):
@@ -257,9 +258,13 @@ class Reductionist(object):
                 rules_on_that_path = [self.grammar.production_rules[int(i)] for i in path_string.split(',')]
             else:
                 rules_on_that_path = []  # An empty path, in the case of paths through symbols with no tags
-            all_tags_for_that_path = set()
+            all_tags_for_that_path = []
             for rule in rules_on_that_path:
-                all_tags_for_that_path |= set(rule.tags)
+                all_tags_for_that_path += rule.tags
+            if not EXPORT_DUPLICATE_TAGS_ON_EXPRESSIBLE_MEANINGS:
+                all_tags_for_that_path = sorted(set(all_tags_for_that_path))
+            else:
+                all_tags_for_that_path.sort()
             if self.trie_output:
                 # Use the trie key
                 grammar_path = str(trie_key_for_that_path_string)
@@ -364,7 +369,7 @@ class ExpressibleMeaning(object):
     def __init__(self, meaning_id, tags, initial_grammar_path, grammar_paths=None):
         """Initialize a ExpressibleMeaning object."""
         self.id = meaning_id
-        # A set including all the tags associated with this expressible meaning; these can be thought
+        # A list including all the tags associated with this expressible meaning; these can be thought
         # of as the semantics that are associated with all the paths through the grammar that this
         # expressible meaning indexes
         self.tags = tags
@@ -608,8 +613,7 @@ class ProductionRule(object):
         for symbol in self.body:
             if type(symbol) != unicode:  # i.e., if the symbol is nonterminal
                 for tag in symbol.tags:
-                    if tag not in self.tags:
-                        self.tags.append(tag)
+                    self.tags.append(tag)
 
     def count_generable_variants(self):
         """Determine the number of unique terminal executions of this rule."""
