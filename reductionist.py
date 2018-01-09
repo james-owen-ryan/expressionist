@@ -296,12 +296,10 @@ class Reductionist(object):
         f = open(expressible_meanings_file_location, 'w')
         tag_to_id = self.grammar.tag_to_id
         for expressible_meaning in self.expressible_meanings:
-            if not self.trie_output:
-                all_paths_str = '|'.join(
-                    self.trie.restore_key(path_trie_key) for path_trie_key in expressible_meaning.grammar_paths
-                )
-            else:
-                all_paths_str = '|'.join(str(path_trie_key) for path_trie_key in expressible_meaning.grammar_paths)
+            # Note: grammar_path will be either a trie key (if self.trie_output == True) or
+            # a unicode string structured as a comma-separated list of production-rule IDs,
+            # e.g., u'63,42,67,22'
+            all_paths_str = '|'.join(str(grammar_path) for grammar_path in expressible_meaning.grammar_paths)
             all_tags_str = ','.join(tag_to_id[tag] for tag in expressible_meaning.tags)
             line = "{meaning_id}\t{paths}\t{tags}\n".format(
                 meaning_id=expressible_meaning.id, paths=all_paths_str, tags=all_tags_str
