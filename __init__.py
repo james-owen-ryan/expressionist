@@ -15,7 +15,8 @@ from reductionist import Reductionist
 from productionist import Productionist, ContentRequest
 
 app = Flask(__name__)
-debug = True
+debug = False
+
 
 @app.route('/api/default', methods=['GET'])
 def default():
