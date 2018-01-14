@@ -9,7 +9,7 @@ class Rule(object):
     def __init__(self, symbol, derivation, application_rate=1):
         """Initialize a Rule object.
         :param symbol: Nonterminal symbol(lhs) for this rule
-        :type symbol: NonterminalSymbol.NonterminalSymbol
+        :type symbol: nonterminal_symbol.NonterminalSymbol
         :param derivation: Derivation of the NonterminalSymbol
         :type derivation: list()
         :param application_rate: application_rate(probability) for this rule

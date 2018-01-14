@@ -1,6 +1,6 @@
-from Markups import Markup, MarkupSet
-from NonterminalSymbol import NonterminalSymbol
-from PCFG import parse_rule, PCFG
+from tags import Markup, MarkupSet
+from nonterminal_symbol import NonterminalSymbol
+from grammar import parse_rule, PCFG
 
 test = PCFG()
 

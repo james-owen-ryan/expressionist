@@ -8,9 +8,9 @@ import json
 import re
 
 # from IPython import embed
-from NonterminalSymbol import NonterminalSymbol
-from Markups import Markup, MarkupSet
-from Terminals import TerminalSymbol, SystemVar
+from nonterminal_symbol import NonterminalSymbol
+from tags import Markup, MarkupSet
+from terminal_symbol import TerminalSymbol, SystemVar
 import copy
 
 import jsontree
@@ -132,7 +132,7 @@ class PCFG(object):
     def add_markup(self, nonterminal, markup):
         """
         add markup to an existing nonterminal
-        :type markup: Markups.Markup
+        :type markup: tags.Markup
         """
         if self.nonterminals.get(str(nonterminal.tag)):
             if not self.markup_class.get(str(markup.tagset)):
@@ -143,7 +143,7 @@ class PCFG(object):
     def remove_markup(self, nonterminal, markup):
         """
         add markup to an existing nonterminal
-        :type markup: Markups.Markup
+        :type markup: tags.Markup
         """
         nonterminal = self.nonterminals.get(str(nonterminal.tag))
         if nonterminal:

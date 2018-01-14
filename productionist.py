@@ -132,9 +132,7 @@ class Productionist(object):
                 path_trie_keys = [int(path_trie_key) for path_trie_key in all_paths_str.split('|')]
                 recipes = [self.trie.restore_key(path_trie_key) for path_trie_key in path_trie_keys]
             else:
-                recipes = []
-                for path_str in all_paths_str.split('|'):
-                    recipes.append([int(rule_id) for rule_id in path_str.split(',')])
+                recipes = [path_str for path_str in all_paths_str.split('|')]
             tags = {id_to_tag[tag_id] for tag_id in all_tags_str.split(',')} if all_tags_str else set()
             expressible_meanings.append(
                 ExpressibleMeaning(meaning_id=int(meaning_id), tags=tags, recipes=recipes)

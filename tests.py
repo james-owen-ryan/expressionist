@@ -1,12 +1,12 @@
 """import unittest for running tests"""
 import unittest
 
-from IntermediateDeriv import IntermediateDeriv
-from Markups import Markup, MarkupSet
-from NonterminalSymbol import NonterminalSymbol
-from PCFG import parse_rule, PCFG
-from Rule import Rule
-from Terminals import TerminalSymbol, SystemVar
+from intermediate_derivation import IntermediateDeriv
+from tags import Markup, MarkupSet
+from nonterminal_symbol import NonterminalSymbol
+from grammar import parse_rule, PCFG
+from rule import Rule
+from terminal_symbol import TerminalSymbol, SystemVar
 
 
 class TestNonterminalEquivalency(unittest.TestCase):

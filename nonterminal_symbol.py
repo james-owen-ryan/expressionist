@@ -1,9 +1,9 @@
 import itertools
 import random
 
-from IntermediateDeriv import IntermediateDeriv
-from Rule import Rule
-from Terminals import TerminalSymbol
+from intermediate_derivation import IntermediateDeriv
+from rule import Rule
+from terminal_symbol import TerminalSymbol
 
 
 class NonterminalSymbol(object):

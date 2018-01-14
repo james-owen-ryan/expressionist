@@ -1,4 +1,4 @@
-from IntermediateDeriv import IntermediateDeriv
+from intermediate_derivation import IntermediateDeriv
 
 
 class TerminalSymbol(object):
