@@ -8,7 +8,8 @@ class FileList extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            grammarFileNames: []
+            grammarFileNames: [],
+            height: this.props.height || '400px',
         };
     }
 
@@ -25,12 +26,15 @@ class FileList extends React.Component {
         var files = null;
         if (this.state.grammarFileNames.length > 0) {
             files = this.state.grammarFileNames.map( (filename) => {
-                return <ListGroupItem onClick={this.props.onFileClick.bind(this, filename)} key={filename}>{filename}</ListGroupItem>
+                if (filename == this.props.highlightedFile){
+                    return <ListGroupItem onClick={ () => { this.props.onFileClick(filename) } } key={filename} bsStyle="success">{filename}</ListGroupItem>
+                }
+                return <ListGroupItem onClick={ () => { this.props.onFileClick(filename) } } key={filename}>{filename}</ListGroupItem>
             })
         } else {
             files = <p>There are no files in /grammars</p>
         }
-        return (<ListGroup class='grammar-files' style={{'overflowY': 'scroll', 'height':'400px'}}>{files}</ListGroup>)
+        return (<ListGroup class='grammar-files' style={{'overflowY': 'scroll', 'height': this.state.height}}>{files}</ListGroup>)
     }
 }
 

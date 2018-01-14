@@ -5,6 +5,7 @@ var ButtonToolbar = require('react-bootstrap').ButtonToolbar
 var Modal = require('react-bootstrap').Modal
 var ajax = require('jquery').ajax
 var TestModal = require('./TestModal.jsx')
+var SaveGrammarModal = require('./SaveGrammarModal.jsx')
 var FileList = require('./FileList.jsx')
 
 class HeaderBar extends React.Component {
@@ -13,17 +14,20 @@ class HeaderBar extends React.Component {
         super(props);
         this.openLoadModal = this.openLoadModal.bind(this);
         this.openTestModal = this.openTestModal.bind(this);
+        this.openSaveModal = this.openSaveModal.bind(this);
         this.closeTestModal = this.closeTestModal.bind(this);
         this.closeLoadModal = this.closeLoadModal.bind(this);
+        this.closeSaveModal = this.closeSaveModal.bind(this);
         this.load = this.load.bind(this);
         this.reset = this.reset.bind(this);
-        this.saveGrammar = this.saveGrammar.bind(this);
         this.exportGrammar = this.exportGrammar.bind(this);
         this.buildProductionist = this.buildProductionist.bind(this);
         this.state = {
             showLoadModal: false,
             showTestModal: false,
-            bundleName: ''
+            showSaveModal: false,
+            bundleName: '',
+            loadedGrammarName: 'example.json'
         }
     }
 
@@ -35,12 +39,20 @@ class HeaderBar extends React.Component {
         this.setState({showTestModal: true});
     }
 
+    openSaveModal() {
+        this.setState({showSaveModal: true});
+    }
+
     closeTestModal() {
         this.setState({showTestModal: false});
     }
 
     closeLoadModal() {
         this.setState({showLoadModal: false});
+    }
+
+    closeSaveModal() {
+        this.setState({showSaveModal: false});
     }
 
     closeSystemVarsModal() {
@@ -57,7 +69,10 @@ class HeaderBar extends React.Component {
             cache: false
         })
         this.props.update()
-        this.setState({showLoadModal: false})
+        this.setState({
+            showLoadModal: false,
+            loadedGrammarName: filename
+        })
     }
 
     reset() {
@@ -72,23 +87,6 @@ class HeaderBar extends React.Component {
         this.props.updateExpansionFeedback('');
         this.props.updateHistory("'", -1);
         this.props.update()
-    }
-
-    saveGrammar() {
-        var filename = window.prompt("Enter a filename for your grammar.")
-        if (filename != "") {
-            ajax({
-                url: $SCRIPT_ROOT + '/api/grammar/save',
-                type: "POST",
-                contentType: "text/plain",
-                data: filename,
-                async: true,
-                cache: false,
-                success: function(status){
-                    window.alert(status);
-                }
-            })
-        }
     }
 
     exportGrammar() {
@@ -133,22 +131,20 @@ class HeaderBar extends React.Component {
                     <ButtonGroup>
                         <Button onClick={this.reset} bsStyle='danger'>New</Button>
                         <Button onClick={this.openLoadModal} bsStyle='primary'>Load</Button>
-                        <Button onClick={this.saveGrammar} bsStyle='primary'>Save</Button>
+                        <Button onClick={this.openSaveModal} bsStyle='primary'>Save</Button>
                         <Button onClick={this.exportGrammar} bsStyle='primary'>Export</Button>
                         <Button onClick={this.buildProductionist} bsStyle='primary'>Build</Button>
                         <Button onClick={this.openTestModal} bsStyle='primary'>Test</Button>
                     </ButtonGroup>
                 </ButtonToolbar>
-                <TestModal  show={this.state.showTestModal} 
-                            onHide={this.closeTestModal}
-                            bundleName={this.state.bundleName}>
-                </TestModal>
+                <TestModal show={this.state.showTestModal} onHide={this.closeTestModal} bundleName={this.state.bundleName}></TestModal>
                 <Modal show={this.state.showLoadModal} onHide={this.closeLoadModal}>
                     <Modal.Header closeButton>
                         <Modal.Title>Load A Grammar</Modal.Title>
                     </Modal.Header>
-                    <FileList onFileClick={this.load}></FileList>
+                    <FileList onFileClick={this.load} highlightedFile={this.state.loadedGrammarName}></FileList>
                 </Modal>
+                <SaveGrammarModal show={this.state.showSaveModal} onHide={this.closeSaveModal} defaultGrammarName={this.state.loadedGrammarName}></SaveGrammarModal>
             </div>
         );
     }
