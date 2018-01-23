@@ -21,6 +21,8 @@ class HeaderBar extends React.Component {
         this.closeSaveModal = this.closeSaveModal.bind(this);
         this.openExportModal = this.openExportModal.bind(this);
         this.closeExportModal = this.closeExportModal.bind(this);
+        this.openBuildModal = this.openBuildModal.bind(this);
+        this.closeBuildModal = this.closeBuildModal.bind(this);
         this.load = this.load.bind(this);
         this.reset = this.reset.bind(this);
         this.buildProductionist = this.buildProductionist.bind(this);
@@ -29,6 +31,9 @@ class HeaderBar extends React.Component {
             showTestModal: false,
             showSaveModal: false,
             showExportModal: false,
+            showBuildModal: false,
+            buildNavTitle: 'Build',
+            buildModalTitle: 'Build A Grammar',
             bundleName: '',
             loadedGrammarName: 'example.json'
         }
@@ -50,6 +55,10 @@ class HeaderBar extends React.Component {
         this.setState({showExportModal: true});
     }
 
+    openBuildModal(){
+        this.setState({showBuildModal: true});
+    }
+
     closeTestModal() {
         this.setState({showTestModal: false});
     }
@@ -64,6 +73,10 @@ class HeaderBar extends React.Component {
 
     closeExportModal(){
         this.setState({showExportModal: false});
+    }
+
+    closeBuildModal(){
+        this.setState({showBuildModal: false});
     }
 
     closeSystemVarsModal() {
@@ -101,22 +114,27 @@ class HeaderBar extends React.Component {
         this.setState({loadedGrammarName: ''})
     }
 
-    buildProductionist() {
-        var contentBundleName = window.prompt("Enter the name of the content bundle that you'd like to build a generator for.")
-        if (contentBundleName != "") {
-            ajax({
-                url: $SCRIPT_ROOT + '/api/grammar/build',
-                type: "POST",
-                contentType: "text/plain",
-                data: contentBundleName,
-                async: true,
-                cache: false,
-                success: function(data){
-                    window.alert(data.status);
-                    this.setState({bundleName: data.bundleName})
-                }.bind(this)
-            })
-        }
+    buildProductionist(contentBundleName) {
+        this.setState({
+            buildNavTitle: 'Building...',
+            buildModalTitle: 'Building...'
+        })
+        ajax({
+            url: $SCRIPT_ROOT + '/api/grammar/build',
+            type: "POST",
+            contentType: "text/plain",
+            data: contentBundleName,
+            async: true,
+            cache: false,
+            success: function(data){
+                this.setState({
+                    bundleName: data.bundleName,
+                    showBuildModal: false,
+                    buildNavTitle: 'Build',
+                    buildModalTitle: 'Build A Grammar'
+                })
+            }.bind(this)
+        })
     }
 
     render() {
@@ -128,7 +146,7 @@ class HeaderBar extends React.Component {
                         <Button onClick={this.openLoadModal} bsStyle='primary'>Load</Button>
                         <Button onClick={this.openSaveModal} bsStyle='primary'>Save</Button>
                         <Button onClick={this.openExportModal} bsStyle='primary'>Export</Button>
-                        <Button onClick={this.buildProductionist} bsStyle='primary'>Build</Button>
+                        <Button onClick={this.openBuildModal} bsStyle='primary'>{this.state.buildNavTitle}</Button>
                         <Button onClick={this.openTestModal} bsStyle='primary'>Test</Button>
                     </ButtonGroup>
                 </ButtonToolbar>
@@ -137,10 +155,16 @@ class HeaderBar extends React.Component {
                     <Modal.Header closeButton>
                         <Modal.Title>Load A Grammar</Modal.Title>
                     </Modal.Header>
-                    <FileList onFileClick={this.load} highlightedFile={this.state.loadedGrammarName}></FileList>
+                    <FileList onFileClick={this.load} highlightedFile={this.state.loadedGrammarName} directory='grammars'></FileList>
                 </Modal>
                 <ExportGrammarModal show={this.state.showExportModal} onHide={this.closeExportModal} defaultGrammarName={this.state.loadedGrammarName}></ExportGrammarModal>
                 <SaveGrammarModal show={this.state.showSaveModal} onHide={this.closeSaveModal} defaultGrammarName={this.state.loadedGrammarName}></SaveGrammarModal>
+                <Modal show={this.state.showBuildModal} onHide={this.closeBuildModal}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>{this.state.buildModalTitle}</Modal.Title>
+                    </Modal.Header>
+                    <FileList onFileClick={this.buildProductionist} highlightedFile={this.state.loadedGrammarName} directory='exports'></FileList>
+                </Modal>
             </div>
         );
     }
