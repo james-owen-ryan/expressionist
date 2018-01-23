@@ -6,6 +6,7 @@ var Modal = require('react-bootstrap').Modal
 var ajax = require('jquery').ajax
 var TestModal = require('./TestModal.jsx')
 var SaveGrammarModal = require('./SaveGrammarModal.jsx')
+var ExportGrammarModal = require('./ExportGrammarModal.jsx')
 var FileList = require('./FileList.jsx')
 
 class HeaderBar extends React.Component {
@@ -18,14 +19,16 @@ class HeaderBar extends React.Component {
         this.closeTestModal = this.closeTestModal.bind(this);
         this.closeLoadModal = this.closeLoadModal.bind(this);
         this.closeSaveModal = this.closeSaveModal.bind(this);
+        this.openExportModal = this.openExportModal.bind(this);
+        this.closeExportModal = this.closeExportModal.bind(this);
         this.load = this.load.bind(this);
         this.reset = this.reset.bind(this);
-        this.exportGrammar = this.exportGrammar.bind(this);
         this.buildProductionist = this.buildProductionist.bind(this);
         this.state = {
             showLoadModal: false,
             showTestModal: false,
             showSaveModal: false,
+            showExportModal: false,
             bundleName: '',
             loadedGrammarName: 'example.json'
         }
@@ -43,6 +46,10 @@ class HeaderBar extends React.Component {
         this.setState({showSaveModal: true});
     }
 
+    openExportModal(){
+        this.setState({showExportModal: true});
+    }
+
     closeTestModal() {
         this.setState({showTestModal: false});
     }
@@ -53,6 +60,10 @@ class HeaderBar extends React.Component {
 
     closeSaveModal() {
         this.setState({showSaveModal: false});
+    }
+
+    closeExportModal(){
+        this.setState({showExportModal: false});
     }
 
     closeSystemVarsModal() {
@@ -87,23 +98,7 @@ class HeaderBar extends React.Component {
         this.props.updateExpansionFeedback('');
         this.props.updateHistory("'", -1);
         this.props.update()
-    }
-
-    exportGrammar() {
-        var filename = window.prompt("Enter a filename for your content bundle.")
-        if (filename != "") {
-            ajax({
-                url: $SCRIPT_ROOT + '/api/grammar/export',
-                type: "POST",
-                contentType: "text/plain",
-                data: filename,
-                async: true,
-                cache: false,
-                success: function(status){
-                    window.alert(status);
-                }
-            })
-        }
+        this.setState({loadedGrammarName: ''})
     }
 
     buildProductionist() {
@@ -132,7 +127,7 @@ class HeaderBar extends React.Component {
                         <Button onClick={this.reset} bsStyle='danger'>New</Button>
                         <Button onClick={this.openLoadModal} bsStyle='primary'>Load</Button>
                         <Button onClick={this.openSaveModal} bsStyle='primary'>Save</Button>
-                        <Button onClick={this.exportGrammar} bsStyle='primary'>Export</Button>
+                        <Button onClick={this.openExportModal} bsStyle='primary'>Export</Button>
                         <Button onClick={this.buildProductionist} bsStyle='primary'>Build</Button>
                         <Button onClick={this.openTestModal} bsStyle='primary'>Test</Button>
                     </ButtonGroup>
@@ -144,6 +139,7 @@ class HeaderBar extends React.Component {
                     </Modal.Header>
                     <FileList onFileClick={this.load} highlightedFile={this.state.loadedGrammarName}></FileList>
                 </Modal>
+                <ExportGrammarModal show={this.state.showExportModal} onHide={this.closeExportModal} defaultGrammarName={this.state.loadedGrammarName}></ExportGrammarModal>
                 <SaveGrammarModal show={this.state.showSaveModal} onHide={this.closeSaveModal} defaultGrammarName={this.state.loadedGrammarName}></SaveGrammarModal>
             </div>
         );
