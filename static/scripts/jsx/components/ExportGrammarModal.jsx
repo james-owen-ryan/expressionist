@@ -23,7 +23,7 @@ class ExportGrammarModal extends React.Component {
             grammarName: this.props.defaultGrammarName || '',
             grammarFileNames: [],
             height: '400px',
-            exportGrammarBtnText: 'Export Grammar',
+            exportGrammarBtnText: 'Export bundle',
             disableExportButton: false,
             validationState: 'success'
         };
@@ -86,11 +86,11 @@ class ExportGrammarModal extends React.Component {
             cache: false,
             success: (status) => { 
                 this.setState({
-                    'exportGrammarBtnText': 'Export Successful!',
+                    'exportGrammarBtnText': 'Export successful!',
                     'disableExportButton': true
                 })
                 setTimeout(() => { this.setState({
-                    'exportGrammarBtnText': 'Export Grammar',
+                    'exportGrammarBtnText': 'Export content bundle',
                     'disableExportButton': false
                 }) }, 3000);
             }
@@ -101,15 +101,15 @@ class ExportGrammarModal extends React.Component {
         return (
             <Modal show={this.props.show} onHide={this.props.onHide}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Export Your Grammar</Modal.Title>
+                    <Modal.Title>Export your content bundle</Modal.Title>
                 </Modal.Header>
                 <div style={{padding: '15px'}}>
                     <form>
                         <FormGroup controlId="exportGrammarForm" validationState={this.checkExportGrammarName()}>
-                            <ControlLabel>Grammar Name</ControlLabel>
-                            <FormControl type="text" value={this.state.grammarName} placeholder="Enter a new grammar name." onChange={this.handleChange} />
+                            <ControlLabel>Bundle name</ControlLabel>
+                            <FormControl type="text" value={this.state.grammarName} placeholder="Enter a name for your content bundle." onChange={this.handleChange} />
                             <FormControl.Feedback />
-                            <HelpBlock><i>Grammars are exported to /exports. Exporting will overwrite files with the same name.</i></HelpBlock>
+                            <HelpBlock><i>Content bundles are exported to /exports. Exporting will overwrite files with the same name.</i></HelpBlock>
                         </FormGroup>
                     </form>
                     <FileList onFileClick={this.updateGrammarName} highlightedFile={this.state.grammarName} height='200px'></FileList>
