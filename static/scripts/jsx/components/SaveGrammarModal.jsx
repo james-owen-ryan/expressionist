@@ -81,8 +81,8 @@ class SaveGrammarModal extends React.Component {
             async: true,
             cache: false,
             success: (status) => { 
-                this.setState({'saveGrammarBtnText': 'Saving Successful!'}) 
-                setTimeout(() => { this.setState({'saveGrammarBtnText': 'Save Grammar'}) }, 3000);
+                this.setState({'saveGrammarBtnText': 'Save successful!'})
+                setTimeout(() => { this.setState({'saveGrammarBtnText': 'Save grammar'}) }, 3000);
             }
         })
     }
@@ -91,15 +91,15 @@ class SaveGrammarModal extends React.Component {
         return (
             <Modal show={this.props.show} onHide={this.props.onHide}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Save This Grammar</Modal.Title>
+                    <Modal.Title>Save this grammar</Modal.Title>
                 </Modal.Header>
                 <div style={{padding: '15px'}}>
                     <form>
                         <FormGroup controlId="saveGrammarForm" validationState={this.checkSaveGrammarName()}>
-                            <ControlLabel>Grammar Name</ControlLabel>
+                            <ControlLabel>Grammar name</ControlLabel>
                             <FormControl type="text" value={this.state.grammarName} placeholder="Enter a new grammar name." onChange={this.handleChange} />
                             <FormControl.Feedback />
-                            <HelpBlock><i>Grammars are saved to .../grammars. Saving will overwrite files with the same name.</i></HelpBlock>
+                            <HelpBlock><i>Grammars are saved to /grammars. Saving will overwrite files with the same name.</i></HelpBlock>
                         </FormGroup>
                     </form>
                     <FileList onFileClick={this.updateGrammarName} highlightedFile={this.state.grammarName} height='200px'></FileList>
