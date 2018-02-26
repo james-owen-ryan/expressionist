@@ -174,7 +174,7 @@ class MarkupSet extends React.Component {
 
         if (this.props.name.indexOf('/this is a new markupset/') != -1){
             return(
-                <ButtonGroup title={this.props.name} style={{padding: '5px', backgroundColor: '#F2F2F2'}}>
+                <ButtonGroup title={this.props.name} style={{padding: '5px', backgroundColor: '#F2F2F2'}} className='nohover'>
                     <input type='text' onChange={this.handleNewNameValueChange} value={this.state.newNameVal} style={{height: '20px', backgroundColor: 'white', padding: '5px', width: '175px', marginRight: '5px'}} placeholder='Enter tagset name.'/>
                     <div style={{'display': 'inline'}}>
                         <Button onClick={this.handleMarkupSetRename} title="new markup set" bsSize="small" bsStyle="success" style={{marginRight: '5px'}} disabled={this.disableNewNameValue()}><Glyphicon glyph="ok"/></Button>
@@ -184,7 +184,7 @@ class MarkupSet extends React.Component {
             )
         } else {
             return (
-                <DropdownButton className="grp-button" id={this.props.name} title={this.props.name} bsStyle={any ? 'success' : 'default'} style={{'height': '38px'}}>
+                <DropdownButton className="grp-button" id={this.props.name} title={this.props.name} bsStyle={any ? 'success' : 'default'} style={{'height': '38px'}} className='nohover'>
                     {out_arr}
                 </DropdownButton>
             );

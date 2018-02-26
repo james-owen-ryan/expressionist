@@ -9,6 +9,10 @@ var FormGroup = require('react-bootstrap').FormGroup
 var ControlLabel = require('react-bootstrap').ControlLabel
 var Button = require('react-bootstrap').Button
 var Modal = require('react-bootstrap').Modal
+var Grid = require('react-bootstrap').Grid
+var Row = require('react-bootstrap').Row
+var Col = require('react-bootstrap').Col
+var Alert = require('react-bootstrap').Alert
 var ajax = require('jquery').ajax
 
 class TestModal extends React.Component {
@@ -27,7 +31,11 @@ class TestModal extends React.Component {
             markups: {},
             tags: [],
             bundleName: '',
-            bundlesList: []
+            bundlesList: [],
+            numOutputs: 0,
+            probablisticOutputText: '',
+            probablisticOutputTags: [],
+            outputError: false
         };
     }
 
@@ -143,6 +151,7 @@ class TestModal extends React.Component {
             }else{ return tagObj; }
         }.bind(this));
         this.setState({tags: updated});
+        this.sendTaggedContentRequest();
     }
 
     getTagData(tag, data) {
@@ -199,13 +208,23 @@ class TestModal extends React.Component {
             }),
             async: true,
             cache: false,
-            success: function(data){
-                alert(data);
+            success: (data) => {
+              if (data != 'The content request cannot be satisfied by the exported content bundle.'){
+                data = JSON.parse(data)
+                this.setState({
+                  probablisticOutputText: data.text,
+                  probablisticOutputTags: data.tags,
+                  outputError: false
+                })
+              } else {
+                this.setState({outputError: true})
+              }
             },
             error: function(err){
                 alert('It seems like you have not built your Productionist grammar into memory yet. See console for more details.');
             }
         })
+        this.setState({numOutputs: this.state.numOutputs+1})
     }
 
     render() {
@@ -221,10 +240,7 @@ class TestModal extends React.Component {
                 </Modal.Header>
                 <FormGroup>
                     <ControlLabel style={{display: 'block', marginLeft: '15px', marginTop: '10px'}}>Bundle Name</ControlLabel>
-                    <FormControl    type="text"
-                                    value={this.state.bundleName}
-                                    style={{width: '200px', display: 'inline', marginLeft: "15px"}}
-                                    readOnly={true}/>
+                    <FormControl type="text" value={this.state.bundleName} style={{width: '200px', display: 'inline', marginLeft: "15px"}} readOnly={true}/>
                 </FormGroup>
                 <div id="tags">
                     <ListGroup id='tagsList' style={{marginBottom: '0px'}}>
@@ -232,26 +248,15 @@ class TestModal extends React.Component {
                             Object.keys(this.state.markups).map(function (tagset){
                                 return (
                                     <ListGroupItem bsSize="xsmall" key={tagset} style={{border: 'none'}}>
-                                        <ListGroupItem  title={tagset}
-                                                        bsSize="xsmall"
-                                                        onClick={this.toggleTagSetStatus.bind(this, tagset)}>
-                                                        {tagset}
+                                        <ListGroupItem  title={tagset} bsSize="xsmall" onClick={this.toggleTagSetStatus.bind(this, tagset)}>{tagset}
                                         </ListGroupItem>
                                         {
                                             this.state.markups[tagset].map(function (tag){
                                                 return (
                                                     <div key={tag}>
-                                                        <ListGroupItem  title={tag}
-                                                                        bsSize="xsmall"
-                                                                        bsStyle={this.getTagColorFromStatus(this.getTagData(tag, "status"))}
-                                                                        onClick={this.toggleTagStatus.bind(this, tag)}>
-                                                                        {tag}
-                                                                        <FormControl    type="number"
-                                                                                        id={tag}
-                                                                                        value={this.getTagData(tag, "frequency")}
-                                                                                        onChange={this.updateTagFrequency}
-                                                                                        style={this.getTagData(tag, "status") == 'enabled' ? {display: 'inline'} : {display: 'none'}}
-                                                                        />
+                                                        <ListGroupItem title={tag} bsSize="xsmall" className='nohover' bsStyle={this.getTagColorFromStatus(this.getTagData(tag, "status"))} onClick={this.toggleTagStatus.bind(this, tag)}>
+                                                            {tag}
+                                                            <FormControl type="number" id={tag} value={this.getTagData(tag, "frequency")} onChange={this.updateTagFrequency} style={this.getTagData(tag, "status") == 'enabled' ? {display: 'inline'} : {display: 'none'}} />
                                                         </ListGroupItem>
                                                     </div>
                                                 )
@@ -262,11 +267,38 @@ class TestModal extends React.Component {
                             }.bind(this))
                         }
                     </ListGroup>
-                    &emsp;&ensp;<Button onClick={this.sendTaggedContentRequest} bsStyle='primary' style={{marginBottom: '10px', marginTop: '10px'}}>Generate!</Button>
+                    <div id='outputs' style={{marginLeft: '15px', marginTop: '10px', marginRight: '15px', marginBottom: '10px'}}>
+                        <Alert bsStyle="danger" style={setErrorWarningStyle(this.state.outputError)}>
+                          Content request is unsatisfiable.
+                        </Alert>
+                        <div style={{marginBottom: '10px'}}>
+                          Output: {this.state.numOutputs}
+                        </div>
+                        <div>
+                            <div style={{display: 'flex', marginBottom: '5px'}}>
+                              <p style={{marginRight: '10px', float: 'left'}}>Probablstic Output</p>
+                              <Button onClick={this.sendTaggedContentRequest} bsStyle='primary' style={{marginTop: '-10px'}}>Generate</Button>
+                            </div>
+                            <Grid fluid>
+                              <Row className="show-grid" style={{display: 'flex'}}>
+                                <Col xs={6} className='feedback-bar feedback-bar-left'>{this.state.probablisticOutputText}</Col>
+                                <Col xs={6} className='feedback-bar feedback-bar-right'>{this.state.probablisticOutputTags.map( (tagset) => <div>{tagset}</div> )}</Col>
+                              </Row>
+                            </Grid>
+                        </div>
+                    </div>
                 </div>
             </Modal>
         );
     }
+}
+
+function setErrorWarningStyle(outputError){
+  if (outputError == true){
+    return {display: 'block'}
+  }else{
+    return {display: 'none'}
+  }
 }
 
 module.exports = TestModal;
