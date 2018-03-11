@@ -762,7 +762,7 @@ class Output(object):
     @property
     def payload(self):
         """Return a dictionary containing data associated with this output, for use by the authoring interface."""
-        return {"text": self.text, "tags": list(self.tags)}
+        return {"text": self.text, "tags": list(self.tags), 'treeExpression': self.tree_expression_with_tags, 'bracketedExpression': self.bracketed_expression }
 
 
 class Grammar(object):

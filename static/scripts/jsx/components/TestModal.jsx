@@ -35,6 +35,8 @@ class TestModal extends React.Component {
             numOutputs: 0,
             probablisticOutputText: '',
             probablisticOutputTags: [],
+            probablisticOutputTreeExpression: '',
+            probablisticOutputBracketedExpression: '',
             outputError: false
         };
     }
@@ -214,6 +216,8 @@ class TestModal extends React.Component {
                 this.setState({
                   probablisticOutputText: data.text,
                   probablisticOutputTags: data.tags,
+                  probablisticOutputTreeExpression: data.treeExpression,
+                  probablisticOutputBracketedExpression: data.bracketedExpression,
                   outputError: false
                 })
               } else {
@@ -272,7 +276,7 @@ class TestModal extends React.Component {
                           Content request is unsatisfiable.
                         </Alert>
                         <div style={{marginBottom: '10px'}}>
-                          Output: {this.state.numOutputs}
+                          Output #{this.state.numOutputs}
                         </div>
                         <div>
                             <div style={{display: 'flex', marginBottom: '5px'}}>
@@ -283,6 +287,12 @@ class TestModal extends React.Component {
                               <Row className="show-grid" style={{display: 'flex'}}>
                                 <Col xs={6} className='feedback-bar feedback-bar-left'>{this.state.probablisticOutputText}</Col>
                                 <Col xs={6} className='feedback-bar feedback-bar-right'>{this.state.probablisticOutputTags.map( (tagset) => <div>{tagset}</div> )}</Col>
+                              </Row>
+                            </Grid>
+                            <div style={{marginTop: '10px', marginBottom: '10px'}}>Tree Expression</div>
+                            <Grid fluid>
+                              <Row className="show-grid">
+                                <Col xs={12} style={{'white-space': 'pre-wrap'}} className='feedback-bar'>{this.state.probablisticOutputTreeExpression}</Col>
                               </Row>
                             </Grid>
                         </div>

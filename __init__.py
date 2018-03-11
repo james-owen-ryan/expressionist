@@ -297,42 +297,6 @@ def tagged_content_request():
         return output_as_json_package
     print "\n\n-- The content request cannot be satisfied by the exported content bundle."
     return "The content request cannot be satisfied by the exported content bundle."
-    # JOR: Here's how the outputs are displayed in the command-line interface
-    # for i in xrange(len(outputs)):
-    #     output = outputs[i]
-    #     if args.verbosity > 0:
-    #         print "\n\n-- Successfully generated an output:"
-    #         # Print the generated output
-    #         print "\n\t{}".format(output)
-    #         # Print out all the tags attached to the generated output
-    #         print "\nThe following tags are attached to this output:"
-    #         for tag in output.tags:
-    #             print '\t{}'.format(tag)
-    #         # Print the tree expression for the generated output
-    #         print (
-    #             "\n\n-- Here's a tree expression illustrating the series of expansions "
-    #             "that produced this output:"
-    #         )
-    #         print "\n{}".format(output.tree_expression)
-    #         # Print the tagged tree expression for the generated output
-    #         print "\n\n-- Here's a tree expression that shows how the generated content got its tags:"
-    #         print "\n{}".format(output.tree_expression_with_tags)
-    #         # Print the bracketed expression for the generated output
-    #         print (
-    #             "\n\n-- Here's a bracketed expression that more economically illustrates "
-    #             "the derivation of the content:"
-    #         )
-    #         print "\n{}".format(output.bracketed_expression)
-    #         print '\n\n'
-    #     else:
-    #         print "#{n}".format(n=i + 1)
-    #         print "--Output--\n{output}".format(output=str(output))
-    #         # Note: For this one, we must either prevent commas in tag names or use a different delimiter
-    #         print "--Tags--\n{tags}".format(tags=','.join(output.tags))
-    #         print "--Bracketed expression--\n{expression}".format(expression=output.bracketed_expression)
-    #         print "--Tree expression--\n{expression}".format(expression=output.tree_expression)
-    #         print "--Tree expression (with tags)--\n{expression}".format(expression=output.tree_expression_with_tags)
-
 
 if __name__ == '__main__':
     app.flask_grammar = grammar.from_json(str(open('./grammars/example.json', 'r').read()))
