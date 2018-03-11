@@ -46,7 +46,7 @@ class FileList extends React.Component {
         } else {
             files = <p>There are no files in /grammars</p>
         }
-        return (<ListGroup class='grammar-files' style={{'overflowY': 'scroll', 'height': this.state.height}}>{files}</ListGroup>)
+        return (<ListGroup className='grammar-files' style={{'overflowY': 'scroll', 'height': this.state.height}}>{files}</ListGroup>)
     }
 }
 

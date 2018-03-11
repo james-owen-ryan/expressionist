@@ -23,26 +23,10 @@ class Interface extends React.Component {
         this.updateMarkupFeedback = this.updateMarkupFeedback.bind(this);
         this.updateExpansionFeedback = this.updateExpansionFeedback.bind(this);
         this.getexpansion = this.getexpansion.bind(this);
-        var a
-        ajax({
-            url: $SCRIPT_ROOT + '/api/default',
-            dataType: 'json',
-            async: false,
-            cache: false,
-            success: function (data) {
-                a = data
-            }.bind(this),
-            error: function (xhr, status, err) {
-                console.error(this.props.url, status, err.toString());
-            }.bind(this)
-        });
-        var b = a['nonterminals']
-        var c = a['markups']
-        var d = a['system_vars']
         this.state = {
-            nonterminals: b,
-            markups: c,
-            system_vars: d,
+            nonterminals: [],
+            markups: [],
+            system_vars: [],
             expansion_feedback: "",
             markup_feedback: [],
             current_nonterminal: "",
@@ -60,6 +44,21 @@ class Interface extends React.Component {
                 this.setState({current_rule: this.props.params.ruleid})
             }
         }
+        ajax({
+            url: $SCRIPT_ROOT + '/api/default',
+            dataType: 'json',
+            cache: false,
+            success: (data) => {
+                this.setState({
+                    nonterminals: data['nonterminals'],
+                    markups: data['markups'],
+                    system_vars: data['system_vars'],
+                })
+            },
+            error: function (xhr, status, err) {
+                console.error(this.props.url, status, err.toString());
+            }.bind(this)
+        });
     }
 
     onBackButtonEvent(e){
@@ -76,25 +75,19 @@ class Interface extends React.Component {
     }
 
     updateFromServer() {
-        var a
         ajax({
             url: $SCRIPT_ROOT + '/api/default',
             dataType: 'json',
-            async: false,
             cache: false,
-            success: function (data) {
-                a = data
-            }.bind(this),
-            error: function (xhr, status, err) {
-                console.error(this.props.url, status, err.toString());
-            }.bind(this)
+            success: (data) => {
+                this.setState({nonterminals: data['nonterminals']})
+                this.setState({markups: data['markups']})
+                this.setState({system_vars: data['system_vars']})
+            },
+            error: (xhr, status, err) => {
+                console.error(this.props.url, status, err.toString())
+            }
         });
-        var b = a['nonterminals']
-        var c = a['markups']
-        var d = a['system_vars']
-        this.setState({nonterminals: b})
-        this.setState({markups: c})
-        this.setState({system_vars: d})
     }
 
     updateHistory(nonterminal, rule){

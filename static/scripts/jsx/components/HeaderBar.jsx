@@ -89,13 +89,14 @@ class HeaderBar extends React.Component {
             type: "POST",
             contentType: "json",
             data: filename,
-            async: false,
+            success: () => {
+                this.props.update()
+                this.setState({
+                    showLoadModal: false,
+                    loadedGrammarName: filename
+                })
+            },
             cache: false
-        })
-        this.props.update()
-        this.setState({
-            showLoadModal: false,
-            loadedGrammarName: filename
         })
     }
 
@@ -103,7 +104,6 @@ class HeaderBar extends React.Component {
         ajax({
             url: $SCRIPT_ROOT + '/api/grammar/new',
             type: 'GET',
-            async: false,
             cache: false
         });
         this.props.updateCurrentNonterminal('');
@@ -124,16 +124,15 @@ class HeaderBar extends React.Component {
             type: "POST",
             contentType: "text/plain",
             data: contentBundleName,
-            async: true,
             cache: false,
-            success: function(data){
+            success: (data) => {
                 this.setState({
                     bundleName: data.bundleName,
                     showBuildModal: false,
                     buildNavTitle: 'Build',
                     buildModalTitle: 'Build A Grammar'
                 })
-            }.bind(this)
+            }
         })
     }
 

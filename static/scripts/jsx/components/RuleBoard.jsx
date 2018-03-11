@@ -20,15 +20,14 @@ class RuleBoard extends React.Component {
             contentType: "application/json",
             data: JSON.stringify({"nonterminal": this.props.name, "index": this.props.currentRule}),
             dataType: 'json',
-            async: true,
             cache: false,
-            success: function (data) {
+            success: (data) => {
                 this.props.updateExpansionFeedback(data.derivation);
                 this.props.updateMarkupFeedback(data.markup);
-            }.bind(this),
-            error: function (xhr, status, err) {
+            },
+            error: (xhr, status, err) => {
                 console.error(this.props.url, status, err.toString());
-            }.bind(this)
+            }
         });
     }
 
@@ -50,12 +49,13 @@ class RuleBoard extends React.Component {
             type: "POST",
             contentType: "application/json",
             data: JSON.stringify(object),
-            async: false,
+            success: () => {
+                this.props.updateCurrentRule(this.props.currentRule-1)
+                this.props.updateFromServer()
+                this.props.updateHistory(this.props.name, -1)
+            },
             cache: false
         })
-        this.props.updateCurrentRule(this.props.currentRule-1)
-        this.props.updateFromServer()
-        this.props.updateHistory(this.props.name, -1)
     }
 
 
@@ -69,10 +69,9 @@ class RuleBoard extends React.Component {
                 type: "POST",
                 contentType: "application/json",
                 data: JSON.stringify(object),
-                async: false,
+                success: () => this.props.updateFromServer(),
                 cache: false
             })
-            this.props.updateFromServer()
         }
     }
 

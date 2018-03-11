@@ -45,41 +45,38 @@ class TestModal extends React.Component {
         if (nextProps.bundleName != ''){
             this.setState({
                 bundleName: nextProps.bundleName,
-                markups: this.getMarkupsFromBundle(nextProps.bundleName),
                 tags: this.getTagsFromBundle(nextProps.bundleName)
             })
+            this.setMarkupsFromBundle(nextProps.bundleName)
         }else{
-            this.setState({
-                bundleName: nextProps.bundleName,
-            })
+            this.setState({bundleName: nextProps.bundleName})
         }
     }
 
-    getMarkupsFromBundle(bundleName) {
+    setMarkupsFromBundle(bundleName) {
         var grammar = null;
         ajax({
             url: $SCRIPT_ROOT + '/api/load_bundle',
             type: "POST",
             contentType: "application/json",
             data: bundleName,
-            async: false,
             cache: false,
-            success: function(data){
+            success: (data) => {
                 grammar = JSON.parse(data);
+                var tagsets = {}
+                for (var i = 0; i < Object.keys(grammar.id_to_tag).length; i++){
+                    var str = grammar.id_to_tag[i];
+                    var tagset = str.substr(0,str.indexOf(':'));
+                    var tag = str.substr(str.indexOf(':')+1);
+                    if (tagsets[tagset] == undefined){
+                        tagsets[tagset] = [tag];
+                    }else{
+                        tagsets[tagset] = tagsets[tagset].concat(tag);
+                    }
+                }
+                this.setState({markups: tagsets})
             }
         })
-        var tagsets = {}
-        for (var i = 0; i < Object.keys(grammar.id_to_tag).length; i++){
-            var str = grammar.id_to_tag[i];
-            var tagset = str.substr(0,str.indexOf(':'));
-            var tag = str.substr(str.indexOf(':')+1);
-            if (tagsets[tagset] == undefined){
-                tagsets[tagset] = [tag];
-            }else{
-                tagsets[tagset] = tagsets[tagset].concat(tag);
-            }
-        }
-        return tagsets
     }
 
     getTagsFromBundle(bundleName) {
@@ -280,7 +277,7 @@ class TestModal extends React.Component {
                         </div>
                         <div>
                             <div style={{display: 'flex', marginBottom: '5px'}}>
-                              <p style={{marginRight: '10px', float: 'left'}}>Probablstic Output</p>
+                              <p style={{marginRight: '10px', float: 'left'}}>Generated Text</p>
                               <Button onClick={this.sendTaggedContentRequest} bsStyle='primary' style={{marginTop: '-10px'}}>Generate</Button>
                             </div>
                             <Grid fluid>

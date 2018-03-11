@@ -44,10 +44,9 @@ class NonterminalBoard extends React.Component {
                 type: "POST",
                 contentType: "application/json",
                 data: JSON.stringify(object),
-                async: false,
+                success: () => this.props.updateFromServer(),
                 cache: false
             })
-            this.props.updateFromServer()
         }
     }
 
@@ -63,12 +62,13 @@ class NonterminalBoard extends React.Component {
                 type: "POST",
                 contentType: "application/json",
                 data: JSON.stringify(object),
-                async: false,
+                success: () => {
+                    this.props.updateFromServer()
+                    this.props.updateCurrentNonterminal(newsymbol)
+                    this.props.updateHistory(newsymbol, this.props.currentRule)
+                },
                 cache: false
             })
-            this.props.updateFromServer()
-            this.props.updateCurrentNonterminal(newsymbol)
-            this.props.updateHistory(newsymbol, this.props.currentRule)
         }
     }
 
@@ -81,13 +81,14 @@ class NonterminalBoard extends React.Component {
                 type: "POST",
                 contentType: "application/json",
                 data: JSON.stringify(object),
-                async: false,
+                succes: () => {
+                    this.props.updateCurrentNonterminal("")
+                    this.props.updateCurrentRule(-1)
+                    this.props.updateFromServer()
+                    this.props.updateHistory("", -1)
+                },
                 cache: false
             })
-            this.props.updateCurrentNonterminal("")
-            this.props.updateCurrentRule(-1)
-            this.props.updateFromServer()
-            this.props.updateHistory("", -1)
         }
     }
 
@@ -100,13 +101,13 @@ class NonterminalBoard extends React.Component {
             dataType: 'json',
             async: true,
             cache: false,
-            success: function (data) {
+            success: (data) => {
                 this.props.updateMarkupFeedback(data.markup);
                 this.props.updateExpansionFeedback(data.derivation)
-            }.bind(this),
-            error: function (xhr, status, err) {
+            },
+            error: (xhr, status, err) => {
                 console.error(this.props.url, status, err.toString());
-            }.bind(this)
+            }
         });
     }
 
@@ -137,20 +138,16 @@ class NonterminalBoard extends React.Component {
                     <h1>
                     <span style={{"padding": "5px"}}>{name}</span>
                     <br></br>
-                    <Button bsStyle={this.props.nonterminal.deep ? "success" : "danger" }
-                                         onClick={this.handleSetDeep} title={deep_str}>{glyph_nt}</Button>
-                    <Button onClick={this.handleExpand} title="Test"><Glyphicon
-                        glyph="resize-full"/></Button>
-                    <Button onClick={this.handleNonterminalRename} title="Rename">
-                        Rename</Button>
-                    <Button onClick={this.handleNonterminalDelete}
-                            title="Delete"> Delete</Button>
+                    <Button bsStyle={this.props.nonterminal.deep ? "success" : "danger" } onClick={this.handleSetDeep} title={deep_str}>{glyph_nt}</Button>
+                    <Button onClick={this.handleExpand} title="Test"><Glyphicon glyph="resize-full"/></Button>
+                    <Button onClick={this.handleNonterminalRename} title="Rename">Rename</Button>
+                    <Button onClick={this.handleNonterminalDelete} title="Delete"> Delete</Button>
                     </h1>
                 </div>
 
                 <div style={{"width": "70%", "float": "left"}}>
                     <Panel>
-                        <ListGroup style={{"maxHeight": "320", "overflowY": "auto"}}>
+                        <ListGroup style={{"maxHeight": "320px", "overflowY": "auto"}}>
                             {referents}
                         </ListGroup>
                     </Panel>

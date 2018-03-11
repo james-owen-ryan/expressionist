@@ -31,20 +31,16 @@ class MarkupBar extends React.Component {
     }
 
     handleMarkupSetAdd() {
-        // var markupTag = window.prompt("Please enter MarkupSet")
-        // if (markupTag != "") {
-            var newMarkupSetName = '/this is a new markupset/' + Object.keys(this.props.total).length
-            var object = {"markupSet": newMarkupSetName}
-            ajax({
-                url: $SCRIPT_ROOT + '/api/markup/addtagset',
-                type: "POST",
-                contentType: "application/json",
-                data: JSON.stringify(object),
-                async: false,
-                cache: false
-            })
-            this.props.updateFromServer()
-        // }
+        var newMarkupSetName = '/this is a new markupset/' + Object.keys(this.props.total).length
+        var object = {"markupSet": newMarkupSetName}
+        ajax({
+            url: $SCRIPT_ROOT + '/api/markup/addtagset',
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(object),
+            success: () => this.props.updateFromServer(),
+            cache: false
+        })
     }
 
     render() {

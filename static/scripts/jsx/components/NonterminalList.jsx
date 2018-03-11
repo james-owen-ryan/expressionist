@@ -86,11 +86,12 @@ class NonterminalList extends React.Component {
             type: "POST",
             contentType: "application/json",
             data: JSON.stringify({'nonterminal': newNTName}),
-            async: false,
+            success: () => {
+                this.setState({'newNameVal': this.state.newNTNumber += 1})
+                this.props.updateFromServer()
+            },
             cache: false
         })
-        this.setState({'newNameVal': this.state.newNTNumber += 1})
-        this.props.updateFromServer();
     }
 
     render() {

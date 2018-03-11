@@ -34,12 +34,13 @@ class Nonterminal extends React.Component {
             type: "POST",
             contentType: "application/json",
             data: JSON.stringify(object),
-            async: false,
+            success: () => {
+                this.props.updateFromServer()
+                this.props.updateCurrentNonterminal(this.state.newNameVal)
+                this.props.updateHistory(this.state.newNameVal, this.props.currentRule)
+            },
             cache: false
         })
-        this.props.updateFromServer()
-        this.props.updateCurrentNonterminal(this.state.newNameVal)
-        this.props.updateHistory(this.state.newNameVal, this.props.currentRule)
     }
 
     disableNewNameValue(){
@@ -56,19 +57,18 @@ class Nonterminal extends React.Component {
             type: "POST",
             contentType: "application/json",
             data: JSON.stringify(object),
-            async: false,
+            success: () => this.props.updateFromServer(),
             cache: false
         })
-        this.props.updateFromServer()
     }
 
     render() {
         if (this.props.new == true){
             return (
-                <ListGroupItem title={this.props.name} bsSize="xsmall" style={{'background-color': 'white'}}>
-                            <input type='text' onChange={this.handleNewNameValueChange} value={this.state.newNameVal} style={{'width': '70%', 'height': '30px', 'padding': '5px', 'margin-right': '10px'}} placeholder='Enter a new nonterminal name.'/>
-                            <div style={{'margin-right': '10px', 'display': 'inline'}}>
-                                <Button onClick={this.handleNonterminalRename} title="new nt" bsStyle="success" style={{'margin-right': '5px'}} disabled={this.disableNewNameValue()}><Glyphicon glyph="ok"/></Button>
+                <ListGroupItem title={this.props.name} bsSize="xsmall" style={{'backgroundColor': 'white'}}>
+                            <input type='text' onChange={this.handleNewNameValueChange} value={this.state.newNameVal} style={{'width': '70%', 'height': '30px', 'padding': '5px', 'marginRight': '10px'}} placeholder='Enter a new nonterminal name.'/>
+                            <div style={{'marginRight': '10px', 'display': 'inline'}}>
+                                <Button onClick={this.handleNonterminalRename} title="new nt" bsStyle="success" style={{'marginRight': '5px'}} disabled={this.disableNewNameValue()}><Glyphicon glyph="ok"/></Button>
                                 <Button onClick={this.handleNonterminalDelete} title="delete nt" bsStyle="danger"><Glyphicon glyph="remove"/></Button>
                             </div>
                 </ListGroupItem>

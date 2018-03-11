@@ -29,7 +29,6 @@
 <body>
 <script type=text/javascript>
     $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-    console.log($SCRIPT_ROOT)
 </script>
 <div id='app'></div>
 <script src="{{ url_for('static', filename='scripts/build/bundle.js') }}"></script>
