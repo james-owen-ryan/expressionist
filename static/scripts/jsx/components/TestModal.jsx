@@ -239,10 +239,19 @@ class TestModal extends React.Component {
                 <Modal.Header closeButton>
                     <Modal.Title>Generate Content</Modal.Title>
                 </Modal.Header>
-                <FormGroup>
-                    <ControlLabel style={{display: 'block', marginLeft: '15px', marginTop: '10px'}}>Bundle Name</ControlLabel>
-                    <FormControl type="text" value={this.state.bundleName} style={{width: '200px', display: 'inline', marginLeft: "15px"}} readOnly={true}/>
-                </FormGroup>
+                <Grid fluid>
+                  <Row className="show-grid">
+                    <Col xs={6}>
+                        <FormGroup>
+                            <ControlLabel style={{display: 'block', marginLeft: '15px', marginTop: '10px'}}>Bundle Name</ControlLabel>
+                            <FormControl type="text" value={this.state.bundleName} style={{width: '200px', display: 'inline', marginLeft: "15px"}} readOnly={true}/>
+                        </FormGroup>
+                    </Col>
+                    <Col xs={6}>
+                        <Button onClick={this.sendTaggedContentRequest} bsStyle='warning' style={{padding: '7px 12px', marginTop: '35px'}}>Generate</Button>
+                    </Col>
+                  </Row>
+                </Grid>
                 <div id="tags">
                     <ListGroup id='tagsList' style={{marginBottom: '0px'}}>
                         {
@@ -277,8 +286,7 @@ class TestModal extends React.Component {
                         </div>
                         <div>
                             <div style={{display: 'flex', marginBottom: '5px'}}>
-                              <p style={{marginRight: '10px', float: 'left'}}>Generated Text</p>
-                              <Button onClick={this.sendTaggedContentRequest} bsStyle='primary' style={{marginTop: '-10px'}}>Generate</Button>
+                              <p>Generated Text</p>
                             </div>
                             <Grid fluid>
                               <Row className="show-grid" style={{display: 'flex'}}>
