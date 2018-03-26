@@ -268,7 +268,7 @@ class TestModal extends React.Component {
                                                     <div key={tag}>
                                                         <ListGroupItem title={tag} bsSize="xsmall" className='nohover' bsStyle={this.getTagColorFromStatus(this.getTagData(tag, "status"))} onClick={this.toggleTagStatus.bind(this, tag)}>
                                                             {tag}
-                                                            <FormControl type="number" id={tag} value={this.getTagData(tag, "frequency")} onChange={this.updateTagFrequency} style={this.getTagData(tag, "status") == 'enabled' ? {display: 'inline'} : {display: 'none'}} />
+                                                            <FormControl type="number" id={tag} value={this.getTagData(tag, "frequency")} onChange={this.updateTagFrequency} style={this.getTagData(tag, "status") == 'enabled' ? {display: 'inline', width: '100px', height: '20px', float: 'right'} : {display: 'none'}} />
                                                         </ListGroupItem>
                                                     </div>
                                                 )
