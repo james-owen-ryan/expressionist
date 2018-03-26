@@ -120,6 +120,7 @@ class TestModal extends React.Component {
             return tagObj;
         }.bind(this));
         this.setState({tags: updated});
+        this.sendTaggedContentRequest(updated);
     }
 
     updateTagFrequency(e) {
@@ -133,6 +134,7 @@ class TestModal extends React.Component {
             }else{ return tagObj; }
         });
         this.setState({tags: updated});
+        this.sendTaggedContentRequest(updated);
     }
 
     toggleTagStatus(tag) {
@@ -150,7 +152,7 @@ class TestModal extends React.Component {
             }else{ return tagObj; }
         }.bind(this));
         this.setState({tags: updated});
-        this.sendTaggedContentRequest();
+        this.sendTaggedContentRequest(updated);
     }
 
     getTagData(tag, data) {
@@ -179,10 +181,10 @@ class TestModal extends React.Component {
         return 'required'
     }
 
-    sendTaggedContentRequest() {
+    sendTaggedContentRequest(tags) {
         // Productionist requires tags to be formatted as `tagset:tag` strings.
         // However, this.state.tags is only a list of objects with no ref to their set.
-        var forProductionist = this.state.tags.map(function (tagObj){
+        var forProductionist = tags.map(function (tagObj){
             var tagsets = Object.keys(this.state.markups);
             for (var i = 0; i < tagsets.length; i++){
                 var tagsetTags = this.state.markups[tagsets[i]]
@@ -215,7 +217,8 @@ class TestModal extends React.Component {
                   probablisticOutputTags: data.tags,
                   probablisticOutputTreeExpression: data.treeExpression,
                   probablisticOutputBracketedExpression: data.bracketedExpression,
-                  outputError: false
+                  outputError: false,
+                  numOutputs: this.state.numOutputs+1
                 })
               } else {
                 this.setState({outputError: true})
@@ -225,7 +228,6 @@ class TestModal extends React.Component {
                 alert('It seems like you have not built your Productionist grammar into memory yet. See console for more details.');
             }
         })
-        this.setState({numOutputs: this.state.numOutputs+1})
     }
 
     render() {
@@ -248,7 +250,7 @@ class TestModal extends React.Component {
                         </FormGroup>
                     </Col>
                     <Col xs={6}>
-                        <Button onClick={this.sendTaggedContentRequest} bsStyle='warning' style={{padding: '7px 12px', marginTop: '35px'}}>Generate</Button>
+                        <Button onClick={this.sendTaggedContentRequest.bind(this, this.state.tags)} bsStyle='warning' style={{padding: '7px 12px', marginTop: '35px'}}>Generate</Button>
                     </Col>
                   </Row>
                 </Grid>
