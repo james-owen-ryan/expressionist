@@ -97,66 +97,71 @@ class TestModal extends React.Component {
         for (var i = 0; i < Object.keys(grammar.id_to_tag).length; i++){
             var str = grammar.id_to_tag[i];
             tags.push({
-                name: str.substr(str.indexOf(':')+1),
+                name: str.split(':')[1],
                 frequency: 0,
-                status: 'enabled'
+                status: 'enabled',
+                tagset: str.split(':')[0]
             });
         }
         return tags;
     }
 
     toggleTagSetStatus(tagset) {
-        var tagsetTags = this.state.markups[tagset];
         var updated = this.state.tags.map(function (tagObj){
-            for (var i = 0; i < tagsetTags.length; i++){
-                if (tagsetTags[i] == tagObj.name){
-                    return {
-                        name: tagObj.name,
-                        frequency: tagObj.frequency,
-                        status: this.cycleStatus(tagObj.status)
-                    }
-                }
-            }
-            return tagObj;
-        }.bind(this));
-        this.setState({tags: updated});
-        this.sendTaggedContentRequest(updated);
-    }
-
-    updateTagFrequency(e) {
-        var updated = this.state.tags.map(tagObj => {
-            if (tagObj.name == e.target.id){
+            if (tagset == tagObj.tagset){
                 return {
                     name: tagObj.name,
-                    frequency: e.target.value,
-                    status: tagObj.status
+                    frequency: tagObj.frequency,
+                    status: this.cycleStatus(tagObj.status),
+                    tagset: tagObj.tagset
                 }
-            }else{ return tagObj; }
+            }
+            return tagObj
         });
         this.setState({tags: updated});
         this.sendTaggedContentRequest(updated);
     }
 
-    toggleTagStatus(tag) {
+    updateTagFrequency(e) {
+        var updated = this.state.tags.map(function(tagObj){
+            if (e.target.id == tagObj.tagset+':'+tagObj.name){
+                return {
+                    name: tagObj.name,
+                    frequency: e.target.value,
+                    status: tagObj.status,
+                    tagset: tagObj.tagset
+                }
+            }
+            return tagObj
+        })
+        this.setState({tags: updated});
+        if (!isNaN(e.target.value) && e.target.value != ''){ 
+            this.sendTaggedContentRequest(updated);
+        }
+    }
+
+    toggleTagStatus(tagset, tag) {
         // only toggle if the active element is a ListGroupItem.
         if (!document.activeElement.classList.contains("list-group-item")){
             return false;
         }
         var updated = this.state.tags.map(function (tagObj){
-            if (tagObj.name == tag){
+            if (tagObj.name == tag && tagObj.tagset == tagset){
                 return {
                     name: tagObj.name,
                     frequency: tagObj.frequency,
-                    status: this.cycleStatus(tagObj.status)
+                    status: this.cycleStatus(tagObj.status),
+                    tagset: tagObj.tagset
                 }
-            }else{ return tagObj; }
-        }.bind(this));
+            }
+            return tagObj; 
+        }.bind(this))
         this.setState({tags: updated});
         this.sendTaggedContentRequest(updated);
     }
 
-    getTagData(tag, data) {
-        return this.state.tags.find(tagObj => { return tagObj.name == tag })[data];
+    getTagData(tagset, tag, data) {
+        return this.state.tags.find(tagObj => { return tagObj.name == tag && tagObj.tagset == tagset })[data];
     }
 
     getTagColorFromStatus(currentStatus) {
@@ -183,22 +188,13 @@ class TestModal extends React.Component {
 
     sendTaggedContentRequest(tags) {
         // Productionist requires tags to be formatted as `tagset:tag` strings.
-        // However, this.state.tags is only a list of objects with no ref to their set.
         var forProductionist = tags.map(function (tagObj){
-            var tagsets = Object.keys(this.state.markups);
-            for (var i = 0; i < tagsets.length; i++){
-                var tagsetTags = this.state.markups[tagsets[i]]
-                var tagObjIsInTagsetTags = tagsetTags.filter(function(t){ return t == tagObj.name }).length == 1
-                if (tagObjIsInTagsetTags){
-                    return {
-                        name: tagsets[i]+":"+tagObj.name,
-                        frequency: tagObj.frequency,
-                        status: tagObj.status
-                    }
-                }
+            return {
+                name: tagObj.tagset + ':' + tagObj.name,
+                frequency: tagObj.frequency,
+                status: tagObj.status
             }
-            return "[HeaderBar.sendTaggedContentRequest] A tag was sent without finding its tag set."
-        }.bind(this));
+        })
         ajax({
             url: $SCRIPT_ROOT + '/api/grammar/tagged_content_request',
             type: "POST",
@@ -266,9 +262,9 @@ class TestModal extends React.Component {
                                             this.state.markups[tagset].map(function (tag){
                                                 return (
                                                     <div key={tag}>
-                                                        <ListGroupItem title={tag} bsSize="xsmall" className='nohover' bsStyle={this.getTagColorFromStatus(this.getTagData(tag, "status"))} onClick={this.toggleTagStatus.bind(this, tag)}>
+                                                        <ListGroupItem title={tag} bsSize="xsmall" className='nohover' bsStyle={this.getTagColorFromStatus(this.getTagData(tagset, tag, "status"))} onClick={this.toggleTagStatus.bind(this, tagset, tag)}>
                                                             {tag}
-                                                            <FormControl type="number" id={tag} value={this.getTagData(tag, "frequency")} onChange={this.updateTagFrequency} style={this.getTagData(tag, "status") == 'enabled' ? {display: 'inline', width: '100px', height: '20px', float: 'right'} : {display: 'none'}} />
+                                                            <FormControl type="number" id={tagset+':'+tag} value={this.getTagData(tagset, tag, "frequency")} onChange={this.updateTagFrequency} style={this.getTagData(tagset, tag, "status") == 'enabled' ? {display: 'inline', width: '100px', height: '20px', float: 'right'} : {display: 'none'}} />
                                                         </ListGroupItem>
                                                     </div>
                                                 )
