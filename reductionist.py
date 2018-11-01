@@ -313,7 +313,8 @@ class Reductionist(object):
             print "Saving grammar file..."
         # Prepare a grammar dictionary with the metadata that we need
         grammar_dictionary = {}
-        # Add in metadata that we need
+        # Add in metadata that we need or want
+        grammar_dictionary['total_generable_outputs'] = self.total_generable_outputs
         grammar_dictionary['id_to_tag'] = self.grammar.id_to_tag
         # Add in the grammar's nonterminal symbols (along with all necessary metadata)
         grammar_dictionary['nonterminal_symbols'] = {}
