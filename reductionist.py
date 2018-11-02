@@ -13,7 +13,7 @@ class Reductionist(object):
     generation at runtime.
     """
 
-    def __init__(self, raw_grammar_json, path_to_write_output_files_to, verbosity=99):
+    def __init__(self, raw_grammar_json, path_to_write_output_files_to, verbosity=1):
         """Initialize a Reductionist object."""
         # Whether this Reductionist will write out its trie file and use trie keys in the .meanings
         # file (as opposed to included all expanded grammar paths, which will take up more space); it
