@@ -13,7 +13,7 @@ class Reductionist(object):
     generation at runtime.
     """
 
-    def __init__(self, raw_grammar_json, path_to_write_output_files_to, verbosity=1):
+    def __init__(self, raw_grammar_json, path_to_write_output_files_to, verbosity=99):
         """Initialize a Reductionist object."""
         # Whether this Reductionist will write out its trie file and use trie keys in the .meanings
         # file (as opposed to included all expanded grammar paths, which will take up more space); it
@@ -252,7 +252,7 @@ class Reductionist(object):
         """
         if self.verbosity > 0:
             print "Constructing expressible meanings..."
-        expressible_meanings = []
+        expressible_meanings = {}
         for path_string, trie_key_for_that_path_string in self.trie.iteritems():
             if path_string:
                 rules_on_that_path = [self.grammar.production_rules[int(i)] for i in path_string.split(',')]
@@ -265,6 +265,8 @@ class Reductionist(object):
                 all_tags_for_that_path = sorted(set(all_tags_for_that_path))
             else:
                 all_tags_for_that_path.sort()
+            # Convert to a tuple so that we can use the path tags as a dictionary key
+            all_tags_for_that_path = tuple(all_tags_for_that_path)
             if self.trie_output:
                 # Use the trie key
                 grammar_path = str(trie_key_for_that_path_string)
@@ -272,20 +274,17 @@ class Reductionist(object):
                 # Use the expanded trie key, i.e., the list of production rule IDs constituting the grammar path
                 grammar_path = path_string
             try:
-                # If an expressible meaning already exists for this tagset, simply
-                # append the trie key for this path to its listing of associated paths
-                expressible_meaning = next(em for em in expressible_meanings if em.tags == all_tags_for_that_path)
+                # If an expressible meaning already exists for this tagset, simply append the trie key for this
+                # path to its listing of associated paths
+                expressible_meaning = expressible_meanings[all_tags_for_that_path]
                 expressible_meaning.grammar_paths.append(grammar_path)
-            except StopIteration:
-                # We haven't constructed an expressible meaning for that tagset yet, so do
-                # so now and pass along this path trie key as its first associated path (more will
-                # likely be collected as this loop proceeds)
+            except KeyError:
+                # We haven't constructed an expressible meaning for that tagset yet, so do so now and pass
+                # along this path trie key as its first associated path (more will likely be collected as
+                # this loop proceeds)
                 meaning_id = len(expressible_meanings)
-                expressible_meanings.append(
-                    ExpressibleMeaning(
-                        meaning_id=meaning_id, tags=all_tags_for_that_path,
-                        initial_grammar_path=grammar_path
-                    )
+                expressible_meanings[all_tags_for_that_path] = ExpressibleMeaning(
+                    meaning_id=meaning_id, tags=all_tags_for_that_path, initial_grammar_path=grammar_path
                 )
         return expressible_meanings
 
@@ -295,7 +294,7 @@ class Reductionist(object):
             print "Saving expressible meanings file..."
         f = open(expressible_meanings_file_location, 'w')
         tag_to_id = self.grammar.tag_to_id
-        for expressible_meaning in self.expressible_meanings:
+        for expressible_meaning in self.expressible_meanings.values():
             # Note: grammar_path will be either a trie key (if self.trie_output == True) or
             # a unicode string structured as a comma-separated list of production-rule IDs,
             # e.g., u'63,42,67,22'
