@@ -230,7 +230,7 @@ def export():
     reductionist = Reductionist(
         raw_grammar_json=app.flask_grammar.to_json(to_file=True),  # JOR: I'm not sure what to_file actually does
         path_to_write_output_files_to=output_path_and_filename,
-        verbosity=0 if debug is False else 2
+        verbosity=1 if debug is False else 2
     )
     if not reductionist.validator.errors:
         print "\n--Success! Indexed this grammar's {n} generable lines to infer {m} expressible meanings.--".format(
