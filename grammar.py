@@ -26,14 +26,12 @@ def parse_rule(rule_string):
     :returns: list[symbols]
     """
     # this regex is a pain but it matches strings of either [[...]] or [...]
-    split_list = re.split('(\[{2}[^\]\[]+\]{2}|\[{1}[^\[\]]+\]{1})', rule_string)
+    split_list = re.split('(\[{2}[^\]\[]+\]{2})', rule_string)
     # remove all empty strings
     split_list = filter(None, split_list)
     derivation = []
     for token in split_list:
-        brackets = token.count("[")
-        brackets2 = token.count("]")
-        if brackets == 2 and brackets == brackets2:
+        if token[:2] == '[[':
             derivation.append(NonterminalSymbol(token.lstrip("[").rstrip("]")))
         else:
             derivation.append(TerminalSymbol(token))
