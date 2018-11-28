@@ -309,8 +309,6 @@ class PCFG(object):
                 str(tag_object.tag) for tag_object in total['markups'][str(markupset)]
                 ]
 
-        total['system_vars'] = sorted(self.system_vars)
-
         def set_default(obj):
             if isinstance(obj, set):
                 return list(obj)
