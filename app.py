@@ -301,8 +301,9 @@ def tagged_content_request():
     print "\n\n-- The content request cannot be satisfied by the exported content bundle."
     return "The content request cannot be satisfied by the exported content bundle."
 
+
 if __name__ == '__main__':
-    app.flask_grammar = grammar.from_json(str(open('./grammars/example.json', 'r').read()))
+    app.flask_grammar = grammar.from_json(str(open('./grammars/new.json', 'r').read()))
     app.productionist = None  # Gets set upon export
     app.debug = debug
     app.run()

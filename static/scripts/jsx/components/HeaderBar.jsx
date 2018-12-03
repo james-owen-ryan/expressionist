@@ -35,7 +35,7 @@ class HeaderBar extends React.Component {
             buildNavTitle: 'Build',
             buildModalTitle: 'Build A Grammar',
             bundleName: '',
-            loadedGrammarName: 'example.json'
+            loadedGrammarName: 'new.json'
         }
     }
 
