@@ -117,7 +117,7 @@ class NonterminalList extends React.Component {
                                 onChange={this.updateList} 
                                 value={this.state.searchVal}
                                 style={{'width': '100%'}}
-                                placeholder='Search...'/>
+                                placeholder='Search'/>
                     </ListGroupItem>
                     {   nonterminals.map((name) => {
                             var complete = this.props.nonterminals[name].complete;
