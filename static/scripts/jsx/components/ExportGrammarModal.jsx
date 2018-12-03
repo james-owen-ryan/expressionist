@@ -112,7 +112,7 @@ class ExportGrammarModal extends React.Component {
                             <HelpBlock><i>Content bundles are exported to /exports. Exporting will overwrite files with the same bundle name.</i></HelpBlock>
                         </FormGroup>
                     </form>
-                    <FileList onFileClick={this.updateGrammarName} highlightedFile={this.state.grammarName} height='200px'></FileList>
+                    <FileList onFileClick={this.updateGrammarName} highlightedFile={this.state.grammarName} height='200px' directory='exports'></FileList>
                     <Button onClick={this.exportGrammar} type="submit" style={{marginTop: '15px'}} bsStyle={this.setExportButtonStyle()} disabled={this.checkDisableExportButton()}>{this.state.exportGrammarBtnText}</Button>
                 </div>
             </Modal>

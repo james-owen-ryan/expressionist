@@ -26,7 +26,7 @@ class FileList extends React.Component {
             cache: false,
             success: (data) => {
                 if (this.props.directory == 'exports'){
-                    // Turn file names (.grammar, .meanings, .stats) into 1 bundle name.
+                    // Turn file names (.grammar, .meanings, .stats) into one bundle name
                     data.results = uniq(data.results.map((fileName) => fileName.split('.')[0]))
                 }
                 this.setState({'grammarFileNames': data.results})
