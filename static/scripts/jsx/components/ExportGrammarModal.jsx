@@ -86,11 +86,11 @@ class ExportGrammarModal extends React.Component {
             cache: false,
             success: (status) => { 
                 this.setState({
-                    'exportGrammarBtnText': 'Export successful!',
+                    'exportGrammarBtnText': 'Exported!',
                     'disableExportButton': true
                 })
                 setTimeout(() => { this.setState({
-                    'exportGrammarBtnText': 'Export content bundle',
+                    'exportGrammarBtnText': 'Export',
                     'disableExportButton': false
                 }) }, 3000);
             }
