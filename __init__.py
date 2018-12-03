@@ -58,13 +58,16 @@ def load_file_grammar():
 @app.route('/api/grammar/save', methods=['GET', 'POST'])
 def save_grammar():
     grammar_name = request.data
+    # Make sure the name includes a '.json' file extension
+    if grammar_name[-5:] != '.json':
+        grammar_name += '.json'
     try:
         filename = os.path.abspath(os.path.join(os.path.dirname(__file__), ''.join(['grammars/', grammar_name])))
         outfile = open(filename, 'w+')
         outfile.write(app.flask_grammar.to_json(to_file=True))
     except Exception as error:
         print repr(error)
-        return "Unable to save the grammar. Please check console for more details."
+        return "Unable to save grammar. Please check console for more details."
     return "The grammar was successfully saved."
 
 
