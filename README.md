@@ -1,5 +1,5 @@
 # Expressionist
-An authoring tool for text generation in games. Currently in pre-release alpha. Feel free to email James for more info.
+An authoring tool for text generation in computational media. Currently in pre-release alpha. Feel free to email James for more info.
 
 ## Getting Started
 
