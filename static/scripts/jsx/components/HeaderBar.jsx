@@ -152,7 +152,7 @@ class HeaderBar extends React.Component {
                 <TestModal show={this.state.showTestModal} onHide={this.closeTestModal} bundleName={this.state.bundleName}></TestModal>
                 <Modal show={this.state.showLoadModal} onHide={this.closeLoadModal}>
                     <Modal.Header closeButton>
-                        <Modal.Title>Load A Grammar</Modal.Title>
+                        <Modal.Title>Load grammar...</Modal.Title>
                     </Modal.Header>
                     <FileList onFileClick={this.load} highlightedFile={this.state.loadedGrammarName} directory='grammars'></FileList>
                 </Modal>
