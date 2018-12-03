@@ -164,7 +164,7 @@ class Interface extends React.Component {
         return (
             <div style={{position: "fixed", top: 0, right: 0, "height": "100%", "width": "100%"}}>
                 <div
-                    style={{ "height": "75%", "width": "75%", position: "absolute", top: 0, left: 0}}>
+                    style={{ "height": "70%", "width": "75%", position: "absolute", top: 0, left: 0}}>
                     <HeaderBar  updateCurrentNonterminal={this.updateCurrentNonterminal}
                                 updateCurrentRule={this.updateCurrentRule}
                                 updateMarkupFeedback={this.updateMarkupFeedback}
@@ -182,6 +182,17 @@ class Interface extends React.Component {
                         </div>
                     </div>
                     {board}
+                    <div className="muwrap" style={{"position": "absolute", "bottom": 0}}>
+                        <RuleBar    rules={def_rules}
+                                    updateFromServer={this.updateFromServer}
+                                    nonterminals={this.state.nonterminals}
+                                    name={this.state.current_nonterminal}
+                                    updateCurrentNonterminal={this.updateCurrentNonterminal}
+                                    updateCurrentRule={this.updateCurrentRule}
+                                    updateMarkupFeedback={this.updateMarkupFeedback}
+                                    updateExpansionFeedback={this.updateExpansionFeedback}
+                                    updateHistory={this.updateHistory}/>
+                    </div>
                 </div>
 
                 <div
@@ -195,19 +206,7 @@ class Interface extends React.Component {
                                         updateExpansionFeedback={this.updateExpansionFeedback}>
                     </NonterminalList>
                 </div>
-
-                <div style={{"width": "75%", "height": "40%", position: "absolute", bottom: 0, left:0}}>
-                    <div className="muwrap">
-                        <RuleBar    rules={def_rules}
-                                    updateFromServer={this.updateFromServer}
-                                    nonterminals={this.state.nonterminals}
-                                    name={this.state.current_nonterminal}
-                                    updateCurrentNonterminal={this.updateCurrentNonterminal}
-                                    updateCurrentRule={this.updateCurrentRule}
-                                    updateMarkupFeedback={this.updateMarkupFeedback}
-                                    updateExpansionFeedback={this.updateExpansionFeedback}
-                                    updateHistory={this.updateHistory}/>
-                    </div>
+                <div style={{"width": "75%", "height": "30%", position: "absolute", bottom: 0, left:0}}>
                     <FeedbackBar derivation={this.state.expansion_feedback} markup={this.state.markup_feedback}/>
                 </div>
             </div>

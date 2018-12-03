@@ -94,13 +94,13 @@ class RuleBar extends React.Component {
         }, this)
         return (
             <div>
-                <div className="btn-test">
+            <div className="btn-test">
                     <ButtonGroup>
-                        <Button onClick={this.openModal} key="addnew"><Glyphicon
-              glyph="plus"/></Button>
+                        <Button onClick={this.openModal} key="addnew"><Glyphicon glyph="plus"/></Button>
                         {rules}
                     </ButtonGroup>
-                </div>
+            </div>
+            <div>
                 <Modal show={this.state.showModal} onHide={this.closeModal}>
                     <Modal.Header closeButton>
                         <Modal.Title>Rule Definition</Modal.Title>
@@ -126,6 +126,7 @@ class RuleBar extends React.Component {
                         <Button bsStyle="primary" bsSize="large" style={{'marginBottom': '25px'}} onClick={this.addRule}>Add Rule</Button>
                     </div>
                 </Modal>
+            </div>
             </div>
         );
     }
