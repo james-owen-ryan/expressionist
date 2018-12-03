@@ -51,35 +51,44 @@ class NonterminalList extends React.Component {
         })
     }
 
-    // returns a sorted array of nonterminal names.
-    formatList(nonterminals) { // nonterminals = array of nonterminal names
-        var anyDeepTerminals = nonterminals.filter((name) => this.props.nonterminals[name].deep == true);
-        if (!anyDeepTerminals || this.state.searchVal == '*'){
-            // put new nonterminals at the bottom of the list.
-            return nonterminals.sort();
-        }
-        // remove deep nonterminals
-        nonterminals = nonterminals.filter((name) => this.props.nonterminals[name].deep == false).sort();
-        // add the searched-for deep nonterminals to the top of the list.
-        var deeps = [];
-        var propsNonterminals = Object.values(this.props.nonterminals);
-        for (var i = 0; i < propsNonterminals.length; i++){
+    // Returns a sorted array of nonterminal names
+    formatList(nonterminals) {  // 'nonterminals' is an array of nonterminal names
+        var nonterminals = Object.values(this.props.nonterminals);
+        var that = this;
+        // Place top-level nonterminal symbols at the top of the list
+        var topLevelSymbols = [];
+        for (var i = 0; i < nonterminals.length; i++){
             var name = Object.keys(this.props.nonterminals)[i];
-            // keep nonterminals that are deep and are being searched for.
-            if (propsNonterminals[i].deep == true && name.indexOf(this.state.searchVal) != -1){
-                deeps.push(Object.keys(this.props.nonterminals)[i]);
+            if (nonterminals[i].deep == true && name.indexOf(this.state.searchVal) != -1){
+                topLevelSymbols.push(Object.keys(this.props.nonterminals)[i]);
             }
         }
-        // add new nonterminals to the end of the list -- a new nonterminal contains the substring 'new nonterminal'
-        var newNT = nonterminals.filter((name) => name.indexOf('new nonterminal') != -1)
-        nonterminals = nonterminals.filter((name) => name.indexOf('new nonterminal') == -1)
-        for (var i in newNT){
-            nonterminals.push(newNT[i]);
-        }
-        nonterminals.sort(function(a, b){
+        topLevelSymbols.sort(function(a, b){
             return a.toLowerCase() == b.toLowerCase() ? 0 : +(a.toLowerCase() > b.toLowerCase()) || -1;
         });
-        return deeps.concat(nonterminals);
+        // Place incomplete symbols next (these are ones for which no production rules have been authored)
+        var incompleteSymbols = [];
+        for (var i = 0; i < nonterminals.length; i++){
+            var name = Object.keys(this.props.nonterminals)[i];
+            if (nonterminals[i].complete == false && name.indexOf(this.state.searchVal) != -1){
+                incompleteSymbols.push(Object.keys(this.props.nonterminals)[i]);
+            }
+        }
+        incompleteSymbols.sort(function(a, b){
+            return a.toLowerCase() == b.toLowerCase() ? 0 : +(a.toLowerCase() > b.toLowerCase()) || -1;
+        });
+        // Finally, place all other symbols last, sorting alphabetically (but ignoring case)
+        var allOtherSymbols = [];
+        for (var i = 0; i < nonterminals.length; i++){
+            var name = Object.keys(this.props.nonterminals)[i];
+            if (nonterminals[i].deep == false && nonterminals[i].complete == true && name.indexOf(this.state.searchVal) != -1){
+                allOtherSymbols.push(Object.keys(this.props.nonterminals)[i]);
+            }
+        }
+        allOtherSymbols.sort(function(a, b){
+            return a.toLowerCase() == b.toLowerCase() ? 0 : +(a.toLowerCase() > b.toLowerCase()) || -1;
+        });
+        return topLevelSymbols.concat(incompleteSymbols).concat(allOtherSymbols);
     }
 
     addNonterminal() {
