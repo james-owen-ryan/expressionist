@@ -43,8 +43,10 @@ class FileList extends React.Component {
                 }
                 return <ListGroupItem onClick={ () => { this.props.onFileClick(filename) } } key={filename}>{filename}</ListGroupItem>
             })
-        } else {
+        } else if (this.props.directory == 'grammars') {
             files = <p>There are no files in /grammars</p>
+        } else {
+            files = <p>There are no files in /exports</p>
         }
         return (<ListGroup className='grammar-files' style={{'overflowY': 'scroll', 'height': this.state.height}}>{files}</ListGroup>)
     }

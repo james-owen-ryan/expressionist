@@ -26,6 +26,8 @@ class HeaderBar extends React.Component {
         this.load = this.load.bind(this);
         this.reset = this.reset.bind(this);
         this.buildProductionist = this.buildProductionist.bind(this);
+        this.getCurrentGrammarName = this.getCurrentGrammarName.bind(this);
+        this.setCurrentGrammarName = this.setCurrentGrammarName.bind(this);
         this.state = {
             showLoadModal: false,
             showTestModal: false,
@@ -35,8 +37,16 @@ class HeaderBar extends React.Component {
             buildNavTitle: 'Build',
             buildModalTitle: 'Build A Grammar',
             bundleName: '',
-            loadedGrammarName: 'new.json'
-        }
+            currentGrammarName: 'new'
+        };
+    }
+
+    getCurrentGrammarName() {
+        return this.state.currentGrammarName;
+    }
+
+    setCurrentGrammarName(grammarName) {
+        this.setState({currentGrammarName: grammarName.replace(".json", "")});
     }
 
     openLoadModal() {
@@ -93,7 +103,7 @@ class HeaderBar extends React.Component {
                 this.props.update()
                 this.setState({
                     showLoadModal: false,
-                    loadedGrammarName: filename
+                    currentGrammarName: filename.replace('.json', '')
                 })
             },
             cache: false
@@ -111,7 +121,7 @@ class HeaderBar extends React.Component {
         this.props.updateExpansionFeedback('');
         this.props.updateHistory("'", -1);
         this.props.update()
-        this.setState({loadedGrammarName: ''})
+        this.setState({currentGrammarName: ''})
     }
 
     buildProductionist(contentBundleName) {
@@ -130,7 +140,7 @@ class HeaderBar extends React.Component {
                     bundleName: data.bundleName,
                     showBuildModal: false,
                     buildNavTitle: 'Build',
-                    buildModalTitle: 'Build A Grammar'
+                    buildModalTitle: 'Build Productionist module...'
                 })
             }
         })
@@ -154,15 +164,15 @@ class HeaderBar extends React.Component {
                     <Modal.Header closeButton>
                         <Modal.Title>Load grammar...</Modal.Title>
                     </Modal.Header>
-                    <FileList onFileClick={this.load} highlightedFile={this.state.loadedGrammarName} directory='grammars'></FileList>
+                    <FileList onFileClick={this.load} highlightedFile={this.state.currentGrammarName} directory='grammars'></FileList>
                 </Modal>
-                <ExportGrammarModal show={this.state.showExportModal} onHide={this.closeExportModal} defaultGrammarName={this.state.loadedGrammarName}></ExportGrammarModal>
-                <SaveGrammarModal show={this.state.showSaveModal} onHide={this.closeSaveModal} defaultGrammarName={this.state.loadedGrammarName}></SaveGrammarModal>
+                <ExportGrammarModal show={this.state.showExportModal} onHide={this.closeExportModal} getCurrentGrammarName={this.getCurrentGrammarName} setCurrentGrammarName={this.setCurrentGrammarName}></ExportGrammarModal>
+                <SaveGrammarModal show={this.state.showSaveModal} onHide={this.closeSaveModal} getCurrentGrammarName={this.getCurrentGrammarName} setCurrentGrammarName={this.setCurrentGrammarName}></SaveGrammarModal>
                 <Modal show={this.state.showBuildModal} onHide={this.closeBuildModal}>
                     <Modal.Header closeButton>
                         <Modal.Title>{this.state.buildModalTitle}</Modal.Title>
                     </Modal.Header>
-                    <FileList onFileClick={this.buildProductionist} highlightedFile={this.state.loadedGrammarName} directory='exports'></FileList>
+                    <FileList onFileClick={this.buildProductionist} highlightedFile={this.state.currentGrammarName} directory='exports'></FileList>
                 </Modal>
             </div>
         );
