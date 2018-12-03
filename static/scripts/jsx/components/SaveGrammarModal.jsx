@@ -103,7 +103,7 @@ class SaveGrammarModal extends React.Component {
                             <HelpBlock><i>Grammars are saved to /grammars. Saving will overwrite files with the same name.</i></HelpBlock>
                         </FormGroup>
                     </form>
-                    <FileList onFileClick={this.updateGrammarName} highlightedFile={this.state.getCurrentGrammarName()} height='200px' directory='grammars'></FileList>
+                    <FileList onFileClick={this.updateGrammarName} highlightedFile={this.state.getCurrentGrammarName() + '.json'} height='200px' directory='grammars'></FileList>
                     <Button onClick={this.saveGrammar} type="submit" style={{marginTop: '15px'}} bsStyle={this.setSaveButtonStyle()} disabled={this.disableSaveButton()}>{this.state.saveGrammarBtnText}</Button>
                 </div>
             </Modal>

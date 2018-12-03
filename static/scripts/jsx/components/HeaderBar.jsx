@@ -164,7 +164,7 @@ class HeaderBar extends React.Component {
                     <Modal.Header closeButton>
                         <Modal.Title>Load grammar...</Modal.Title>
                     </Modal.Header>
-                    <FileList onFileClick={this.load} highlightedFile={this.state.currentGrammarName} directory='grammars'></FileList>
+                    <FileList onFileClick={this.load} highlightedFile={this.state.currentGrammarName + '.json'} directory='grammars'></FileList>
                 </Modal>
                 <ExportGrammarModal show={this.state.showExportModal} onHide={this.closeExportModal} getCurrentGrammarName={this.getCurrentGrammarName} setCurrentGrammarName={this.setCurrentGrammarName}></ExportGrammarModal>
                 <SaveGrammarModal show={this.state.showSaveModal} onHide={this.closeSaveModal} getCurrentGrammarName={this.getCurrentGrammarName} setCurrentGrammarName={this.setCurrentGrammarName}></SaveGrammarModal>
