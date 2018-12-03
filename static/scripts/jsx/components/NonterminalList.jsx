@@ -76,6 +76,9 @@ class NonterminalList extends React.Component {
         for (var i in newNT){
             nonterminals.push(newNT[i]);
         }
+        nonterminals.sort(function(a, b){
+            return a.toLowerCase() == b.toLowerCase() ? 0 : +(a.toLowerCase() > b.toLowerCase()) || -1;
+        });
         return deeps.concat(nonterminals);
     }
 
