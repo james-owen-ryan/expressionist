@@ -45,7 +45,7 @@ class NonterminalList extends React.Component {
             })
         }
         return names.filter( (name) => {
-            var res = name.indexOf(this.state.searchVal);
+            var res = name.toLowerCase().indexOf(this.state.searchVal.toLowerCase());
             if (res != -1){ return true; }
             return false;
         })
@@ -105,7 +105,7 @@ class NonterminalList extends React.Component {
                                 onChange={this.updateList} 
                                 value={this.state.searchVal}
                                 style={{'width': '100%'}}
-                                placeholder='Filter by symbol name'/>
+                                placeholder='Search...'/>
                     </ListGroupItem>
                     {   nonterminals.map((name) => {
                             var complete = this.props.nonterminals[name].complete;
