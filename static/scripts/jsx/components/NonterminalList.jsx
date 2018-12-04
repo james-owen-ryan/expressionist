@@ -11,11 +11,11 @@ class NonterminalList extends React.Component {
         super(props);
         this.clickNonterminalUpdate = this.clickNonterminalUpdate.bind(this);
         this.updateList = this.updateList.bind(this);
-        this.getList = this.getList.bind(this);
+        this.getListOfMatchingSymbolNames = this.getListOfMatchingSymbolNames.bind(this);
         this.formatList = this.formatList.bind(this);
         this.addNonterminal = this.addNonterminal.bind(this);
         this.state = {
-            searchVal: '',
+            symbolFilterQuery: '',
         }
     }
 
@@ -30,18 +30,52 @@ class NonterminalList extends React.Component {
     }
 
     updateList(e) {
-        this.setState({'searchVal': e.target.value})
+        this.setState({'symbolFilterQuery': e.target.value})
     }
 
-    // returns an array of nonterminal names that match state.searchVal.
-    getList() {
-        var names = Object.keys(this.props.nonterminals);
-        if (this.state.searchVal == ''){
-            return names
+    // returns an array of nonterminal names that match state.symbolFilterQuery.
+    getListOfMatchingSymbolNames() {
+        var allSymbolNames = Object.keys(this.props.nonterminals);
+        // If there's no filter query, all symbols match
+        if (this.state.symbolFilterQuery == ''){
+            return allSymbolNames
         }
-        return names.filter( (name) => {
-            var res = name.toLowerCase().indexOf(this.state.searchVal.toLowerCase());
-            if (res != -1){ return true; }
+        // If there's a filter query operating over tags, match all symbols having those tags; here's
+        // an example of such a filter query: '$tags:Moves:greeting & Moves:farewell' (note: these
+        // queries are treated in a case-sensitive manner because tags are case-sensitive)
+        else if (this.state.symbolFilterQuery.slice(0, 6) == "$tags:") {
+            var matches = [];
+            var raw_tags = this.state.symbolFilterQuery.slice(6).split(' & ');
+            for (var i = 0; i < allSymbolNames.length; i++){
+                var symbolName = allSymbolNames[i];
+                var isMatch = true;
+                for (var j = 0; j < raw_tags.length; j++){
+                    if (!raw_tags[j].includes(':')) {
+                        isMatch = false;
+                    }
+                    else {
+                        var tagset = raw_tags[j].split(':')[0];
+                        var tag = raw_tags[j].split(':')[1];
+                        if (!(tagset in this.props.nonterminals[symbolName]["markup"])) {
+                            isMatch = false;
+                        }
+                        else if (!(this.props.nonterminals[symbolName]["markup"][tagset].includes(tag))) {
+                            isMatch = false;
+                        }
+                    }
+                }
+                if (isMatch){
+                    matches.push(symbolName);
+                }
+            }
+            return matches;
+        }
+        // Lastly, handle conventional filter queries, which simply match against the symbol names (in
+        // a case-insensitive manner)
+        return allSymbolNames.filter( (symbolName) => {
+            // A given symbol is a match if the filter query is a substring of its name
+            var isMatch = symbolName.toLowerCase().indexOf(this.state.symbolFilterQuery.toLowerCase());
+            if (isMatch != -1){ return true; }
             return false;
         })
     }
@@ -100,7 +134,7 @@ class NonterminalList extends React.Component {
     }
 
     render() {
-        var nonterminals = this.formatList(this.getList());
+        var nonterminals = this.formatList(this.getListOfMatchingSymbolNames());
         return (
             <div>
                 <ListGroup id='nonterminalList'>
@@ -108,7 +142,7 @@ class NonterminalList extends React.Component {
                         <input  id='nonterminalListSearch' 
                                 type='text' 
                                 onChange={this.updateList} 
-                                value={this.state.searchVal}
+                                value={this.state.symbolFilterQuery}
                                 style={{'width': '100%'}}
                                 placeholder='Search'/>
                     </ListGroupItem>
