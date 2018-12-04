@@ -39,11 +39,6 @@ class NonterminalList extends React.Component {
         if (this.state.searchVal == ''){ 
             return names
         }
-        else if (this.state.searchVal == '*'){
-            return names.filter( (name) => {
-                return this.props.nonterminals[name].deep == true;
-            })
-        }
         return names.filter( (name) => {
             var res = name.toLowerCase().indexOf(this.state.searchVal.toLowerCase());
             if (res != -1){ return true; }
