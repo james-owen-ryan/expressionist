@@ -22,13 +22,16 @@ debug = False
 def default():
     return app.flask_grammar.to_json()
 
+
 @app.route('/api/grammar/load_dir', methods=['GET'])
 def load_dir():
     return jsonify(results=os.listdir(os.path.abspath(os.path.join(os.path.dirname(__file__), 'grammars/'))))
 
+
 @app.route('/api/load_bundles', methods=['GET'])
 def load_bundles():
     return jsonify(results=os.listdir(os.path.abspath(os.path.join(os.path.dirname(__file__), 'exports/'))))
+
 
 @app.route('/api/load_bundle', methods=['POST'])
 def load_bundle():
@@ -40,11 +43,13 @@ def load_bundle():
         print repr(error)
     return str(grammar_file.read())
 
+
 @app.route('/api/grammar/load', methods=['POST'])
 def load_grammar():
     print request
     app.flask_grammar = grammar.from_json(str(request.data))
     return app.flask_grammar.to_json()
+
 
 @app.route('/api/grammar/from_file', methods=['POST'])
 def load_file_grammar():
@@ -54,6 +59,7 @@ def load_file_grammar():
     if grammar_file:
         app.flask_grammar = grammar.from_json(str(grammar_file.read()))
     return app.flask_grammar.to_json()
+
 
 @app.route('/api/grammar/save', methods=['GET', 'POST'])
 def save_grammar():
@@ -92,12 +98,14 @@ def rename_nt():
     app.flask_grammar.modify_tag(old, new)
     return app.flask_grammar.to_json()
 
+
 @app.route('/api/nonterminal/delete', methods=['POST'])
 def delete_nt():
     data = request.get_json()
     nonterminal = re.search('[^\[\]]+', data['nonterminal']).group(0)
     app.flask_grammar.delete_nonterminal(nonterminal)
     return app.flask_grammar.to_json()
+
 
 @app.route('/api/nonterminal/deep', methods=['POST'])
 def set_deep():
@@ -117,10 +125,12 @@ def expand_nt():
     data = request.get_json()
     return app.flask_grammar.expand(nonterminal_symbol.NonterminalSymbol(data['nonterminal'])).to_json()
 
+
 @app.route('/api/rule/expand', methods=['POST', 'GET'])
 def expand_rule():
     data = request.get_json()
     return app.flask_grammar.expand_rule(data['nonterminal'], int(data['index']) ).to_json()
+
 
 @app.route('/api/rule/swap', methods=['POST'])
 def swap_rule():
@@ -130,6 +140,7 @@ def swap_rule():
     new = re.search('[^\[\]]+', data['new']).group(0)
     app.flask_grammar.copy_rule(original, index, new)
     return app.flask_grammar.to_json()
+
 
 @app.route('/api/rule/add', methods=['POST'])
 def add_rule():
@@ -176,6 +187,7 @@ def add_tagset():
     app.flask_grammar.add_new_markup_set(markupSet)
     return app.flask_grammar.to_json()
 
+
 @app.route('/api/markup/toggle', methods=['POST'])
 def toggle_tag():
     data = request.get_json()
@@ -188,6 +200,7 @@ def toggle_tag():
 
     return app.flask_grammar.to_json()
 
+
 @app.route('/api/markup/renameset', methods=['POST'])
 def rename_markupset():
     data = request.get_json()
@@ -195,6 +208,7 @@ def rename_markupset():
     newset = data['newset']
     app.flask_grammar.modify_markupset(oldset, newset)
     return app.flask_grammar.to_json()
+
 
 @app.route('/api/markup/renametag', methods=['POST'])
 def rename_markuptag():
@@ -205,12 +219,14 @@ def rename_markuptag():
     app.flask_grammar.modify_markup(markupset, oldtag, newtag)
     return app.flask_grammar.to_json()
 
+
 @app.route('/api/markup/deletetagset', methods=['POST'])
 def delete_tagset():
     name = request.get_json()['tagsetName']
     print 'Deleting tagset: '+name
     app.flask_grammar.delete_tagset(name)
     return app.flask_grammar.to_json()
+
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
