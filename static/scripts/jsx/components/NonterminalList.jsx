@@ -36,7 +36,7 @@ class NonterminalList extends React.Component {
     // returns an array of nonterminal names that match state.searchVal.
     getList() {
         var names = Object.keys(this.props.nonterminals);
-        if (this.state.searchVal == ''){ 
+        if (this.state.searchVal == ''){
             return names
         }
         return names.filter( (name) => {
@@ -48,14 +48,12 @@ class NonterminalList extends React.Component {
 
     // Returns a sorted array of nonterminal names
     formatList(nonterminals) {  // 'nonterminals' is an array of nonterminal names
-        var nonterminals = Object.values(this.props.nonterminals);
-        var that = this;
         // Place top-level nonterminal symbols at the top of the list
         var topLevelSymbols = [];
         for (var i = 0; i < nonterminals.length; i++){
-            var name = Object.keys(this.props.nonterminals)[i];
-            if (nonterminals[i].deep == true && name.indexOf(this.state.searchVal) != -1){
-                topLevelSymbols.push(Object.keys(this.props.nonterminals)[i]);
+            var symbolName = nonterminals[i];
+            if (this.props.nonterminals[symbolName].deep == true){
+                topLevelSymbols.push(symbolName);
             }
         }
         topLevelSymbols.sort(function(a, b){
@@ -64,9 +62,9 @@ class NonterminalList extends React.Component {
         // Place incomplete symbols next (these are ones for which no production rules have been authored)
         var incompleteSymbols = [];
         for (var i = 0; i < nonterminals.length; i++){
-            var name = Object.keys(this.props.nonterminals)[i];
-            if (nonterminals[i].complete == false && name.indexOf(this.state.searchVal) != -1){
-                incompleteSymbols.push(Object.keys(this.props.nonterminals)[i]);
+            var symbolName = nonterminals[i];
+            if (this.props.nonterminals[symbolName].complete == false){
+                incompleteSymbols.push(symbolName);
             }
         }
         incompleteSymbols.sort(function(a, b){
@@ -75,9 +73,9 @@ class NonterminalList extends React.Component {
         // Finally, place all other symbols last, sorting alphabetically (but ignoring case)
         var allOtherSymbols = [];
         for (var i = 0; i < nonterminals.length; i++){
-            var name = Object.keys(this.props.nonterminals)[i];
-            if (nonterminals[i].deep == false && nonterminals[i].complete == true && name.indexOf(this.state.searchVal) != -1){
-                allOtherSymbols.push(Object.keys(this.props.nonterminals)[i]);
+            var symbolName = nonterminals[i];
+            if (this.props.nonterminals[symbolName].deep == false && this.props.nonterminals[symbolName].complete == true){
+                allOtherSymbols.push(symbolName);
             }
         }
         allOtherSymbols.sort(function(a, b){
