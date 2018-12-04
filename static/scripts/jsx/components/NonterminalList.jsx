@@ -70,6 +70,31 @@ class NonterminalList extends React.Component {
             }
             return matches;
         }
+        // If there's a filter query operating over symbol expansions, match all symbols that have
+        // a production rule whose body includes a terminal symbol for which the filter-query component
+        // is a substring
+        else if (this.state.symbolFilterQuery.slice(0, 6) == "$text:") {
+            var matches = [];
+            var text = this.state.symbolFilterQuery.slice(6);
+            for (var i = 0; i < allSymbolNames.length; i++){
+                var symbolName = allSymbolNames[i];
+                var isMatch = false;
+                var productionRules = this.props.nonterminals[symbolName]["rules"];
+                for (var j = 0; j < productionRules.length; j++){
+                    var productionRule = productionRules[j];
+                    for (var k = 0; k < productionRule["expansion"].length; k++){
+                        var symbol = productionRule["expansion"][k];
+                        if (symbol.slice(0, 2) != '[[' && symbol.toLowerCase().indexOf(text.toLowerCase()) != -1) {
+                            isMatch = true;
+                        }
+                    }
+                }
+                if (isMatch){
+                    matches.push(symbolName);
+                }
+            }
+            return matches;
+        }
         // Lastly, handle conventional filter queries, which simply match against the symbol names (in
         // a case-insensitive manner)
         return allSymbolNames.filter( (symbolName) => {
