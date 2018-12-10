@@ -99,7 +99,7 @@ class RuleBoard extends React.Component {
                 </div>
 
                 <div>
-                    <h3>{this.props.name} -> {expansion_arr}</h3><Button bsStyle="danger" title="Delete Rule"
+                    <h3>-> {expansion_arr}</h3><Button bsStyle="danger" title="Delete Rule"
                                                                                 onClick={this.onRuleDelete}><Glyphicon
                     glyph="warning-sign"/>Delete</Button>
                 </div>
