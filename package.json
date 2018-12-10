@@ -1,7 +1,7 @@
 {
-  "name": "pythonExpressionist",
-  "version": "1.0.0",
-  "description": "First commit to an empty repo for Expressionist",
+  "name": "Expressionist",
+  "version": "0.9.0",
+  "description": "An authoring tool for text generation in computational media",
   "main": "index.js",
   "scripts": {
     "build": "node ./node_modules/webpack/bin/webpack.js --progress --colors"
@@ -27,11 +27,11 @@
   "keywords": [],
   "repository": {
     "type": "git",
-    "url": "git://github.com/eternalnoob/pythonExpressionist.git"
+    "url": "https://github.com/james-owen-ryan/expressionist"
   },
-  "author": "Ethan Seither",
-  "license": "BSD-2-Clause",
+  "author": "James Ryan, Tyler Brothers, and Ethan Seither",
+  "license": "MIT License",
   "bugs": {
-    "url": "https://github.com/eternalnoob/pythonExpressionist/issues"
+    "url": "https://github.com/james-owen-ryan/expressionist/issues"
   }
 }
