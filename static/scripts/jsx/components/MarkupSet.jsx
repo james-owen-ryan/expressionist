@@ -105,8 +105,8 @@ class MarkupSet extends React.Component {
     }
 
     handleTagsetDelete(){
-        var prompt = window.prompt("Type 'YES' to delete this tagset.")
-        if (prompt != "YES"){
+        var prompt = window.confirm("Are you sure you'd like to delete this tagset?");
+        if (prompt == false){
             return false;
         }
         var object = {tagsetName: this.props.name}

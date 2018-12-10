@@ -63,9 +63,9 @@ class NonterminalBoard extends React.Component {
                 contentType: "application/json",
                 data: JSON.stringify(object),
                 success: () => {
-                    this.props.updateFromServer()
-                    this.props.updateCurrentNonterminal(newsymbol)
-                    this.props.updateHistory(newsymbol, this.props.currentRule)
+                    this.props.updateFromServer();
+                    this.props.updateCurrentNonterminal(newsymbol);
+                    this.props.updateHistory(newsymbol, this.props.currentRule);
                 },
                 cache: false
             })
@@ -73,19 +73,19 @@ class NonterminalBoard extends React.Component {
     }
 
     handleNonterminalDelete() {
-        var confirmresponse = window.prompt("This will delete the nonterminal and all rules which reference it, Be warned! YES, in all caps.");
-        if (this.props.name != "" && confirmresponse == "YES") {
-            var object = {"nonterminal": this.props.name}
+        var confirmresponse = window.confirm("Are you sure you'd like to delete this nonterminal symbol? This will also delete any production rules that reference it.");
+        if (this.props.name != "" && confirmresponse == true) {
+            var object = {"nonterminal": this.props.name};
             ajax({
                 url: $SCRIPT_ROOT + '/api/nonterminal/delete',
                 type: "POST",
                 contentType: "application/json",
                 data: JSON.stringify(object),
                 succes: () => {
-                    this.props.updateCurrentNonterminal("")
-                    this.props.updateCurrentRule(-1)
-                    this.props.updateFromServer()
-                    this.props.updateHistory("", -1)
+                    this.props.updateCurrentNonterminal("");
+                    this.props.updateCurrentRule(-1);
+                    this.props.updateFromServer();
+                    this.props.updateHistory("", -1);
                 },
                 cache: false
             })
