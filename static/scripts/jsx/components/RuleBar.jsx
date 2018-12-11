@@ -40,14 +40,9 @@ class RuleBar extends React.Component {
     }
 
     submitRuleDefinitionOnEnter(e) {
-        if (this.state.showModal) {
+        if (this.state.showModal || this.props.ruleDefinitionModalIsOpen) {
             if (e.key === 'Enter') {
-                if (this.props.idOfRuleToEdit !== null) {
-                    this.editRule();
-                }
-                else {
-                    this.addRule();
-                }
+                document.getElementById("submitRuleButton").click();
             }
         }
     }
@@ -125,6 +120,8 @@ class RuleBar extends React.Component {
     }
 
     editRule() {
+        document.getElementById('submitRuleButton').style.backgroundColor = 'rgb(87, 247, 224)';
+        document.getElementById('submitRuleButton').innerHTML = 'Updated!'
         var appRate = this.state.ruleApplicationRate;
         var expansion = this.state.ruleExpansionInputVal;
         if (expansion != '') {
@@ -145,7 +142,6 @@ class RuleBar extends React.Component {
                     this.props.updateMarkupFeedback([]);
                     this.props.updateExpansionFeedback('');
                     this.props.updateHistory(this.props.name, -1);
-                    this.updateRuleExpansionInputVal({'target': {'value': ''}})
                     this.props.updateFromServer()
                     this.closeModal()
                 },
