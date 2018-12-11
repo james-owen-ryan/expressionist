@@ -177,7 +177,7 @@ class MarkupSet extends React.Component {
                     </div>
                     { this.props.current_set.sort().map((tag) => this.isThisTagInCurrentlySelectedNT(tag)) }
                     <MenuItem divider={true}></MenuItem>
-                    <MenuItem bsStyle='primary' key={this.props.current_set.length+1} onClick={this.handleMarkupRename.bind(this, this.props.name)}>Rename Tag</MenuItem>;
+                    <MenuItem bsStyle='primary' key={this.props.current_set.length+1} onClick={this.handleMarkupRename.bind(this, this.props.name)}>Rename Tag</MenuItem>
                 </DropdownButton>
             );
         }
