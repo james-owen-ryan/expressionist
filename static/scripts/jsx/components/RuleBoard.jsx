@@ -105,11 +105,9 @@ class RuleBoard extends React.Component {
                     <h3>-> {expansion_arr}</h3>
                 </div>
                 <h2>
-                {this.props.app_rate}
-                <Button bsStyle="default" title="Modify application rate" onClick={this.handleAppModify}><Glyphicon glyph="console"/></Button>
-                <Button bsStyle="default" title="Execute this rule" onClick={this.handleExpandRule}><Glyphicon glyph="resize-full"/></Button>
-                <Button bsStyle="default" title="Edit rule definition" onClick={this.prepareForRuleDefinitionEdit}>Edit</Button>
-                <Button bsStyle="danger" title="Delete this rule" onClick={this.onRuleDelete}><Glyphicon glyph="warning-sign"/>Delete</Button>
+                <Button bsStyle="default" title="Execute this rule" onClick={this.handleExpandRule}><Glyphicon glyph="play"/></Button>
+                <Button bsStyle="default" title="Edit rule definition" onClick={this.prepareForRuleDefinitionEdit}><Glyphicon glyph="pencil"/></Button>
+                <Button bsStyle="danger" title="Delete this rule" onClick={this.onRuleDelete}><Glyphicon glyph="trash"/></Button>
                 </h2>
 
             </div>

@@ -181,7 +181,7 @@ class NonterminalList extends React.Component {
                             return (
                                 <Nonterminal    name={name}
                                                 complete={complete}
-                                                deep={deep} 
+                                                deep={deep}
                                                 onClick={this.clickNonterminalUpdate.bind(this, name)} 
                                                 key={name}
                                                 new={newNT}

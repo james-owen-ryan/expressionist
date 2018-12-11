@@ -51,8 +51,8 @@ class NonterminalBoard extends React.Component {
     }
 
     handleNonterminalRename(nonterminal) {
-        var newsymbol = window.prompt("How would you like to rename this nonterminal symbol?")
-        if (this.props.name != "" && newsymbol != "") {
+        var newsymbol = window.prompt("Enter a new name for this nonterminal symbol.");
+        if (this.props.name !== "" && newsymbol) {
             var object = {
                 "old": this.props.name,
                 "new": newsymbol
@@ -120,12 +120,12 @@ class NonterminalBoard extends React.Component {
             var name = this.props.name
             var deep_str = ""
             if (this.props.nonterminal && this.props.nonterminal.deep) {
-                deep_str = "Toggle Top-Level"
-                glyph_nt = <Glyphicon glyph="asterisk"/>
+                deep_str = "Toggle top-level status"
+                glyph_nt = <Glyphicon glyph="star"/>
             }
             else {
-                deep_str = "Toggle Top-Level"
-                glyph_nt = <Glyphicon glyph="remove"/>
+                deep_str = "Toggle top-level status"
+                glyph_nt = <Glyphicon glyph="star-empty"/>
             }
             if( this.props.referents != []) {
                 var referents = this.props.referents.map(this.handleClickerThing)
@@ -138,10 +138,10 @@ class NonterminalBoard extends React.Component {
                     <h1>
                     <span style={{"padding": "5px"}}>{name}</span>
                     <br></br>
-                    <Button bsStyle={this.props.nonterminal.deep ? "success" : "danger" } onClick={this.handleSetDeep} title={deep_str}>{glyph_nt}</Button>
-                    <Button onClick={this.handleExpand} title="Test"><Glyphicon glyph="resize-full"/></Button>
-                    <Button onClick={this.handleNonterminalRename} title="Rename">Rename</Button>
-                    <Button onClick={this.handleNonterminalDelete} title="Delete"> Delete</Button>
+                    <Button bsStyle={this.props.nonterminal.deep ? "success" : "default" } onClick={this.handleSetDeep} title={deep_str}>{glyph_nt}</Button>
+                    <Button onClick={this.handleExpand} title="Rewrite symbol"><Glyphicon glyph="play"/></Button>
+                    <Button onClick={this.handleNonterminalRename} title="Rename"><Glyphicon glyph="pencil"/></Button>
+                    <Button onClick={this.handleNonterminalDelete} title="Delete"><Glyphicon glyph="trash"/></Button>
                     </h1>
                 </div>
 
