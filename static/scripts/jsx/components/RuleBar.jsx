@@ -29,7 +29,11 @@ class RuleBar extends React.Component {
     }
 
     closeModal() {
-        this.setState({showModal: false});
+        this.setState({
+            showModal: false,
+            ruleExpansionInputVal: '',
+            ruleApplicationRate: 1
+        });
         this.props.closeRuleDefinitionModal();
     }
 
@@ -51,7 +55,8 @@ class RuleBar extends React.Component {
     updateApplicationRate(e) { 
         if (!isNaN(e.target.value)){
             this.setState({ruleApplicationRate: e.target.value}) 
-        }else{
+        }
+        else {
             this.setState({ruleApplicationRate: 1})
         }
     }
@@ -60,10 +65,15 @@ class RuleBar extends React.Component {
         var appRate = this.state.ruleApplicationRate;
         var expansion = this.state.ruleExpansionInputVal;
         if (expansion != '') {
+            // Reset the application rate, but we'll keep the expansion (in case the author wishes
+            // to define a bunch of similar variants quickly)
+            this.setState({
+                ruleApplicationRate: 1
+            })
             var object = {
                 "rule": expansion,
                 "app_rate": appRate,
-                "nonterminal": this.props.name //current_nonterminal
+                "nonterminal": this.props.name  // current_nonterminal
             }
             ajax({
                 url: $SCRIPT_ROOT + '/api/rule/add',
@@ -76,7 +86,6 @@ class RuleBar extends React.Component {
                     this.props.updateMarkupFeedback([]);
                     this.props.updateExpansionFeedback('');
                     this.props.updateHistory(this.props.name, -1);
-                    this.updateRuleExpansionInputVal({'target': {'value': ''}})
                     this.props.updateFromServer()
                 },
                 cache: false
@@ -92,7 +101,7 @@ class RuleBar extends React.Component {
                 "rule_id": this.props.idOfRuleToEdit,
                 "rule": expansion,
                 "app_rate": appRate,
-                "nonterminal": this.props.name //current_nonterminal
+                "nonterminal": this.props.name  // current_nonterminal
             }
             ajax({
                 url: $SCRIPT_ROOT + '/api/rule/edit',
@@ -107,6 +116,7 @@ class RuleBar extends React.Component {
                     this.props.updateHistory(this.props.name, -1);
                     this.updateRuleExpansionInputVal({'target': {'value': ''}})
                     this.props.updateFromServer()
+                    this.closeModal()
                 },
                 cache: false
             })
@@ -118,12 +128,6 @@ class RuleBar extends React.Component {
             this.setState({
                 ruleExpansionInputVal: nextProps.rules[nextProps.idOfRuleToEdit].expansion.join(''),
                 ruleApplicationRate: nextProps.rules[nextProps.idOfRuleToEdit].app_rate
-            });
-        }
-        else {
-            this.setState({
-                ruleExpansionInputVal: '',
-                prepopulatedRuleApplicationRate: 1
             });
         }
     }
