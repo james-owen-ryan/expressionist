@@ -66,7 +66,7 @@ class Nonterminal extends React.Component {
         if (this.props.new == true){
             return (
                 <ListGroupItem title={this.props.name} bsSize="xsmall" style={{'backgroundColor': 'white'}}>
-                            <input type='text' onChange={this.handleNewNameValueChange} value={this.state.newNameVal} style={{'width': '70%', 'height': '30px', 'padding': '5px', 'marginRight': '10px'}} placeholder='Enter a new nonterminal name.'/>
+                            <input type='text' onChange={this.handleNewNameValueChange} value={this.state.newNameVal} style={{'width': '70%', 'height': '30px', 'padding': '5px', 'marginRight': '10px'}} placeholder='Enter symbol name.' autoFocus="true"/>
                             <div style={{'marginRight': '10px', 'display': 'inline'}}>
                                 <Button onClick={this.handleNonterminalRename} title="new nt" bsStyle="success" style={{'marginRight': '5px'}} disabled={this.disableNewNameValue()}><Glyphicon glyph="ok"/></Button>
                                 <Button onClick={this.handleNonterminalDelete} title="delete nt" bsStyle="danger"><Glyphicon glyph="remove"/></Button>
