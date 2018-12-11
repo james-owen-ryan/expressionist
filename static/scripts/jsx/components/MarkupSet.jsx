@@ -18,6 +18,7 @@ class MarkupSet extends React.Component {
         this.handleNewNameValueChange = this.handleNewNameValueChange.bind(this);
         this.handleTagsetDelete = this.handleTagsetDelete.bind(this);
         this.isThisTagInCurrentlySelectedNT = this.isThisTagInCurrentlySelectedNT.bind(this);
+        this.submitTagsetNameOnEnterKeypress = this.submitTagsetNameOnEnterKeypress.bind(this);
         this.state = {
             newNameVal: '',
         }
@@ -120,6 +121,14 @@ class MarkupSet extends React.Component {
         })
     }
 
+    submitTagsetNameOnEnterKeypress(e) {
+        if (document.activeElement.id === "newTagsetNameInputElement") {
+            if (e.key === 'Enter') {
+                document.getElementById("newTagsetNameInputElementButton").click();
+            }
+        }
+    };
+
     disableNewNameValue(){
         if (this.state.newNameVal == ''){
             return true
@@ -140,13 +149,17 @@ class MarkupSet extends React.Component {
         }
     }
 
+    componentDidMount(){
+        document.addEventListener("keydown", this.submitTagsetNameOnEnterKeypress, false);
+    }
+
     render() {
         if (this.props.name.indexOf('/this is a new markupset/') != -1){
             return(
                 <ButtonGroup title={this.props.name} style={{padding: '5px', backgroundColor: '#F2F2F2'}} className='nohover'>
-                    <input type='text' onChange={this.handleNewNameValueChange} value={this.state.newNameVal} style={{height: '20px', backgroundColor: 'white', padding: '5px', width: '175px', marginRight: '5px'}} placeholder='Enter tagset name.' autoFocus="true"/>
+                    <input id="newTagsetNameInputElement" type='text' onChange={this.handleNewNameValueChange} value={this.state.newNameVal} style={{height: '20px', backgroundColor: 'white', padding: '5px', width: '175px', marginRight: '5px'}} placeholder='Enter tagset name.' autoFocus="true"/>
                     <div style={{'display': 'inline'}}>
-                        <Button onClick={this.handleMarkupSetRename} title="new markup set" bsSize="small" bsStyle="success" style={{marginRight: '5px'}} disabled={this.disableNewNameValue()}><Glyphicon glyph="ok"/></Button>
+                        <Button id="newTagsetNameInputElementButton" onClick={this.handleMarkupSetRename} title="new markup set" bsSize="small" bsStyle="success" style={{marginRight: '5px'}} disabled={this.disableNewNameValue()}><Glyphicon glyph="ok"/></Button>
                         <Button onClick={this.handleTagsetDelete} title="delete markup set" bsSize="small" bsStyle="danger"><Glyphicon glyph="remove"/></Button>
                     </div>
                 </ButtonGroup>
