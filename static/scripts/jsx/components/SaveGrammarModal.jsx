@@ -18,6 +18,7 @@ class SaveGrammarModal extends React.Component {
         this.disableSaveButton = this.disableSaveButton.bind(this);
         this.setSaveButtonStyle = this.setSaveButtonStyle.bind(this);
         this.saveGrammar = this.saveGrammar.bind(this);
+        this.saveGrammarOnEnter = this.saveGrammarOnEnter.bind(this);
         this.juiceSaveButton = this.juiceSaveButton.bind(this);
         this.state = {
             grammarFileNames: [],
@@ -40,6 +41,14 @@ class SaveGrammarModal extends React.Component {
     handleChange(e){
         this.state.setCurrentGrammarName(e.target.value);
     }
+
+    saveGrammarOnEnter(e) {
+        if (this.props.show) {
+            if (e.key === 'Enter') {
+                this.saveGrammar()
+            }
+        }
+    };
 
     updateGrammarName(filename){
         this.state.setCurrentGrammarName(filename);
@@ -118,6 +127,10 @@ class SaveGrammarModal extends React.Component {
         this.getFileNames((data) => { this.setState({'grammarFileNames': data.results}) })
     }
 
+    componentDidMount(){
+        document.addEventListener("keydown", this.saveGrammarOnEnter, false);
+    }
+
     render() {
         return (
             <Modal show={this.props.show} onHide={this.props.onHide}>
@@ -127,14 +140,14 @@ class SaveGrammarModal extends React.Component {
                 <div style={{padding: '15px'}}>
                     <form>
                         <FormGroup controlId="saveGrammarForm" validationState={this.checkSaveGrammarName()}>
-                            <ControlLabel>Grammar name</ControlLabel>
-                            <FormControl type="text" value={this.state.getCurrentGrammarName()} placeholder="Enter a filename." onChange={this.handleChange} />
+                            <ControlLabel>Grammar Name</ControlLabel>
+                            <FormControl type="text" value={this.state.getCurrentGrammarName()} placeholder="Enter a filename." onChange={this.handleChange}/>
                             <FormControl.Feedback />
                             <HelpBlock><i>Grammars are saved to /grammars. Saving will overwrite files with the same name.</i></HelpBlock>
                         </FormGroup>
                     </form>
                     <FileList onFileClick={this.updateGrammarName} highlightedFile={this.state.getCurrentGrammarName() + '.json'} height='200px' directory='grammars'></FileList>
-                    <Button id="saveButton" onClick={this.saveGrammar} type="submit" style={{marginTop: '15px'}} bsStyle={this.setSaveButtonStyle()} disabled={this.disableSaveButton()}>{this.state.saveGrammarBtnText}</Button>
+                    <Button id="saveButton" onClick={this.saveGrammar} style={{marginTop: '15px'}} bsStyle={this.setSaveButtonStyle()} disabled={this.disableSaveButton()}>{this.state.saveGrammarBtnText}</Button>
                 </div>
             </Modal>
 
