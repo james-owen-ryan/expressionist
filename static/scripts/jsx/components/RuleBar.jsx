@@ -40,12 +40,14 @@ class RuleBar extends React.Component {
     }
 
     submitRuleDefinitionOnEnter(e) {
-        if (e.key === 'Enter') {
-            if (this.props.idOfRuleToEdit !== null) {
-                this.editRule();
-            }
-            else {
-                this.addRule();
+        if (this.state.showModal) {
+            if (e.key === 'Enter') {
+                if (this.props.idOfRuleToEdit !== null) {
+                    this.editRule();
+                }
+                else {
+                    this.addRule();
+                }
             }
         }
     };
@@ -66,10 +68,12 @@ class RuleBar extends React.Component {
     }
 
     updateRuleExpansionInputVal(e) {
-        this.setState({ruleExpansionInputVal: e.target.value})
+        if (e.target.value.indexOf('\n') === -1) {
+            this.setState({ruleExpansionInputVal: e.target.value})
+        }
     }
 
-    updateApplicationRate(e) { 
+    updateApplicationRate(e) {
         if (!isNaN(e.target.value)){
             this.setState({ruleApplicationRate: e.target.value}) 
         }

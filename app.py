@@ -145,7 +145,7 @@ def swap_rule():
 @app.route('/api/rule/add', methods=['POST'])
 def add_rule():
     data = request.get_json()
-    rule = data['rule']
+    rule = data['rule']  # Right-hand side of the rule (the expansion)
     app_rate = int(data['app_rate'])
     nonterminal = nonterminal_symbol.NonterminalSymbol(data["nonterminal"])
     app.flask_grammar.add_rule(nonterminal, grammar.parse_rule(rule), app_rate)

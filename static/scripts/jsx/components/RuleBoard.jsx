@@ -101,11 +101,9 @@ class RuleBoard extends React.Component {
                 <div style={{"width": "50%", "margin": "0 auto"}}>
                     <h2 onClick={this.handleRuleClickThrough.bind(this, this.props.name)}><b>{this.props.name}</b></h2>
                 </div>
-
                 <div>
                     <h3>-> {expansion_arr}</h3>
                 </div>
-
                 <h2>
                 {this.props.app_rate}
                 <Button bsStyle="default" title="Modify application rate" onClick={this.handleAppModify}><Glyphicon glyph="console"/></Button>
