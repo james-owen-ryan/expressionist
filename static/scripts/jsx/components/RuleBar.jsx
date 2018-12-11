@@ -11,12 +11,14 @@ class RuleBar extends React.Component {
         super(props);
         this.openModal = this.openModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
+        this.submitRuleDefinitionOnEnter = this.submitRuleDefinitionOnEnter.bind(this);
         this.handleRuleClick = this.handleRuleClick.bind(this);
         this.addToRuleExpansion = this.addToRuleExpansion.bind(this);
         this.updateRuleExpansionInputVal = this.updateRuleExpansionInputVal.bind(this);
         this.updateApplicationRate = this.updateApplicationRate.bind(this);
         this.addRule = this.addRule.bind(this);
         this.editRule = this.editRule.bind(this);
+        this.juiceRuleDefinitionSubmitButton = this.juiceRuleDefinitionSubmitButton.bind(this);
         this.state = {
             showModal: false,
             ruleExpansionInputVal: '',
@@ -37,7 +39,20 @@ class RuleBar extends React.Component {
         this.props.closeRuleDefinitionModal();
     }
 
-    toExpressionistSyntax(nonterminalName) { return "[[" + nonterminalName + "]]" }
+    submitRuleDefinitionOnEnter(e) {
+        if (e.key === 'Enter') {
+            if (this.props.idOfRuleToEdit !== null) {
+                this.editRule();
+            }
+            else {
+                this.addRule();
+            }
+        }
+    };
+
+    toExpressionistSyntax(nonterminalName) {
+        return "[[" + nonterminalName + "]]"
+    }
 
     handleRuleClick(index) {
         this.props.updateCurrentRule(index)
@@ -50,7 +65,9 @@ class RuleBar extends React.Component {
         this.setState({ruleExpansionInputVal: res})
     }
 
-    updateRuleExpansionInputVal(e) { this.setState({ruleExpansionInputVal: e.target.value}) }
+    updateRuleExpansionInputVal(e) {
+        this.setState({ruleExpansionInputVal: e.target.value})
+    }
 
     updateApplicationRate(e) { 
         if (!isNaN(e.target.value)){
@@ -62,6 +79,10 @@ class RuleBar extends React.Component {
     }
 
     addRule() {
+        // Generate a juicy response (button lights yellow and fades back to gray)
+        document.getElementById('submitRuleButton').style.backgroundColor = 'rgb(87, 247, 224)';
+        var juicingIntervalFunction = setInterval(this.juiceRuleDefinitionSubmitButton, 1);
+        // Send the new rule definition to the server
         var appRate = this.state.ruleApplicationRate;
         var expansion = this.state.ruleExpansionInputVal;
         if (expansion != '') {
@@ -91,6 +112,7 @@ class RuleBar extends React.Component {
                 cache: false
             })
         }
+        setTimeout(function() { clearInterval(juicingIntervalFunction); }, 1000);
     }
 
     editRule() {
@@ -121,6 +143,30 @@ class RuleBar extends React.Component {
                 cache: false
             })
         }
+    }
+
+    juiceRuleDefinitionSubmitButton() {
+        // This function gradually fades the rule-definition submit button ("Add Rule" or "Edit Rule")
+        // from our palette green, rgb(87, 247, 224), to our palette gray, rgb(242, 242, 242)
+        var currentButtonRgbValues = document.getElementById("submitRuleButton").style.backgroundColor;
+        var extractedRgbComponents = currentButtonRgbValues.match(/\d+/g);
+        var r = extractedRgbComponents[0];
+        var g = extractedRgbComponents[1];
+        var b = extractedRgbComponents[2];
+        if (r < 242){
+            r++;
+        }
+        if (g > 242){
+            g--;
+        }
+        if (b < 242){
+            b++;
+        }
+        document.getElementById("submitRuleButton").style.backgroundColor = "rgb("+r+","+g+","+b+")";
+    }
+
+    componentDidMount(){
+        document.addEventListener("keydown", this.submitRuleDefinitionOnEnter, false);
     }
 
     componentWillReceiveProps(nextProps) {
@@ -179,7 +225,7 @@ class RuleBar extends React.Component {
                             <p style={{'fontWeight': '300', 'fontSize': '16px'}}>Application Rate</p>
                             <input id='appRateModal' type='text' value={this.state.ruleApplicationRate} onChange={this.updateApplicationRate}
                             style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '43px', 'marginBottom': '25px', 'fontSize': '18px', 'padding': '0 12px'}}/>
-                            <Button bsStyle="primary" bsSize="large" style={{'marginBottom': '25px'}} onClick={ruleDefinitionModalButtonCallback}>{ruleDefinitionModalButtonText}</Button>
+                            <Button id="submitRuleButton" bsStyle="primary" bsSize="large" style={{'marginBottom': '25px'}} onClick={ruleDefinitionModalButtonCallback}>{ruleDefinitionModalButtonText}</Button>
                         </div>
                     </Modal>
                 </div>
