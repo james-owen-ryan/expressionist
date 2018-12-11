@@ -18,6 +18,7 @@ class SaveGrammarModal extends React.Component {
         this.disableSaveButton = this.disableSaveButton.bind(this);
         this.setSaveButtonStyle = this.setSaveButtonStyle.bind(this);
         this.saveGrammar = this.saveGrammar.bind(this);
+        this.juiceSaveButton = this.juiceSaveButton.bind(this);
         this.state = {
             grammarFileNames: [],
             height: '400px',
@@ -58,7 +59,11 @@ class SaveGrammarModal extends React.Component {
     setSaveButtonStyle(){
         if (this.checkSaveGrammarName() == 'error'){
             return 'danger'
-        }else{
+        }
+        else if (this.checkSaveGrammarName() === null){
+            return 'default'
+        }
+        else {
             return this.checkSaveGrammarName();
         }
     }
@@ -69,11 +74,14 @@ class SaveGrammarModal extends React.Component {
         } else if (this.state.getCurrentGrammarName() == '') {
             return 'error'
         }
-        return 'success'
+        return null
     }
 
     saveGrammar() {
-        this.setState({'saveGrammarBtnText': 'Saving...'})
+        // Generate a juicy response (button lights yellow and fades back to gray)
+        document.getElementById('saveButton').style.backgroundColor = 'rgb(87, 247, 224)';
+        document.getElementById('saveButton').innerHTML = 'Saved!'
+        var juicingIntervalFunction = setInterval(this.juiceSaveButton, 1);
         ajax({
             url: $SCRIPT_ROOT + '/api/grammar/save',
             type: "POST",
@@ -81,11 +89,33 @@ class SaveGrammarModal extends React.Component {
             data: this.state.getCurrentGrammarName(),
             async: true,
             cache: false,
-            success: (status) => { 
-                this.setState({'saveGrammarBtnText': 'Saved!'})
-                setTimeout(() => { this.setState({'saveGrammarBtnText': 'Save'}) }, 3000);
-            }
+            success: (status) => {}
         })
+        setTimeout(function() {
+            clearInterval(juicingIntervalFunction);
+            document.getElementById('saveButton').innerHTML = 'Save';
+            document.getElementById('saveButton').style.backgroundColor = 'rgb(242, 242, 242)';
+        }, 1250);
+    }
+
+    juiceSaveButton() {
+        // This function gradually fades the save button from our palette green (rgb(87, 247, 224))
+        // to our palette gray (rgb(242, 242, 242))
+        var currentButtonRgbValues = document.getElementById("saveButton").style.backgroundColor;
+        var extractedRgbComponents = currentButtonRgbValues.match(/\d+/g);
+        var r = extractedRgbComponents[0];
+        var g = extractedRgbComponents[1];
+        var b = extractedRgbComponents[2];
+        if (r < 242){
+            r++;
+        }
+        if (g > 242){
+            g--;
+        }
+        if (b < 242){
+            b++;
+        }
+        document.getElementById("saveButton").style.backgroundColor = "rgb("+r+","+g+","+b+")";
     }
 
     render() {
@@ -104,7 +134,7 @@ class SaveGrammarModal extends React.Component {
                         </FormGroup>
                     </form>
                     <FileList onFileClick={this.updateGrammarName} highlightedFile={this.state.getCurrentGrammarName() + '.json'} height='200px' directory='grammars'></FileList>
-                    <Button onClick={this.saveGrammar} type="submit" style={{marginTop: '15px'}} bsStyle={this.setSaveButtonStyle()} disabled={this.disableSaveButton()}>{this.state.saveGrammarBtnText}</Button>
+                    <Button id="saveButton" onClick={this.saveGrammar} type="submit" style={{marginTop: '15px'}} bsStyle={this.setSaveButtonStyle()} disabled={this.disableSaveButton()}>{this.state.saveGrammarBtnText}</Button>
                 </div>
             </Modal>
 
