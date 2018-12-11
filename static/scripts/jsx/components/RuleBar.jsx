@@ -83,14 +83,14 @@ class RuleBar extends React.Component {
     }
 
     addRule() {
-        // Generate a juicy response (button lights yellow and fades back to gray)
-        document.getElementById('submitRuleButton').style.backgroundColor = 'rgb(87, 247, 224)';
-        document.getElementById('submitRuleButton').innerHTML = 'Added!'
-        var juicingIntervalFunction = setInterval(this.juiceRuleDefinitionSubmitButton, 1);
         // Send the new rule definition to the server
         var appRate = this.state.ruleApplicationRate;
         var expansion = this.state.ruleExpansionInputVal;
         if (expansion != '') {
+            // Generate a juicy response (button lights yellow and fades back to gray)
+            document.getElementById('submitRuleButton').style.backgroundColor = 'rgb(87, 247, 224)';
+            document.getElementById('submitRuleButton').innerHTML = 'Added!'
+            var juicingIntervalFunction = setInterval(this.juiceRuleDefinitionSubmitButton, 1);
             // Reset the application rate, but we'll keep the expansion (in case the author wishes
             // to define a bunch of similar variants quickly)
             this.setState({
@@ -116,12 +116,12 @@ class RuleBar extends React.Component {
                 },
                 cache: false
             })
+            setTimeout(function() {
+                clearInterval(juicingIntervalFunction);
+                document.getElementById('submitRuleButton').innerHTML = 'Add Rule';
+                document.getElementById('submitRuleButton').style.backgroundColor = 'rgb(242, 242, 242)';
+            }, 1250);
         }
-        setTimeout(function() {
-            clearInterval(juicingIntervalFunction);
-            document.getElementById('submitRuleButton').innerHTML = 'Add Rule';
-            document.getElementById('submitRuleButton').style.backgroundColor = 'rgb(242, 242, 242)';
-        }, 1250);
     }
 
     editRule() {
