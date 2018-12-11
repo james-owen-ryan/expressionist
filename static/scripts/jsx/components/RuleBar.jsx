@@ -85,6 +85,7 @@ class RuleBar extends React.Component {
     addRule() {
         // Generate a juicy response (button lights yellow and fades back to gray)
         document.getElementById('submitRuleButton').style.backgroundColor = 'rgb(87, 247, 224)';
+        document.getElementById('submitRuleButton').innerHTML = 'Added!'
         var juicingIntervalFunction = setInterval(this.juiceRuleDefinitionSubmitButton, 1);
         // Send the new rule definition to the server
         var appRate = this.state.ruleApplicationRate;
@@ -116,7 +117,11 @@ class RuleBar extends React.Component {
                 cache: false
             })
         }
-        setTimeout(function() { clearInterval(juicingIntervalFunction); }, 1000);
+        setTimeout(function() {
+            clearInterval(juicingIntervalFunction);
+            document.getElementById('submitRuleButton').innerHTML = 'Add Rule';
+            document.getElementById('submitRuleButton').style.backgroundColor = 'rgb(242, 242, 242)';
+        }, 1250);
     }
 
     editRule() {
