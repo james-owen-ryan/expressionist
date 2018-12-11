@@ -37,10 +37,6 @@ class SaveGrammarModal extends React.Component {
         })
     }
 
-    componentWillMount(){
-        this.getFileNames((data) => { this.setState({'grammarFileNames': data.results}) })
-    }
-
     handleChange(e){
         this.state.setCurrentGrammarName(e.target.value);
     }
@@ -116,6 +112,10 @@ class SaveGrammarModal extends React.Component {
             b++;
         }
         document.getElementById("saveButton").style.backgroundColor = "rgb("+r+","+g+","+b+")";
+    }
+
+    componentWillMount(){
+        this.getFileNames((data) => { this.setState({'grammarFileNames': data.results}) })
     }
 
     render() {
