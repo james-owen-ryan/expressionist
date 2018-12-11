@@ -35,7 +35,7 @@ class HeaderBar extends React.Component {
             showExportModal: false,
             showBuildModal: false,
             buildNavTitle: 'Build',
-            buildModalTitle: 'Build A Grammar',
+            buildModalTitle: 'Build Productionist module...',
             bundleName: '',
             currentGrammarName: 'new'
         };
