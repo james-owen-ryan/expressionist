@@ -230,7 +230,7 @@ class RuleBar extends React.Component {
                         </div>
                         <div style={{'textAlign': 'center'}}>
                             <p style={{'fontWeight': '300', 'fontSize': '16px'}}>Rewrite As</p>
-                            <textarea id='ruleExpansionInput' type='text' value={this.state.ruleExpansionInputVal} onChange={this.updateRuleExpansionInputVal} style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '100px', 'marginTop': '10px', 'marginBottom': '15px', 'fontSize': '18px', 'padding': '0 12px', backgroundColor: '#f2f2f2'}}/>
+                            <textarea id='ruleExpansionInput' type='text' value={this.state.ruleExpansionInputVal} onChange={this.updateRuleExpansionInputVal} style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '100px', 'marginTop': '10px', 'marginBottom': '15px', 'fontSize': '18px', 'padding': '0 12px', backgroundColor: '#f2f2f2'}} autoFocus="true"/>
                             <p style={{'fontWeight': '300', 'fontSize': '16px'}}>Application Rate</p>
                             <input id='appRateModal' type='text' value={this.state.ruleApplicationRate} onChange={this.updateApplicationRate}
                             style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '43px', 'marginBottom': '25px', 'fontSize': '18px', 'padding': '0 12px'}}/>
