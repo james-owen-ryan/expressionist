@@ -84,8 +84,28 @@ class PCFG(object):
                     new_derivation.append(token)
                 else:
                     new_derivation.append(token)
-
             nonterm_add.add_rule(new_derivation, application_rate)
+
+    def modify_rule_expansion(self, rule_id, nonterminal, derivation, application_rate=1):
+        """Modify the expansion for a production rule."""
+        nonterminal_for_this_rule = self.nonterminals.get(str(nonterminal.tag))
+        if nonterminal_for_this_rule:
+            new_derivation = []
+            for token in derivation:
+                if isinstance(token, NonterminalSymbol):
+                    if self.nonterminals.get(token.tag):
+                        new_derivation.append(self.nonterminals.get(token.tag))
+                    else:
+                        self.add_nonterminal(token)
+                        new_derivation.append(token)
+                elif isinstance(token, SystemVar) and token not in self.system_vars:
+                    self.system_vars.append(token)
+                    new_derivation.append(token)
+                else:
+                    new_derivation.append(token)
+            rules = self.nonterminals.get(str(nonterminal.tag)).rules
+            rules[rule_id].modify_derivation(expansion=new_derivation)
+            nonterminal_for_this_rule.add_rule(new_derivation, application_rate)
 
     def remove_rule(self, nonterminal, derivation):
         """remove a rule from a nonterminal"""

@@ -152,6 +152,18 @@ def add_rule():
     return app.flask_grammar.to_json()
 
 
+@app.route('/api/rule/edit', methods=['POST'])
+def edit_rule():
+    data = request.get_json()
+    rule = data['rule']  # Right-hand side of the rule (the expansion)
+    app_rate = int(data['app_rate'])
+    nonterminal = data['nonterminal']
+    rule_id = int(data['rule_id'])
+    app.flask_grammar.modify_application_rate(nonterminal_symbol.NonterminalSymbol(nonterminal), rule_id, app_rate)
+    app.flask_grammar.modify_rule_expansion(rule_id, nonterminal_symbol.NonterminalSymbol(nonterminal), grammar.parse_rule(rule), app_rate)
+    return app.flask_grammar.to_json()
+
+
 @app.route('/api/rule/delete', methods=['POST'])
 def del_rule():
     data = request.get_json()

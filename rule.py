@@ -36,6 +36,10 @@ class Rule(object):
     def __repr__(self):
         return self.__str__()
 
+    def modify_derivation(self, expansion):
+        """Update the right-hand side (expansion) for this rule."""
+        self.derivation = expansion
+
     def modify_application_rate(self, application_rate):
         """
         change the application rate for this rule

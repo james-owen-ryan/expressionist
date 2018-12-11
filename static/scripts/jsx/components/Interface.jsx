@@ -23,6 +23,8 @@ class Interface extends React.Component {
         this.updateMarkupFeedback = this.updateMarkupFeedback.bind(this);
         this.updateExpansionFeedback = this.updateExpansionFeedback.bind(this);
         this.getexpansion = this.getexpansion.bind(this);
+        this.openRuleDefinitionModal = this.openRuleDefinitionModal.bind(this);
+        this.closeRuleDefinitionModal = this.closeRuleDefinitionModal.bind(this);
         this.state = {
             nonterminals: [],
             markups: [],
@@ -31,6 +33,8 @@ class Interface extends React.Component {
             markup_feedback: [],
             current_nonterminal: "",
             current_rule: -1,
+            ruleDefinitionModalIsOpen: false,
+            idOfRuleToEdit: null
         }
     }
 
@@ -120,6 +124,16 @@ class Interface extends React.Component {
         return {"symbol": symbol, "index": index, "expansion": this.state.nonterminals[symbol].rules[index].expansion.join("")}
     }
 
+    openRuleDefinitionModal(idOfRuleToEdit) {
+        this.setState({ruleDefinitionModalIsOpen: true});
+        this.setState({idOfRuleToEdit: idOfRuleToEdit});
+    }
+
+    closeRuleDefinitionModal() {
+        this.setState({ruleDefinitionModalIsOpen: false});
+        this.setState({idOfRuleToEdit: null});
+    }
+
     render() {
         var def_rules = []
         var board
@@ -127,7 +141,7 @@ class Interface extends React.Component {
         if (this.state.current_nonterminal in this.state.nonterminals) {
             var current = this.state.nonterminals[this.state.current_nonterminal]
             def_rules = this.state.nonterminals[this.state.current_nonterminal].rules
-            //check which board we need to render
+            // Check which board we need to render
             if (this.state.current_rule == -1 || current.rules[this.state.current_rule] == null ) {
                 var referents = []
                 if ("referents" in current)
@@ -157,7 +171,8 @@ class Interface extends React.Component {
                                     updateExpansionFeedback={this.updateExpansionFeedback}
                                     updateHistory={this.updateHistory}
                                     expansion={def_rules[this.state.current_rule].expansion}
-                                    app_rate={def_rules[this.state.current_rule].app_rate}/>
+                                    app_rate={def_rules[this.state.current_rule].app_rate}
+                                    openRuleDefinitionModal={this.openRuleDefinitionModal}/>
             }
         }
 
@@ -191,7 +206,10 @@ class Interface extends React.Component {
                                     updateCurrentRule={this.updateCurrentRule}
                                     updateMarkupFeedback={this.updateMarkupFeedback}
                                     updateExpansionFeedback={this.updateExpansionFeedback}
-                                    updateHistory={this.updateHistory}/>
+                                    updateHistory={this.updateHistory}
+                                    closeRuleDefinitionModal={this.closeRuleDefinitionModal}
+                                    ruleDefinitionModalIsOpen={this.state.ruleDefinitionModalIsOpen}
+                                    idOfRuleToEdit={this.state.idOfRuleToEdit}/>
                     </div>
                 </div>
 

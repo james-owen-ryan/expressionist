@@ -11,6 +11,7 @@ class RuleBoard extends React.Component {
         this.handleRuleClickThrough = this.handleRuleClickThrough.bind(this);
         this.onRuleDelete = this.onRuleDelete.bind(this);
         this.handleAppModify = this.handleAppModify.bind(this);
+        this.prepareForRuleDefinitionEdit = this.prepareForRuleDefinitionEdit.bind(this);
     }
 
     handleExpandRule() {
@@ -58,10 +59,9 @@ class RuleBoard extends React.Component {
         })
     }
 
-
     handleAppModify() {
         var index = this.props.currentRule;
-        var app_rate = window.prompt("Please enter new application rate");
+        var app_rate = window.prompt("Enter a new application rate.");
         if (!isNaN(app_rate)) {
             var object = {"rule": index, "nonterminal": this.props.name, "app_rate": app_rate}
             ajax({
@@ -73,6 +73,10 @@ class RuleBoard extends React.Component {
                 cache: false
             })
         }
+    }
+
+    prepareForRuleDefinitionEdit() {
+        this.props.openRuleDefinitionModal(this.props.currentRule)
     }
 
     render() {
@@ -99,16 +103,15 @@ class RuleBoard extends React.Component {
                 </div>
 
                 <div>
-                    <h3>-> {expansion_arr}</h3><Button bsStyle="danger" title="Delete Rule"
-                                                                                onClick={this.onRuleDelete}><Glyphicon
-                    glyph="warning-sign"/>Delete</Button>
+                    <h3>-> {expansion_arr}</h3>
                 </div>
 
-                <h2>{this.props.app_rate}<Button bsStyle="default" title="Modify Application Rate"
-                                                 onClick={this.handleAppModify}><Glyphicon glyph="console"/></Button>
-                
-                <Button bsStyle="default" title="Expand this rule"
-                                                 onClick={this.handleExpandRule}><Glyphicon glyph="resize-full"/></Button>
+                <h2>
+                {this.props.app_rate}
+                <Button bsStyle="default" title="Modify application rate" onClick={this.handleAppModify}><Glyphicon glyph="console"/></Button>
+                <Button bsStyle="default" title="Execute this rule" onClick={this.handleExpandRule}><Glyphicon glyph="resize-full"/></Button>
+                <Button bsStyle="default" title="Edit rule definition" onClick={this.prepareForRuleDefinitionEdit}>Edit</Button>
+                <Button bsStyle="danger" title="Delete this rule" onClick={this.onRuleDelete}><Glyphicon glyph="warning-sign"/>Delete</Button>
                 </h2>
 
             </div>
