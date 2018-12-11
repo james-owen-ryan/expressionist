@@ -57,9 +57,13 @@ class RuleBar extends React.Component {
     }
 
     addToRuleExpansion(nonterminalName) {
-        var exp = this.toExpressionistSyntax(nonterminalName);
-        var res = this.state.ruleExpansionInputVal.concat(exp);
-        this.setState({ruleExpansionInputVal: res})
+        // Insert a reference to the clicked nonterminal at the current cursor position
+        var referenceToClickedNonterminal = this.toExpressionistSyntax(nonterminalName);
+        var cursorPosition = document.getElementById("ruleExpansionInput").selectionStart;
+        var ruleBodySegmentToLeftOfCursor = this.state.ruleExpansionInputVal.slice(0, cursorPosition);
+        var ruleBodySegmentToRightOfCursor = this.state.ruleExpansionInputVal.slice(cursorPosition);
+        var ruleBodyWithReferenceInserted = ruleBodySegmentToLeftOfCursor.concat(referenceToClickedNonterminal).concat(ruleBodySegmentToRightOfCursor);
+        this.setState({ruleExpansionInputVal: ruleBodyWithReferenceInserted});
     }
 
     updateRuleExpansionInputVal(e) {
