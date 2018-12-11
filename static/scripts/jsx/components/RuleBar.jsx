@@ -50,7 +50,7 @@ class RuleBar extends React.Component {
                 }
             }
         }
-    };
+    }
 
     toExpressionistSyntax(nonterminalName) {
         return "[[" + nonterminalName + "]]"
