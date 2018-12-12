@@ -144,9 +144,8 @@ class Interface extends React.Component {
             // Check which board we need to render
             if (this.state.current_rule == -1 || current.rules[this.state.current_rule] == null ) {
                 var referents = []
-                if ("referents" in current)
-                {
-                    var referents = current["referents"]
+                if ("referents" in current)  {
+                    var referents = current["referents"];
                     referents = referents.map(this.getexpansion.bind(this))
                 }
 
@@ -214,7 +213,7 @@ class Interface extends React.Component {
                 </div>
 
                 <div
-                    style={{"overflow": "auto", "width": "25%", "height":"100%", position: "absolute", top: 0, right: 0, "border": "10px solid #f2f2f2"}}>
+                    style={{"overflow": "auto", "width": "25%", "height":"100%", position: "absolute", top: 0, right: 0, "border": "10px solid #f2f2f2", "borderTop": "4px solid rgb(242, 242, 242)"}}>
                     <NonterminalList    nonterminals={this.state.nonterminals}
                                         updateFromServer={this.updateFromServer}
                                         updateCurrentNonterminal={this.updateCurrentNonterminal}

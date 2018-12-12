@@ -3,6 +3,7 @@ var Nonterminal = require('./Nonterminal.jsx')
 var ListGroupItem = require('react-bootstrap').ListGroupItem
 var ListGroup = require('react-bootstrap').ListGroup
 var Glyphicon = require('react-bootstrap').Glyphicon
+var Button = require('react-bootstrap').Button
 var ajax = require('jquery').ajax
 
 class NonterminalList extends React.Component {
@@ -144,7 +145,7 @@ class NonterminalList extends React.Component {
     }
 
     addNonterminal() {
-        var newNTName = 'new nonterminal ' + this.state.newNTNumber
+        var newNTName = '000000000 new nonterminal ' + this.state.newNTNumber
         ajax({
             url: $SCRIPT_ROOT + '/api/nonterminal/add',
             type: "POST",
@@ -163,19 +164,20 @@ class NonterminalList extends React.Component {
         return (
             <div>
                 <ListGroup id='nonterminalList'>
-                    <ListGroupItem bsSize='xsmall' key='nonterminalListSearchGroupItem'>
+                    <ListGroupItem bsSize='xsmall' key='nonterminalListSearchGroupItem' style={{'padding': '0px'}}>
+                        <Button key="ADDNEW" onClick={this.addNonterminal} style={{'height': '35px', 'marginBottom': '2px'}}><Glyphicon glyph="plus"/></Button>
                         <input  id='nonterminalListSearch' 
                                 type='text' 
                                 onChange={this.updateList} 
                                 value={this.state.symbolFilterQuery}
-                                style={{'width': '100%'}}
-                                placeholder='Search'/>
+                                style={{'width': 'calc(100% - 38px)', 'height': '100%', 'padding': '8px'}}
+                                placeholder='Search...'/>
                     </ListGroupItem>
                     {   nonterminals.map((name) => {
                             var complete = this.props.nonterminals[name].complete;
                             var deep = this.props.nonterminals[name].deep;
                             var newNT = false
-                            if (name.indexOf('new nonterminal') != -1){
+                            if (name.indexOf('000000000 new nonterminal') != -1){
                                 newNT = true
                             }
                             return (
@@ -194,10 +196,6 @@ class NonterminalList extends React.Component {
                             )
                         })
                     }
-                    <ListGroupItem bsSize="xsmall" key="ADDNEW" onClick={this.addNonterminal}>
-                        <Glyphicon glyph="plus"/>
-                    </ListGroupItem>
-
                 </ListGroup>
             </div>
         );

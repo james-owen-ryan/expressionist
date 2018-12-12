@@ -78,11 +78,11 @@ class Nonterminal extends React.Component {
     render() {
         if (this.props.new == true){
             return (
-                <ListGroupItem title={this.props.name} bsSize="xsmall" style={{'backgroundColor': 'white'}}>
-                            <input id="newSymbolNameInputElement" type='text' onChange={this.handleNewNameValueChange} value={this.state.newNameVal} style={{'width': '70%', 'height': '30px', 'padding': '5px', 'marginRight': '10px'}} placeholder='Enter symbol name.' autoFocus="true"/>
-                            <div style={{'marginRight': '10px', 'display': 'inline'}}>
-                                <Button id="newSymbolNameInputElementButton" onClick={this.handleNonterminalRename} title="new nt" bsStyle="success" style={{'marginRight': '5px'}} disabled={this.disableNewNameValue()}><Glyphicon glyph="ok"/></Button>
-                                <Button onClick={this.handleNonterminalDelete} title="delete nt" bsStyle="danger"><Glyphicon glyph="remove"/></Button>
+                <ListGroupItem title={this.props.name} bsSize="xsmall" style={{'padding': '0', 'height': '44px', 'marginBottom': '0px'}}>
+                            <input id="newSymbolNameInputElement" type='text' onChange={this.handleNewNameValueChange} value={this.state.newNameVal} style={{'width': 'calc(100% - 80px)', 'height': '35px', 'padding': '8px', 'backgroundColor': 'white'}} placeholder='Enter symbol name.' autoFocus="true"/>
+                            <div style={{'marginRight': '10px', 'display': 'inline', 'width': '80px'}}>
+                                <Button id="newSymbolNameInputElementButton" onClick={this.handleNonterminalRename} title="new nt" bsStyle="success" style={{'marginBottom': '2px', 'padding': '8px 13px'}} disabled={this.disableNewNameValue()}><Glyphicon glyph="ok"/></Button>
+                                <Button onClick={this.handleNonterminalDelete} title="delete nt" style={{'marginBottom': '2px', 'padding': '8px 13px'}} bsStyle="danger"><Glyphicon glyph="remove"/></Button>
                             </div>
                 </ListGroupItem>
             );

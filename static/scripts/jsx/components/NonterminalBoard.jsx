@@ -136,7 +136,7 @@ class NonterminalBoard extends React.Component {
             <div>
                 <div style={{"width": "70%", "margin": "0 auto", "float": "center"}}>
                     <h1>
-                    <span style={{"padding": "5px"}}>{name}</span>
+                    <span>{name}</span>
                     <br></br>
                     <Button bsStyle={this.props.nonterminal.deep ? "success" : "default" } onClick={this.handleSetDeep} title={deep_str}>{glyph_nt}</Button>
                     <Button onClick={this.handleExpand} title="Rewrite symbol"><Glyphicon glyph="play"/></Button>
@@ -145,7 +145,7 @@ class NonterminalBoard extends React.Component {
                     </h1>
                 </div>
 
-                <div style={{"width": "70%", "float": "left"}}>
+                <div style={{"width": "70%", "margin": "0 auto"}}>
                     <Panel>
                         <ListGroup style={{"maxHeight": "320px", "overflowY": "auto"}}>
                             {referents}
