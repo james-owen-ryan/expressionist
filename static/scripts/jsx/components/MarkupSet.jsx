@@ -44,7 +44,7 @@ class MarkupSet extends React.Component {
 
     handleMarkupAdd(set) {
         var markupTag = window.prompt("Enter tag name.")
-        if (markupTag != "") {
+        if (markupTag) {
             //ensure tag does not exist in tagset
             if (this.props.markups[set].indexOf(markupTag) === -1) {
                 var object = {
