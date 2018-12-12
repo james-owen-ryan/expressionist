@@ -95,7 +95,7 @@ def rename_nt():
     data = request.get_json()
     old = data['old']
     new = data['new']
-    app.flask_grammar.modify_tag(old, new)
+    app.flask_grammar.rename_nonterminal_symbol(old, new)
     return app.flask_grammar.to_json()
 
 
@@ -225,10 +225,10 @@ def rename_markupset():
 @app.route('/api/markup/renametag', methods=['POST'])
 def rename_markuptag():
     data = request.get_json()
-    markupset = data['markupset']
-    oldtag = data['oldtag']
-    newtag = data['newtag']
-    app.flask_grammar.modify_markup(markupset, oldtag, newtag)
+    tagset_name = data['markupset']
+    old_tag_name = data['oldtag']
+    new_tag_name = data['newtag']
+    app.flask_grammar.rename_tag(tagset_name=tagset_name, old_tag_name=old_tag_name, new_tag_name=new_tag_name)
     return app.flask_grammar.to_json()
 
 

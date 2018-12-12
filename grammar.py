@@ -341,33 +341,30 @@ class PCFG(object):
         return sum(symbol.n_terminal_expansions() for symbol in self.nonterminals.values() if symbol.deep)
 
     # really need to get a better way to do this
-    def modify_tag(self, old_tag, new_tag):
+    def rename_nonterminal_symbol(self, old_symbol_name, new_symbol_name):
         JSON = jsontree.loads(self.to_json())
         #print(JSON)
-        JSON['nonterminals'][new_tag] = JSON['nonterminals'].pop(old_tag)
+        JSON['nonterminals'][new_symbol_name] = JSON['nonterminals'].pop(old_symbol_name)
         #print(JSON)
         test_str = jsontree.dumps(JSON)
-        test_str = test_str.replace("[[{0}]]".format(old_tag), "[[{0}]]".format(new_tag))
+        test_str = test_str.replace("[[{0}]]".format(old_symbol_name), "[[{0}]]".format(new_symbol_name))
         #print test_str
         new  = from_json(test_str)
         self.__dict__ = new.__dict__
 
-    def modify_markup(self, markupset, old_tag, new_tag):
-        JSON = jsontree.loads(self.to_json())
-
-        index = JSON['markups'][markupset].index(old_tag)
-        JSON['markups'][markupset][index] = new_tag
-
-        for val in JSON['nonterminals'].values():
-            if val['markup'].has_key(markupset):
+    def rename_tag(self, tagset_name, old_tag_name, new_tag_name):
+        grammar_dictionary = jsontree.loads(self.to_json())
+        index = grammar_dictionary['markups'][tagset_name].index(old_tag_name)
+        grammar_dictionary['markups'][tagset_name][index] = new_tag_name
+        for val in grammar_dictionary['nonterminals'].values():
+            if tagset_name in val['markup']:
                 try:
-                    index = val['markup'][markupset].index(old_tag)
+                    index = val['markup'][tagset_name].index(old_tag_name)
                     if index != -1:
-                        val['markup'][markupset][index] = new_tag
+                        val['markup'][tagset_name][index] = new_tag_name
                 except ValueError:
-                    x=1
-
-        test_str = jsontree.dumps(JSON)
+                    pass
+        test_str = jsontree.dumps(grammar_dictionary)
         new = from_json(test_str)
         self.__dict__ = new.__dict__
 

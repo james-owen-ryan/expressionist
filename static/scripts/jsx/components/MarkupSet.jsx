@@ -13,12 +13,13 @@ class MarkupSet extends React.Component {
         this.handleMarkupClick = this.handleMarkupClick.bind(this);
         this.handleMarkupAdd = this.handleMarkupAdd.bind(this);
         this.handleMarkupSetRename = this.handleMarkupSetRename.bind(this);
-        this.handleMarkupRename = this.handleMarkupRename.bind(this);
+        this.handleTagRename = this.handleTagRename.bind(this);
         this.disableNewNameValue = this.disableNewNameValue.bind(this);
         this.handleNewNameValueChange = this.handleNewNameValueChange.bind(this);
         this.handleTagsetDelete = this.handleTagsetDelete.bind(this);
         this.isThisTagInCurrentlySelectedNT = this.isThisTagInCurrentlySelectedNT.bind(this);
         this.submitTagsetNameOnEnterKeypress = this.submitTagsetNameOnEnterKeypress.bind(this);
+        this.toggleBackgroundColor = this.toggleBackgroundColor.bind(this);
         this.state = {
             newNameVal: '',
         }
@@ -81,15 +82,15 @@ class MarkupSet extends React.Component {
         })
     }
 
-    handleMarkupRename(set) {
-        var oldTag = window.prompt("Please enter the original tag name.")
-        var markupTag = window.prompt("Please enter the new tag name.")
-        if ( markupTag != "" && oldTag != "" ){
+    handleTagRename(tagsetName, tagName) {
+        var newTagName = window.prompt("Enter a new tag name.");
+        if (newTagName){
             var object = {
-                "markupset": set,
-                "oldtag": oldTag,
-                "newtag": markupTag
+                "markupset": tagsetName,
+                "oldtag": tagName,
+                "newtag": newTagName
             }
+            console.log(object);
             ajax({
                 url: $SCRIPT_ROOT +'/api/markup/renametag',
                 type: "POST",
@@ -142,10 +143,25 @@ class MarkupSet extends React.Component {
         }
 
         if (this.props.present_nt.indexOf(tag) != -1) {
-            return <MenuItem style={{backgroundColor: "#57F7E0"}} key={tag} onClick={this.handleMarkupClick.bind(this, this.props.name, tag)}>{tag}</MenuItem>;
+            return <MenuItem>
+                <Button id={"tagEditButton:"+tag} style={{backgroundColor: "#57F7E0"}} onClick={this.handleTagRename.bind(this, this.props.name, tag)} onMouseEnter={this.toggleBackgroundColor.bind(this, "tagEditButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")} onMouseLeave={this.toggleBackgroundColor.bind(this, "tagEditButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")}><Glyphicon glyph="pencil"/></Button>
+                <Button id={"tagToggleButton:"+tag} style={{backgroundColor: "#57F7E0", padding: "0", paddingLeft: "10px", textAlign: "left", height: "32px", width: "calc(100% - 37px"}} key={tag} onClick={this.handleMarkupClick.bind(this, this.props.name, tag)} onMouseEnter={this.toggleBackgroundColor.bind(this, "tagToggleButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")} onMouseLeave={this.toggleBackgroundColor.bind(this, "tagToggleButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")}>{tag}</Button>
+            </MenuItem>;
         }
         else {
-            return <MenuItem bsStyle='default' onClick={this.handleMarkupClick.bind(this, this.props.name, tag)} key={tag}>{tag}</MenuItem>;
+            return <MenuItem>
+                <Button onClick={this.handleTagRename.bind(this, this.props.name, tag)}><Glyphicon glyph="pencil"/></Button>
+                <Button style={{padding: '0', padding: "0", paddingLeft: "10px", textAlign: "left", height: "32px", width: "calc(100% - 37px"}} onClick={this.handleMarkupClick.bind(this, this.props.name, tag)} key={tag}>{tag}</Button>
+            </MenuItem>;
+        }
+    }
+
+    toggleBackgroundColor(componentId, color1, color2) {
+        if (document.getElementById(componentId).style.backgroundColor === color1) {
+            document.getElementById(componentId).style.backgroundColor = color2
+        }
+        else {
+            document.getElementById(componentId).style.backgroundColor = color1
         }
     }
 
@@ -159,8 +175,8 @@ class MarkupSet extends React.Component {
                 <ButtonGroup title={this.props.name} style={{padding: '4.5px', backgroundColor: '#F2F2F2'}} className='nohover'>
                     <input id="newTagsetNameInputElement" type='text' onChange={this.handleNewNameValueChange} value={this.state.newNameVal} style={{height: '26px', padding: '5px', width: '175px'}} placeholder='Enter tagset name.' autoFocus="true"/>
                     <div style={{'display': 'inline'}}>
-                        <Button id="newTagsetNameInputElementButton" onClick={this.handleMarkupSetRename} title="new markup set" bsSize="small" bsStyle="success" style={{marginBottom: '3px', fontSize: '11px'}} disabled={this.disableNewNameValue()}><Glyphicon glyph="ok"/></Button>
-                        <Button onClick={this.handleTagsetDelete} title="delete markup set" bsSize="small" bsStyle="danger" style={{marginBottom: '3px', fontSize: '11px'}}><Glyphicon glyph="remove"/></Button>
+                        <Button id="newTagsetNameInputElementButton" onClick={this.handleMarkupSetRename} title="Add tagset" bsSize="small" bsStyle="success" style={{marginBottom: '3px', fontSize: '11px'}} disabled={this.disableNewNameValue()}><Glyphicon glyph="ok"/></Button>
+                        <Button onClick={this.handleTagsetDelete} title="Delete tagset" bsSize="small" bsStyle="danger" style={{marginBottom: '3px', fontSize: '11px'}}><Glyphicon glyph="remove"/></Button>
                     </div>
                 </ButtonGroup>
             )
@@ -169,15 +185,12 @@ class MarkupSet extends React.Component {
                 <DropdownButton className="grp-button" id={this.props.name} title={this.props.name} bsStyle={this.isThisTagInCurrentlySelectedNT('/any/') ? 'success' : 'default'} style={{'height': '38px'}} className='nohover'>
                     <div>
                         <MenuItem key={-1} header={true}>
-                            <Button style={{backgroundColor: 'white'}} onClick={this.handleMarkupAdd.bind(this, this.props.name)}><Glyphicon glyph="plus"/></Button>
-                            <Button style={{backgroundColor: 'white'}} onClick={this.handleTagsetDelete.bind(this, this.props.name)}><Glyphicon glyph="minus"/></Button>
-                            <Button style={{backgroundColor: 'white'}} onClick={this.handleMarkupSetRename.bind(this, 1)}><Glyphicon glyph="pencil"/></Button>
+                            <Button onClick={this.handleMarkupAdd.bind(this, this.props.name)}><Glyphicon glyph="plus"/></Button>
+                            <Button onClick={this.handleMarkupSetRename.bind(this, 1)}><Glyphicon glyph="pencil"/></Button>
+                            <Button onClick={this.handleTagsetDelete.bind(this, this.props.name)}><Glyphicon glyph="trash"/></Button>
                         </MenuItem>
-                        <MenuItem divider={true}></MenuItem>
                     </div>
                     { this.props.current_set.sort().map((tag) => this.isThisTagInCurrentlySelectedNT(tag)) }
-                    <MenuItem divider={true}></MenuItem>
-                    <MenuItem bsStyle='primary' key={this.props.current_set.length+1} onClick={this.handleMarkupRename.bind(this, this.props.name)}>Rename Tag</MenuItem>
                 </DropdownButton>
             );
         }

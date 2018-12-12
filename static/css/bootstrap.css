@@ -3620,9 +3620,9 @@ tbody.collapse.in {
 }
 .dropdown-menu > li > a:hover,
 .dropdown-menu > li > a:focus {
-  color: #262626;
+  color: #black;
   text-decoration: none;
-  background-color: #f5f5f5;
+  background-color: #FFE97F;
 }
 .dropdown-menu > .active > a,
 .dropdown-menu > .active > a:hover,
@@ -4400,6 +4400,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
   .navbar-nav .open .dropdown-menu > li > a:hover,
   .navbar-nav .open .dropdown-menu > li > a:focus {
     background-image: none;
+    background-color: #FFE97F;
   }
 }
 @media (min-width: 768px) {
