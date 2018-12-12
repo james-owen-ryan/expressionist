@@ -99,13 +99,13 @@ class RuleBoard extends React.Component {
         return (
             <div>
                 <div style={{"width": "70%", "margin": "0 auto", "height": "70%"}}>
-                    <h3>
+                    <h2>
                         <span style={{"cursor": "pointer"}} onClick={this.handleRuleClickThrough.bind(this, this.props.name)}><b>{this.props.name}</b></span> <Glyphicon glyph="circle-arrow-right" style={{"fontSize": "20px"}}/>
                         <br></br>
                         <Button bsStyle="default" title="Execute this rule" onClick={this.handleExpandRule}><Glyphicon glyph="play"/></Button>
                         <Button bsStyle="default" title="Edit rule definition" onClick={this.prepareForRuleDefinitionEdit}><Glyphicon glyph="pencil"/></Button>
                         <Button bsStyle="danger" title="Delete this rule" onClick={this.onRuleDelete}><Glyphicon glyph="trash"/></Button>
-                    </h3>
+                    </h2>
                 </div>
                 <div style={{"width": "70%", "margin": "0 auto", "height": "85%", "overflowY": "auto"}}>
                     <h3>{expansion_arr}</h3>
