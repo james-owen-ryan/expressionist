@@ -23,6 +23,7 @@ class NonterminalBoard extends React.Component {
         var symbol = object.symbol
         return <ListGroupItem
             key={object.index}
+            style={{"border": "0px"}}
             onClick={this.handleNonterminalRuleClickThrough.bind(this, symbol, idx)}>{object['expansion']}</ListGroupItem>
     }
 
