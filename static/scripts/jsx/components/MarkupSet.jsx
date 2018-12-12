@@ -14,6 +14,7 @@ class MarkupSet extends React.Component {
         this.handleMarkupAdd = this.handleMarkupAdd.bind(this);
         this.handleMarkupSetRename = this.handleMarkupSetRename.bind(this);
         this.handleTagRename = this.handleTagRename.bind(this);
+        this.handleTagDelete = this.handleTagDelete.bind(this);
         this.disableNewNameValue = this.disableNewNameValue.bind(this);
         this.handleNewNameValueChange = this.handleNewNameValueChange.bind(this);
         this.handleTagsetDelete = this.handleTagsetDelete.bind(this);
@@ -90,7 +91,6 @@ class MarkupSet extends React.Component {
                 "oldtag": tagName,
                 "newtag": newTagName
             }
-            console.log(object);
             ajax({
                 url: $SCRIPT_ROOT +'/api/markup/renametag',
                 type: "POST",
@@ -102,12 +102,31 @@ class MarkupSet extends React.Component {
         }
     }
 
+    handleTagDelete(tagsetName, tagName) {
+        var prompt = window.confirm("Are you sure you'd like to delete this tag? It will disappear from any nonterminal symbols to which it may be attached.");
+        if (prompt == false){
+            return false;
+        }
+        var object = {
+            "tagSet": tagsetName,
+            "tagName": tagName
+        }
+        ajax({
+            url: $SCRIPT_ROOT +'/api/markup/removetag',
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(object),
+            success: () => this.props.updateFromServer(),
+            cache: false
+        })
+    }
+
     handleNewNameValueChange(e) {
         this.setState({'newNameVal': e.target.value})
     }
 
     handleTagsetDelete(){
-        var prompt = window.confirm("Are you sure you'd like to delete this tagset?");
+        var prompt = window.confirm("Are you sure you'd like to delete this tagset? All of its tags will disappear, including any that are attached to nonterminal symbols.");
         if (prompt == false){
             return false;
         }
@@ -145,13 +164,15 @@ class MarkupSet extends React.Component {
         if (this.props.present_nt.indexOf(tag) != -1) {
             return <MenuItem>
                 <Button id={"tagEditButton:"+tag} style={{backgroundColor: "#57F7E0"}} onClick={this.handleTagRename.bind(this, this.props.name, tag)} onMouseEnter={this.toggleBackgroundColor.bind(this, "tagEditButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")} onMouseLeave={this.toggleBackgroundColor.bind(this, "tagEditButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")}><Glyphicon glyph="pencil"/></Button>
-                <Button id={"tagToggleButton:"+tag} style={{backgroundColor: "#57F7E0", padding: "0", paddingLeft: "10px", textAlign: "left", height: "32px", width: "calc(100% - 37px"}} key={tag} onClick={this.handleMarkupClick.bind(this, this.props.name, tag)} onMouseEnter={this.toggleBackgroundColor.bind(this, "tagToggleButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")} onMouseLeave={this.toggleBackgroundColor.bind(this, "tagToggleButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")}>{tag}</Button>
+                <Button id={"tagDeleteButton:"+tag} style={{backgroundColor: "#57F7E0"}} onClick={this.handleTagDelete.bind(this, this.props.name, tag)} onMouseEnter={this.toggleBackgroundColor.bind(this, "tagDeleteButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")} onMouseLeave={this.toggleBackgroundColor.bind(this, "tagDeleteButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")}><Glyphicon glyph="trash"/></Button>
+                <Button id={"tagToggleButton:"+tag} style={{backgroundColor: "#57F7E0", padding: "0", paddingLeft: "10px", textAlign: "left", height: "32px", width: "calc(100% - 74px"}} key={tag} onClick={this.handleMarkupClick.bind(this, this.props.name, tag)} onMouseEnter={this.toggleBackgroundColor.bind(this, "tagToggleButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")} onMouseLeave={this.toggleBackgroundColor.bind(this, "tagToggleButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")}>{tag}</Button>
             </MenuItem>;
         }
         else {
             return <MenuItem>
                 <Button onClick={this.handleTagRename.bind(this, this.props.name, tag)}><Glyphicon glyph="pencil"/></Button>
-                <Button style={{padding: '0', padding: "0", paddingLeft: "10px", textAlign: "left", height: "32px", width: "calc(100% - 37px"}} onClick={this.handleMarkupClick.bind(this, this.props.name, tag)} key={tag}>{tag}</Button>
+                <Button onClick={this.handleTagDelete.bind(this, this.props.name, tag)}><Glyphicon glyph="trash"/></Button>
+                <Button style={{padding: '0', padding: "0", paddingLeft: "10px", textAlign: "left", height: "32px", width: "calc(100% - 74px"}} onClick={this.handleMarkupClick.bind(this, this.props.name, tag)} key={tag}>{tag}</Button>
             </MenuItem>;
         }
     }

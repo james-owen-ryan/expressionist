@@ -223,12 +223,21 @@ def rename_markupset():
 
 
 @app.route('/api/markup/renametag', methods=['POST'])
-def rename_markuptag():
+def rename_tag():
     data = request.get_json()
     tagset_name = data['markupset']
     old_tag_name = data['oldtag']
     new_tag_name = data['newtag']
     app.flask_grammar.rename_tag(tagset_name=tagset_name, old_tag_name=old_tag_name, new_tag_name=new_tag_name)
+    return app.flask_grammar.to_json()
+
+
+@app.route('/api/markup/removetag', methods=['POST'])
+def remove_tag():
+    data = request.get_json()
+    tagset_name = data['tagSet']
+    tag_name = data['tagName']
+    app.flask_grammar.remove_tag(tagset_name=tagset_name, tag_name=tag_name)
     return app.flask_grammar.to_json()
 
 

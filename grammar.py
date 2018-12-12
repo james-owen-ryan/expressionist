@@ -356,12 +356,25 @@ class PCFG(object):
         grammar_dictionary = jsontree.loads(self.to_json())
         index = grammar_dictionary['markups'][tagset_name].index(old_tag_name)
         grammar_dictionary['markups'][tagset_name][index] = new_tag_name
-        for val in grammar_dictionary['nonterminals'].values():
-            if tagset_name in val['markup']:
+        for nonterminal_symbol in grammar_dictionary['nonterminals'].values():
+            if tagset_name in nonterminal_symbol['markup']:
                 try:
-                    index = val['markup'][tagset_name].index(old_tag_name)
-                    if index != -1:
-                        val['markup'][tagset_name][index] = new_tag_name
+                    index = nonterminal_symbol['markup'][tagset_name].index(old_tag_name)
+                    nonterminal_symbol['markup'][tagset_name][index] = new_tag_name
+                except ValueError:
+                    pass
+        test_str = jsontree.dumps(grammar_dictionary)
+        new = from_json(test_str)
+        self.__dict__ = new.__dict__
+
+    def remove_tag(self, tagset_name, tag_name):
+        """Remove the given tag from the grammar."""
+        grammar_dictionary = jsontree.loads(self.to_json())
+        grammar_dictionary['markups'][tagset_name].remove(tag_name)
+        for nonterminal_symbol in grammar_dictionary['nonterminals'].values():
+            if tagset_name in nonterminal_symbol['markup']:
+                try:
+                    nonterminal_symbol['markup'][tagset_name].remove(tag_name)
                 except ValueError:
                     pass
         test_str = jsontree.dumps(grammar_dictionary)
