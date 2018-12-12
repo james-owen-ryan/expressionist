@@ -270,25 +270,19 @@ class PCFG(object):
             rules_list = []
             i = 0
             for rules in value.rules:
-
                 # createJSON representation for individual rule markup
-                    if to_file == False:
-                        for symbol in rules.derivation:
-                            if isinstance(symbol, NonterminalSymbol):
-                                if not nonterminals.get(symbol.tag):
-                                    nonterminals[symbol.tag] = collections.defaultdict()
-                                if not nonterminals[symbol.tag].get('referents'):
-                                    nonterminals[symbol.tag]['referents'] = []
-                                #print(nonterminals[symbol.tag]['referents'])
-
-                                ref_tag = {"symbol": str(value.tag), "index": i}
-                                if not ref_tag in nonterminals[symbol.tag]['referents']:
-
-                                    nonterminals[symbol.tag]['referents'].append(ref_tag)
-
-                    rules_list.append({'expansion': rules.derivation_json(), 'app_rate': rules.application_rate,})
-
-                    i+=1
+                if to_file == False:
+                    for symbol in rules.derivation:
+                        if isinstance(symbol, NonterminalSymbol):
+                            if not nonterminals.get(symbol.tag):
+                                nonterminals[symbol.tag] = collections.defaultdict()
+                            if not nonterminals[symbol.tag].get('referents'):
+                                nonterminals[symbol.tag]['referents'] = []
+                            ref_tag = {"symbol": str(value.tag), "index": i}
+                            if not ref_tag in nonterminals[symbol.tag]['referents']:
+                                nonterminals[symbol.tag]['referents'].append(ref_tag)
+                rules_list.append({'expansion': rules.derivation_json(), 'app_rate': rules.application_rate, })
+                i += 1
             temp['rules'] = rules_list
 
             markup_dict = collections.defaultdict(set)
