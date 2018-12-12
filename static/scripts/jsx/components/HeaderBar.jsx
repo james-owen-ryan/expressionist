@@ -111,6 +111,10 @@ class HeaderBar extends React.Component {
     }
 
     reset() {
+        var prompt = window.confirm("Are you sure you'd like to start a new grammar? All unsaved changes will be lost.");
+        if (prompt == false){
+            return false;
+        }
         ajax({
             url: $SCRIPT_ROOT + '/api/grammar/new',
             type: 'GET',
