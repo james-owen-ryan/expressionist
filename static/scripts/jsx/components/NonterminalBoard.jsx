@@ -52,7 +52,7 @@ class NonterminalBoard extends React.Component {
     }
 
     handleNonterminalRename(nonterminal) {
-        var newsymbol = window.prompt("Enter a new name for this nonterminal symbol.");
+        var newsymbol = window.prompt("Enter a new name for this nonterminal symbol.", this.props.name);
         if (this.props.name !== "" && newsymbol) {
             var object = {
                 "old": this.props.name,

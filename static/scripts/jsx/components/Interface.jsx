@@ -25,6 +25,7 @@ class Interface extends React.Component {
         this.getexpansion = this.getexpansion.bind(this);
         this.openRuleDefinitionModal = this.openRuleDefinitionModal.bind(this);
         this.closeRuleDefinitionModal = this.closeRuleDefinitionModal.bind(this);
+        this.updateSymbolFilterQuery = this.updateSymbolFilterQuery.bind(this);
         this.state = {
             nonterminals: [],
             markups: [],
@@ -34,7 +35,8 @@ class Interface extends React.Component {
             current_nonterminal: "",
             current_rule: -1,
             ruleDefinitionModalIsOpen: false,
-            idOfRuleToEdit: null
+            idOfRuleToEdit: null,
+            symbolFilterQuery: ""
         }
     }
 
@@ -134,6 +136,10 @@ class Interface extends React.Component {
         this.setState({idOfRuleToEdit: null});
     }
 
+    updateSymbolFilterQuery(query) {
+        this.setState({symbolFilterQuery: query});
+    }
+
     render() {
         var def_rules = []
         var board
@@ -192,7 +198,8 @@ class Interface extends React.Component {
                                         currentNonterminal={this.state.current_nonterminal}
                                         updateFromServer={this.updateFromServer}
                                         nonterminals={this.state.nonterminals}
-                                        total={this.state.markups}/>
+                                        total={this.state.markups}
+                                        updateSymbolFilterQuery={this.updateSymbolFilterQuery}/>
                         </div>
                     </div>
                     {board}
@@ -220,7 +227,9 @@ class Interface extends React.Component {
                                         updateHistory={this.updateHistory}
                                         updateCurrentRule={this.updateCurrentRule}
                                         updateMarkupFeedback={this.updateMarkupFeedback}
-                                        updateExpansionFeedback={this.updateExpansionFeedback}>
+                                        updateExpansionFeedback={this.updateExpansionFeedback}
+                                        updateSymbolFilterQuery={this.updateSymbolFilterQuery}
+                                        symbolFilterQuery={this.state.symbolFilterQuery}>
                     </NonterminalList>
                 </div>
                 <div style={{"width": "75%", "height": "30%", position: "absolute", bottom: 0, left:0}}>
