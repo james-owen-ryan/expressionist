@@ -235,7 +235,7 @@ class TestModal extends React.Component {
         return (
             <Modal show={this.props.show} onHide={this.props.onHide}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Generate Content</Modal.Title>
+                    <Modal.Title>Test Productionist module...</Modal.Title>
                 </Modal.Header>
                 <Grid fluid>
                   <Row className="show-grid">
