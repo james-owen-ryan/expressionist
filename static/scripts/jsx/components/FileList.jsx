@@ -39,9 +39,9 @@ class FileList extends React.Component {
         if (this.state.grammarFileNames.length > 0) {
             files = this.state.grammarFileNames.map( (filename) => {
                 if (filename == this.props.highlightedFile){
-                    return <ListGroupItem onClick={ () => { this.props.onFileClick(filename) } } key={filename} bsStyle="success">{filename}</ListGroupItem>
+                    return <ListGroupItem style={{border: "0px"}} onClick={ () => { this.props.onFileClick(filename) } } key={filename} bsStyle="success">{filename}</ListGroupItem>
                 }
-                return <ListGroupItem onClick={ () => { this.props.onFileClick(filename) } } key={filename}>{filename}</ListGroupItem>
+                return <ListGroupItem style={{border: "0px"}} onClick={ () => { this.props.onFileClick(filename) } } key={filename}>{filename}</ListGroupItem>
             })
         } else {
             files = <p></p>
