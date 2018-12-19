@@ -44,7 +44,7 @@ class NonterminalList extends React.Component {
         // queries are treated in a case-sensitive manner because tags are case-sensitive)
         else if (this.props.symbolFilterQuery.slice(0, 6) == "$tags:") {
             var matches = [];
-            var raw_tags = this.props.symbolFilterQuery.slice(6).split(' & ');
+            var raw_tags = this.props.symbolFilterQuery.slice(6).split(' $& ');
             for (var i = 0; i < allSymbolNames.length; i++){
                 var symbolName = allSymbolNames[i];
                 var isMatch = true;
