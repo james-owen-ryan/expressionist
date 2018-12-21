@@ -83,7 +83,7 @@ class SaveGrammarModal extends React.Component {
     }
 
     saveGrammar() {
-        // Generate a juicy response (button lights yellow and fades back to gray)
+        // Generate a juicy response (button lights green and fades back to gray)
         document.getElementById('saveButton').style.backgroundColor = 'rgb(87, 247, 224)';
         document.getElementById('saveButton').innerHTML = 'Saved!'
         var juicingIntervalFunction = setInterval(this.juiceSaveButton, 1);
