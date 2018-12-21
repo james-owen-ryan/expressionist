@@ -89,8 +89,8 @@ class Nonterminal extends React.Component {
                 <ListGroupItem title={this.props.name} bsSize="xsmall" style={{'padding': '0', 'height': '44px', 'marginBottom': '0px'}}>
                             <input id="newSymbolNameInputElement" type='text' onChange={this.handleNewNameValueChange} value={this.state.newNameVal} style={{'width': 'calc(100% - 80px)', 'height': '35px', 'padding': '8px', 'backgroundColor': 'white'}} placeholder='Enter symbol name.' autoFocus="true"/>
                             <div style={{'marginRight': '10px', 'display': 'inline', 'width': '80px'}}>
-                                <Button id="newSymbolNameInputElementButton" onClick={this.handleNonterminalRename} title="Add symbol" bsStyle="success" style={{'marginBottom': '2px', 'padding': '8px 13px'}} disabled={this.disableNewNameValue()}><Glyphicon glyph="ok"/></Button>
-                                <Button onClick={this.handleNonterminalDelete} title="Remove symbol" style={{'marginBottom': '2px', 'padding': '8px 13px'}} bsStyle="danger"><Glyphicon glyph="remove"/></Button>
+                                <Button id="newSymbolNameInputElementButton" onClick={this.handleNonterminalRename} title="Add symbol" bsStyle="default" style={{'marginBottom': '3px', 'padding': '8px 13px', 'height': '35.5px'}} disabled={this.disableNewNameValue()}><Glyphicon glyph="ok"/></Button>
+                                <Button onClick={this.handleNonterminalDelete} title="Remove symbol" style={{'marginBottom': '3px', 'padding': '8px 13px', 'height': '35.5px'}} bsStyle="default"><Glyphicon glyph="remove"/></Button>
                             </div>
                 </ListGroupItem>
             );
