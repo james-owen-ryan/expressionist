@@ -47,7 +47,7 @@ class Nonterminal extends React.Component {
     }
 
     submitSymbolNameOnEnterKeypress(e) {
-        if (this.props.new && !this.state.renameRequestAlreadySent) {
+        if (this.props.new && !this.state.renameRequestAlreadySent && !this.disableNewNameValue()) {
             if (document.activeElement.id === "newSymbolNameInputElement") {
                 if (e.key === 'Enter') {
                     this.handleNonterminalRename();
