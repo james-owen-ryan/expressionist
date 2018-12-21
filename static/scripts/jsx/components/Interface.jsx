@@ -26,6 +26,9 @@ class Interface extends React.Component {
         this.openRuleDefinitionModal = this.openRuleDefinitionModal.bind(this);
         this.closeRuleDefinitionModal = this.closeRuleDefinitionModal.bind(this);
         this.updateSymbolFilterQuery = this.updateSymbolFilterQuery.bind(this);
+        this.getCurrentGrammarName = this.getCurrentGrammarName.bind(this);
+        this.setCurrentGrammarName = this.setCurrentGrammarName.bind(this);
+        this.quickSave = this.quickSave.bind(this);
         this.state = {
             nonterminals: [],
             markups: [],
@@ -36,7 +39,8 @@ class Interface extends React.Component {
             current_rule: -1,
             ruleDefinitionModalIsOpen: false,
             idOfRuleToEdit: null,
-            symbolFilterQuery: ""
+            symbolFilterQuery: "",
+            currentGrammarName: 'new'
         }
     }
 
@@ -140,6 +144,72 @@ class Interface extends React.Component {
         this.setState({symbolFilterQuery: query});
     }
 
+    getCurrentGrammarName() {
+        return this.state.currentGrammarName;
+    }
+
+    setCurrentGrammarName(grammarName) {
+        this.setState({currentGrammarName: grammarName.replace(".json", "")});
+    }
+
+    quickSave(e) {
+        var quickSaveHotKeyMatch = false;
+        // Check if ctrl+s/command+s was pressed
+        if (e.ctrlKey || e.metaKey) {
+            switch (String.fromCharCode(e.which).toLowerCase()) {
+            case 's':
+                e.preventDefault();
+                quickSaveHotKeyMatch = true;
+                break;
+            }
+        }
+        // If it was, do a quick save by overwriting the current grammar file
+        if (quickSaveHotKeyMatch) {
+            // Generate a juicy response (button lights green and fades back to gray)
+            document.getElementById('headerBarSaveButton').style.backgroundColor = 'rgb(87, 247, 224)';
+            document.getElementById('headerBarSaveButton').innerHTML = 'Saved!'
+            var juicingIntervalFunction = setInterval(this.juiceSaveButton, 1);
+            ajax({
+                url: $SCRIPT_ROOT + '/api/grammar/save',
+                type: "POST",
+                contentType: "text/plain",
+                data: this.getCurrentGrammarName(),
+                async: true,
+                cache: false,
+                success: (status) => {}
+            })
+            setTimeout(function() {
+                clearInterval(juicingIntervalFunction);
+                document.getElementById('headerBarSaveButton').innerHTML = 'Save';
+                document.getElementById('headerBarSaveButton').style.backgroundColor = 'rgb(242, 242, 242)';
+            }, 1250);
+        }
+    }
+
+    juiceSaveButton() {
+        // This function gradually fades the save button from our palette green (rgb(87, 247, 224))
+        // to our palette gray (rgb(242, 242, 242))
+        var currentButtonRgbValues = document.getElementById("headerBarSaveButton").style.backgroundColor;
+        var extractedRgbComponents = currentButtonRgbValues.match(/\d+/g);
+        var r = extractedRgbComponents[0];
+        var g = extractedRgbComponents[1];
+        var b = extractedRgbComponents[2];
+        if (r < 242){
+            r++;
+        }
+        if (g > 242){
+            g--;
+        }
+        if (b < 242){
+            b++;
+        }
+        document.getElementById("headerBarSaveButton").style.backgroundColor = "rgb("+r+","+g+","+b+")";
+    }
+
+    componentDidMount(){
+        document.addEventListener("keydown", this.quickSave, false);
+    }
+
     render() {
         var def_rules = []
         var board
@@ -191,6 +261,8 @@ class Interface extends React.Component {
                                 updateExpansionFeedback={this.updateExpansionFeedback}
                                 updateHistory={this.updateHistory}
                                 update={this.updateFromServer}
+                                getCurrentGrammarName={this.getCurrentGrammarName}
+                                setCurrentGrammarName={this.setCurrentGrammarName}
                                 systemVars={this.state.system_vars}/>
                     <div className="muwrap">
                         <div className="show-y-wrapper">

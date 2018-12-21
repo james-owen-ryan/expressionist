@@ -26,8 +26,6 @@ class HeaderBar extends React.Component {
         this.load = this.load.bind(this);
         this.reset = this.reset.bind(this);
         this.buildProductionist = this.buildProductionist.bind(this);
-        this.getCurrentGrammarName = this.getCurrentGrammarName.bind(this);
-        this.setCurrentGrammarName = this.setCurrentGrammarName.bind(this);
         this.state = {
             showLoadModal: false,
             showTestModal: false,
@@ -37,16 +35,7 @@ class HeaderBar extends React.Component {
             buildNavTitle: 'Build',
             buildModalTitle: 'Build Productionist module...',
             bundleName: '',
-            currentGrammarName: 'new'
         };
-    }
-
-    getCurrentGrammarName() {
-        return this.state.currentGrammarName;
-    }
-
-    setCurrentGrammarName(grammarName) {
-        this.setState({currentGrammarName: grammarName.replace(".json", "")});
     }
 
     openLoadModal() {
@@ -157,7 +146,7 @@ class HeaderBar extends React.Component {
                     <ButtonGroup>
                         <Button title="Start new grammar" onClick={this.reset} bsStyle='primary'>New</Button>
                         <Button title="Load grammar" onClick={this.openLoadModal} bsStyle='primary'>Load</Button>
-                        <Button title="Save grammar" onClick={this.openSaveModal} bsStyle='primary'>Save</Button>
+                        <Button id="headerBarSaveButton" title="Save grammar" onClick={this.openSaveModal} bsStyle='primary'>Save</Button>
                         <Button title="Export content bundle" onClick={this.openExportModal} bsStyle='primary'>Export</Button>
                         <Button title="Build Productionist module" onClick={this.openBuildModal} bsStyle='primary'>{this.state.buildNavTitle}</Button>
                         <Button title="Test Productionist module" onClick={this.openTestModal} bsStyle='primary'>Test</Button>
@@ -168,15 +157,15 @@ class HeaderBar extends React.Component {
                     <Modal.Header closeButton>
                         <Modal.Title>Load grammar...</Modal.Title>
                     </Modal.Header>
-                    <FileList onFileClick={this.load} highlightedFile={this.state.currentGrammarName + '.json'} directory='grammars'></FileList>
+                    <FileList onFileClick={this.load} highlightedFile={this.props.getCurrentGrammarName()} directory='grammars'></FileList>
                 </Modal>
-                <ExportGrammarModal show={this.state.showExportModal} onHide={this.closeExportModal} getCurrentGrammarName={this.getCurrentGrammarName} setCurrentGrammarName={this.setCurrentGrammarName}></ExportGrammarModal>
-                <SaveGrammarModal show={this.state.showSaveModal} onHide={this.closeSaveModal} getCurrentGrammarName={this.getCurrentGrammarName} setCurrentGrammarName={this.setCurrentGrammarName}></SaveGrammarModal>
+                <ExportGrammarModal show={this.state.showExportModal} onHide={this.closeExportModal} getCurrentGrammarName={this.props.getCurrentGrammarName} setCurrentGrammarName={this.props.setCurrentGrammarName}></ExportGrammarModal>
+                <SaveGrammarModal show={this.state.showSaveModal} onHide={this.closeSaveModal} getCurrentGrammarName={this.props.getCurrentGrammarName} setCurrentGrammarName={this.props.setCurrentGrammarName}></SaveGrammarModal>
                 <Modal show={this.state.showBuildModal} onHide={this.closeBuildModal}>
                     <Modal.Header closeButton>
                         <Modal.Title>{this.state.buildModalTitle}</Modal.Title>
                     </Modal.Header>
-                    <FileList onFileClick={this.buildProductionist} highlightedFile={this.state.currentGrammarName} directory='exports'></FileList>
+                    <FileList onFileClick={this.buildProductionist} highlightedFile={this.props.getCurrentGrammarName()} directory='exports'></FileList>
                 </Modal>
             </div>
         );
