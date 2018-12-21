@@ -156,7 +156,7 @@ class MarkupSet extends React.Component {
     };
 
     disableNewNameValue(){
-        if (this.state.newNameVal == ''){
+        if (this.state.newNameVal == '' || this.props.markups[this.state.newNameVal] != undefined){
             return true
         }
         return false

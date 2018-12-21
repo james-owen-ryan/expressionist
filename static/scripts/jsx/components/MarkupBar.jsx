@@ -46,26 +46,24 @@ class MarkupBar extends React.Component {
     render() {
         var output = []
         var total = Object.keys(this.props.total)
-        for( var outer = 0; total.length > outer ; outer++)
-        {
-          var present_nt = []
-          if (this.state.present[total[outer]])
-          {
-            present_nt = this.state.present[total[outer]]
-          }
-          else
-          {
-            present_nt = []
-          }
-
-          output.push(<MarkupSet    currentNonterminal={this.props.currentNonterminal}
-                                    updateFromServer={this.props.updateFromServer}
-                                    markups={this.props.total}
-                                    key={total[outer]} 
-                                    name={total[outer]}
-                                    present_nt={present_nt} 
-                                    current_set={this.props.total[total[outer]]}
-                                    updateSymbolFilterQuery={this.props.updateSymbolFilterQuery}/>)
+        for (var outer = 0; total.length > outer ; outer++) {
+            var present_nt = []
+            if (this.state.present[total[outer]])
+            {
+              present_nt = this.state.present[total[outer]]
+            }
+            else
+            {
+              present_nt = []
+            }
+            output.push(<MarkupSet    currentNonterminal={this.props.currentNonterminal}
+                                      updateFromServer={this.props.updateFromServer}
+                                      markups={this.props.total}
+                                      key={total[outer]}
+                                      name={total[outer]}
+                                      present_nt={present_nt}
+                                      current_set={this.props.total[total[outer]]}
+                                      updateSymbolFilterQuery={this.props.updateSymbolFilterQuery}/>)
         }
         return(
             <ButtonGroup className="btn-test">
