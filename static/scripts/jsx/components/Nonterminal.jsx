@@ -98,9 +98,8 @@ class Nonterminal extends React.Component {
             var deep_glyph = ""
             if (this.props.deep === true)
                 deep_glyph = <Glyphicon glyph="star"/>
-
             return (
-                <ListGroupItem title={this.props.name} bsSize="xsmall" bsStyle={this.props.complete ? "success" : "danger" }
+                <ListGroupItem title="View symbol" bsSize="xsmall" bsStyle={this.props.complete ? "success" : "danger" }
                            onClick={this.props.onClick}>{deep_glyph} {this.props.name}</ListGroupItem>
             );
         }

@@ -155,12 +155,12 @@ class HeaderBar extends React.Component {
             <div>
                 <ButtonToolbar>
                     <ButtonGroup>
-                        <Button onClick={this.reset} bsStyle='danger'>New</Button>
-                        <Button onClick={this.openLoadModal} bsStyle='primary'>Load</Button>
-                        <Button onClick={this.openSaveModal} bsStyle='primary'>Save</Button>
-                        <Button onClick={this.openExportModal} bsStyle='primary'>Export</Button>
-                        <Button onClick={this.openBuildModal} bsStyle='primary'>{this.state.buildNavTitle}</Button>
-                        <Button onClick={this.openTestModal} bsStyle='primary'>Test</Button>
+                        <Button title="Start new grammar" onClick={this.reset} bsStyle='primary'>New</Button>
+                        <Button title="Load grammar" onClick={this.openLoadModal} bsStyle='primary'>Load</Button>
+                        <Button title="Save grammar" onClick={this.openSaveModal} bsStyle='primary'>Save</Button>
+                        <Button title="Export content bundle" onClick={this.openExportModal} bsStyle='primary'>Export</Button>
+                        <Button title="Build Productionist module" onClick={this.openBuildModal} bsStyle='primary'>{this.state.buildNavTitle}</Button>
+                        <Button title="Test Productionist module" onClick={this.openTestModal} bsStyle='primary'>Test</Button>
                     </ButtonGroup>
                 </ButtonToolbar>
                 <TestModal show={this.state.showTestModal} onHide={this.closeTestModal} bundleName={this.state.bundleName}></TestModal>

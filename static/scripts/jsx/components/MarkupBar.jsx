@@ -69,7 +69,7 @@ class MarkupBar extends React.Component {
         }
         return(
             <ButtonGroup className="btn-test">
-                <Button className="grp_button" onClick={this.handleMarkupSetAdd} key="addnew"  style={{height: '38px'}}>
+                <Button className="grp_button" onClick={this.handleMarkupSetAdd} key="addnew" title="Add new tagset"  style={{height: '38px'}}>
                     <Glyphicon glyph="plus"/>
                 </Button>
             {output}

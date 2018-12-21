@@ -87,7 +87,7 @@ class RuleBoard extends React.Component {
             symbol = this.props.expansion[i]
             if (symbol.indexOf('[[') != -1) {
                 var tag = symbol.slice(2,-2);
-                expansion_arr.push(<span style={{"cursor": "pointer"}} onClick={this.handleRuleClickThrough.bind(this, symbol.slice(2,-2))}>
+                expansion_arr.push(<span title="View symbol" style={{"cursor": "pointer"}} onClick={this.handleRuleClickThrough.bind(this, symbol.slice(2,-2))}>
                 <b>{symbol}</b></span>)
             }
             else
@@ -100,15 +100,15 @@ class RuleBoard extends React.Component {
             <div>
                 <div style={{"width": "70%", "margin": "0 auto", "height": "70%"}}>
                     <h2>
-                        <span style={{"cursor": "pointer"}} onClick={this.handleRuleClickThrough.bind(this, this.props.name)}><b>{this.props.name}</b></span> <Glyphicon glyph="circle-arrow-right" style={{"fontSize": "20px"}}/>
+                        <span title="View rule head" style={{"cursor": "pointer"}} onClick={this.handleRuleClickThrough.bind(this, this.props.name)}><b>{this.props.name}</b></span> <Glyphicon title="Rule head" glyph="circle-arrow-right" style={{"fontSize": "20px"}}/>
                         <br></br>
-                        <Button bsStyle="default" title="Test" onClick={this.handleExpandRule}><Glyphicon glyph="play"/></Button>
-                        <Button bsStyle="default" title="Edit" onClick={this.prepareForRuleDefinitionEdit}><Glyphicon glyph="pencil"/></Button>
-                        <Button bsStyle="danger" title="Delete" onClick={this.onRuleDelete}><Glyphicon glyph="trash"/></Button>
+                        <Button bsStyle="default" title="Test rule execution" onClick={this.handleExpandRule}><Glyphicon glyph="play"/></Button>
+                        <Button bsStyle="default" title="Edit rule" onClick={this.prepareForRuleDefinitionEdit}><Glyphicon glyph="pencil"/></Button>
+                        <Button bsStyle="danger" title="Delete rule" onClick={this.onRuleDelete}><Glyphicon glyph="trash"/></Button>
                     </h2>
                 </div>
                 <div style={{"width": "70%", "margin": "0 auto", "height": "85%", "overflowY": "auto"}}>
-                    <h3>{expansion_arr}</h3>
+                    <h3 title="Rule body">{expansion_arr}</h3>
                 </div>
             </div>
         )

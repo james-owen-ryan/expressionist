@@ -192,22 +192,24 @@ class RuleBar extends React.Component {
         this.props.rules.forEach(function (rule, i) {
             var shortened = rule.expansion.join('').substring(0, 10);
             rules.push(<Button onClick={this.handleRuleClick.bind(this, i)}
-                               title={rule.expansion.join('')}
+                               title="View production rule"
                                key={rule.expansion.join('') + this.props.name}>{shortened}</Button>);
         }, this);
         if (this.props.idOfRuleToEdit !== null) {
             var ruleDefinitionModalButtonText = 'Update Rule';
+            var ruleDefinitionModalButtonHoverText = 'Update rule';
             var ruleDefinitionModalButtonCallback = this.editRule;
         }
         else {
             var ruleDefinitionModalButtonText = 'Add Rule';
+            var ruleDefinitionModalButtonHoverText = 'Add rule';
             var ruleDefinitionModalButtonCallback = this.addRule;
         }
         return (
             <div>
                 <div className="btn-test">
                         <ButtonGroup>
-                            <Button onClick={this.openModal} key="addnew"><Glyphicon glyph="plus"/></Button>
+                            <Button onClick={this.openModal} title="Add new production rule" key="addnew"><Glyphicon glyph="plus"/></Button>
                             {rules}
                         </ButtonGroup>
                 </div>
@@ -222,6 +224,7 @@ class RuleBar extends React.Component {
                                     return (
                                         <button className={'list-group-item list-group-item-xs nonterminal list-group-item-'.concat(color)}
                                         style={{'margin':'0', 'border':'0px'}}
+                                        title="Add symbol reference"
                                         onClick={this.addToRuleExpansion.bind(this, name)} key={name}>{name}
                                         </button>
                                     )
@@ -234,7 +237,7 @@ class RuleBar extends React.Component {
                             <p style={{'fontWeight': '300', 'fontSize': '16px'}}>Application Rate</p>
                             <input id='appRateModal' type='text' value={this.state.ruleApplicationRate} onChange={this.updateApplicationRate}
                             style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '43px', 'marginBottom': '25px', 'fontSize': '18px', 'padding': '0 12px'}}/>
-                            <Button id="submitRuleButton" bsStyle="primary" bsSize="large" style={{'marginBottom': '25px'}} onClick={ruleDefinitionModalButtonCallback}>{ruleDefinitionModalButtonText}</Button>
+                            <Button id="submitRuleButton" title={ruleDefinitionModalButtonHoverText} bsStyle="primary" bsSize="large" style={{'marginBottom': '25px'}} onClick={ruleDefinitionModalButtonCallback}>{ruleDefinitionModalButtonText}</Button>
                         </div>
                     </Modal>
                 </div>

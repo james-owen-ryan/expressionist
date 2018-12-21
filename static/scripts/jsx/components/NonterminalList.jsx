@@ -112,7 +112,6 @@ class NonterminalList extends React.Component {
         var symbolDefinition = [];
         for (var i = 0; i < nonterminals.length; i++){
             var symbolName = nonterminals[i];
-            console.log(symbolName);
             if (symbolName.indexOf('$symbol') != -1){
                 symbolDefinition.push(symbolName);
             }
@@ -177,9 +176,9 @@ class NonterminalList extends React.Component {
                     <ListGroupItem bsSize='xsmall' key='nonterminalListSearchGroupItem' style={{'padding': '0px'}}>
                         <Button key="ADDNEW" onClick={this.addNonterminal} title="Add new symbol" style={{'height': '35px', 'marginBottom': '2px'}}><Glyphicon glyph="plus"/></Button>
                         <input  id='nonterminalListSearch'
-                                title="Hint: Try '$text:[text from symbol expansion]', e.g., '$text:typoo'"
-                                type='text' 
-                                onChange={this.updateList} 
+                                title="Hint: try '$text:[text from symbol expansion]', e.g., '$text:typoo'"
+                                type='text'
+                                onChange={this.updateList}
                                 value={this.props.symbolFilterQuery}
                                 style={{'width': 'calc(100% - 38px)', 'height': '100%', 'padding': '8px'}}
                                 placeholder='Filter list...'/>
