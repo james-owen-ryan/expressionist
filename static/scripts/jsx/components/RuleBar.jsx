@@ -213,6 +213,23 @@ class RuleBar extends React.Component {
                 break;
             }
         }
+        var ruleDefinitionAddButtonIsDisabled = false;
+        if (this.state.ruleExpansionInputVal !== '' && this.state.ruleApplicationRate !== '') {
+            this.props.rules.forEach(function (rule, i) {
+                var ruleBodyString = rule.expansion.join('');
+                if (this.state.ruleExpansionInputVal === ruleBodyString) {
+                    ruleDefinitionAddButtonIsDisabled = true;
+                    if (this.props.idOfRuleToEdit !== null) {
+                        if (rule.app_rate != this.state.ruleApplicationRate) {
+                            ruleDefinitionAddButtonIsDisabled = false;
+                        }
+                    }
+                }
+            }, this);
+        }
+        else {
+            ruleDefinitionAddButtonIsDisabled = true;
+        }
         return (
             <div>
                 <div className="btn-test">
@@ -245,7 +262,7 @@ class RuleBar extends React.Component {
                             <p title="This number specifies how often this rule will be randomly selected relative to any sibling rules (a higher number increases the chance)." style={{'fontWeight': '300', 'fontSize': '16px'}}>Application Rate</p>
                             <input title="This number specifies how often this rule will be randomly selected relative to any sibling rules (a higher number increases the chance)." id='appRateModal' type='text' value={this.state.ruleApplicationRate} onChange={this.updateApplicationRate}
                             style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '43px', 'marginBottom': '25px', 'fontSize': '18px', 'padding': '0 12px'}}/>
-                            <Button id="submitRuleButton" title={ruleDefinitionModalButtonHoverText} bsStyle="primary" bsSize="large" style={{'marginBottom': '25px'}} onClick={ruleDefinitionModalButtonCallback}>{ruleDefinitionModalButtonText}</Button>
+                            <Button id="submitRuleButton" title={ruleDefinitionModalButtonHoverText} disabled={ruleDefinitionAddButtonIsDisabled} bsStyle="primary" bsSize="large" style={{'marginBottom': '25px'}} onClick={ruleDefinitionModalButtonCallback}>{ruleDefinitionModalButtonText}</Button>
                         </div>
                     </Modal>
                 </div>
