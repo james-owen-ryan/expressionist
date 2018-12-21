@@ -205,11 +205,19 @@ class RuleBar extends React.Component {
             var ruleDefinitionModalButtonHoverText = 'Add rule';
             var ruleDefinitionModalButtonCallback = this.addRule;
         }
+        var openRuleModalButtonIsDisabled = true;
+        var allSymbolNames = Object.keys(this.props.nonterminals);
+        for (var i = 0; i < allSymbolNames.length; i++){
+            if (allSymbolNames[i].indexOf('$symbol') === -1) {
+                openRuleModalButtonIsDisabled = false;
+                break;
+            }
+        }
         return (
             <div>
                 <div className="btn-test">
                         <ButtonGroup>
-                            <Button onClick={this.openModal} title="Add new production rule" key="addnew"><Glyphicon glyph="plus"/></Button>
+                            <Button disabled={openRuleModalButtonIsDisabled} onClick={this.openModal} title="Add new production rule" key="addnew"><Glyphicon glyph="plus"/></Button>
                             {rules}
                         </ButtonGroup>
                 </div>
