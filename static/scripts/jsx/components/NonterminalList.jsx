@@ -112,7 +112,8 @@ class NonterminalList extends React.Component {
         var symbolDefinition = [];
         for (var i = 0; i < nonterminals.length; i++){
             var symbolName = nonterminals[i];
-            if (name.indexOf('$symbol') != -1){
+            console.log(symbolName);
+            if (symbolName.indexOf('$symbol') != -1){
                 symbolDefinition.push(symbolName);
             }
         }
