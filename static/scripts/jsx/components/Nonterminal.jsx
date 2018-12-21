@@ -17,15 +17,17 @@ class Nonterminal extends React.Component {
         this.handleNonterminalRename = this.handleNonterminalRename.bind(this);
         this.submitSymbolNameOnEnterKeypress = this.submitSymbolNameOnEnterKeypress.bind(this);
         this.state = {
-            newNameVal: ''
+            newNameVal: '',
+            renameRequestAlreadySent: false
         }
     }
 
     handleNewNameValueChange(e) {
-       this.setState({'newNameVal': e.target.value})
+       this.setState({newNameVal: e.target.value})
     }
 
     handleNonterminalRename(e){
+        this.setState({renameRequestAlreadySent: true})
         var object = {
             "old": this.props.name,
             "new": this.state.newNameVal
@@ -45,9 +47,11 @@ class Nonterminal extends React.Component {
     }
 
     submitSymbolNameOnEnterKeypress(e) {
-        if (document.activeElement.id === "newSymbolNameInputElement") {
-            if (e.key === 'Enter') {
-                document.getElementById("newSymbolNameInputElementButton").click();
+        if (this.props.new && !this.state.renameRequestAlreadySent) {
+            if (document.activeElement.id === "newSymbolNameInputElement") {
+                if (e.key === 'Enter') {
+                    this.handleNonterminalRename();
+                }
             }
         }
     };
@@ -72,7 +76,11 @@ class Nonterminal extends React.Component {
     }
 
     componentDidMount(){
-        document.addEventListener("keydown", this.submitSymbolNameOnEnterKeypress, false);
+        // Remove any earlier event listener that was added from earlier nonterminals being mounted
+        // for the first time
+        document.removeEventListener("keyup", this.submitSymbolNameOnEnterKeypress, false);
+        // Add the new event listener
+        document.addEventListener("keyup", this.submitSymbolNameOnEnterKeypress, false);
     }
 
     render() {
@@ -81,8 +89,8 @@ class Nonterminal extends React.Component {
                 <ListGroupItem title={this.props.name} bsSize="xsmall" style={{'padding': '0', 'height': '44px', 'marginBottom': '0px'}}>
                             <input id="newSymbolNameInputElement" type='text' onChange={this.handleNewNameValueChange} value={this.state.newNameVal} style={{'width': 'calc(100% - 80px)', 'height': '35px', 'padding': '8px', 'backgroundColor': 'white'}} placeholder='Enter symbol name.' autoFocus="true"/>
                             <div style={{'marginRight': '10px', 'display': 'inline', 'width': '80px'}}>
-                                <Button id="newSymbolNameInputElementButton" onClick={this.handleNonterminalRename} title="new nt" bsStyle="success" style={{'marginBottom': '2px', 'padding': '8px 13px'}} disabled={this.disableNewNameValue()}><Glyphicon glyph="ok"/></Button>
-                                <Button onClick={this.handleNonterminalDelete} title="delete nt" style={{'marginBottom': '2px', 'padding': '8px 13px'}} bsStyle="danger"><Glyphicon glyph="remove"/></Button>
+                                <Button id="newSymbolNameInputElementButton" onClick={this.handleNonterminalRename} title="Add symbol" bsStyle="success" style={{'marginBottom': '2px', 'padding': '8px 13px'}} disabled={this.disableNewNameValue()}><Glyphicon glyph="ok"/></Button>
+                                <Button onClick={this.handleNonterminalDelete} title="Remove symbol" style={{'marginBottom': '2px', 'padding': '8px 13px'}} bsStyle="danger"><Glyphicon glyph="remove"/></Button>
                             </div>
                 </ListGroupItem>
             );

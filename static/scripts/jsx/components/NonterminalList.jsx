@@ -15,7 +15,9 @@ class NonterminalList extends React.Component {
         this.getListOfMatchingSymbolNames = this.getListOfMatchingSymbolNames.bind(this);
         this.formatList = this.formatList.bind(this);
         this.addNonterminal = this.addNonterminal.bind(this);
-        this.state = {}
+        this.state = {
+            newNTNumber: 0
+        }
     }
 
     clickNonterminalUpdate(position) {
@@ -143,14 +145,13 @@ class NonterminalList extends React.Component {
     }
 
     addNonterminal() {
-        var newNTName = '000000000 new nonterminal ' + this.state.newNTNumber
+        var newNTName = 'unnamed symbol'
         ajax({
             url: $SCRIPT_ROOT + '/api/nonterminal/add',
             type: "POST",
             contentType: "application/json",
             data: JSON.stringify({'nonterminal': newNTName}),
             success: () => {
-                this.setState({'newNameVal': this.state.newNTNumber += 1})
                 this.props.updateFromServer()
             },
             cache: false
@@ -175,7 +176,7 @@ class NonterminalList extends React.Component {
                             var complete = this.props.nonterminals[name].complete;
                             var deep = this.props.nonterminals[name].deep;
                             var newNT = false
-                            if (name.indexOf('000000000 new nonterminal') != -1){
+                            if (name.indexOf('unnamed symbol') != -1){
                                 newNT = true
                             }
                             return (
