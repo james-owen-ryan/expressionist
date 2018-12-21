@@ -182,7 +182,7 @@ class NonterminalList extends React.Component {
                                 onChange={this.updateList} 
                                 value={this.props.symbolFilterQuery}
                                 style={{'width': 'calc(100% - 38px)', 'height': '100%', 'padding': '8px'}}
-                                placeholder='Filter...'/>
+                                placeholder='Filter list...'/>
                     </ListGroupItem>
                     {   nonterminals.map((name) => {
                             var complete = this.props.nonterminals[name].complete;
