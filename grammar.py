@@ -343,13 +343,10 @@ class PCFG(object):
     # really need to get a better way to do this
     def rename_nonterminal_symbol(self, old_symbol_name, new_symbol_name):
         JSON = jsontree.loads(self.to_json())
-        #print(JSON)
         JSON['nonterminals'][new_symbol_name] = JSON['nonterminals'].pop(old_symbol_name)
-        #print(JSON)
         test_str = jsontree.dumps(JSON)
         test_str = test_str.replace("[[{0}]]".format(old_symbol_name), "[[{0}]]".format(new_symbol_name))
-        #print test_str
-        new  = from_json(test_str)
+        new = from_json(test_str)
         self.__dict__ = new.__dict__
 
     def rename_tag(self, tagset_name, old_tag_name, new_tag_name):

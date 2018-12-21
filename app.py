@@ -203,11 +203,9 @@ def add_tagset():
 @app.route('/api/markup/toggle', methods=['POST'])
 def toggle_tag():
     data = request.get_json()
-    print data
     nonterminal = nonterminal_symbol.NonterminalSymbol(data["nonterminal"])
     markupSet = tags.MarkupSet(data['markupSet'])
     markup = tags.Markup(data['tag'], markupSet)
-    print("nonterminal")
     app.flask_grammar.toggle_markup(nonterminal, markup)
 
     return app.flask_grammar.to_json()
