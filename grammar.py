@@ -343,7 +343,13 @@ class PCFG(object):
     # really need to get a better way to do this
     def rename_nonterminal_symbol(self, old_symbol_name, new_symbol_name):
         JSON = jsontree.loads(self.to_json())
-        JSON['nonterminals'][new_symbol_name] = JSON['nonterminals'].pop(old_symbol_name)
+        try:
+            JSON['nonterminals'][new_symbol_name] = JSON['nonterminals'].pop(old_symbol_name)
+        except KeyError:
+            # This is a dumb fix for the problem of enter keypress events on the add-symbol input
+            # firing many times, triggering potentially dozens or hundreds of requests for an
+            # already renamed symbol to be renamed again
+            pass
         test_str = jsontree.dumps(JSON)
         test_str = test_str.replace("[[{0}]]".format(old_symbol_name), "[[{0}]]".format(new_symbol_name))
         new = from_json(test_str)

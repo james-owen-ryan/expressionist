@@ -112,7 +112,7 @@ class NonterminalList extends React.Component {
         var symbolDefinition = [];
         for (var i = 0; i < nonterminals.length; i++){
             var symbolName = nonterminals[i];
-            if (symbolName === '$unnamed symbol'){
+            if (name.indexOf('$symbol') != -1){
                 symbolDefinition.push(symbolName);
             }
         }
@@ -149,18 +149,20 @@ class NonterminalList extends React.Component {
         allOtherSymbols.sort(function(a, b){
             return a.toLowerCase() == b.toLowerCase() ? 0 : +(a.toLowerCase() > b.toLowerCase()) || -1;
         });
+        // Return the sorted list
         return symbolDefinition.concat(topLevelSymbols).concat(incompleteSymbols).concat(allOtherSymbols);
     }
 
     addNonterminal() {
-        var newNTName = '$unnamed symbol'
+        var newNTName = '$symbol' + this.state.newNTNumber;
         ajax({
             url: $SCRIPT_ROOT + '/api/nonterminal/add',
             type: "POST",
             contentType: "application/json",
             data: JSON.stringify({'nonterminal': newNTName}),
             success: () => {
-                this.props.updateFromServer()
+                this.props.updateFromServer();
+                this.setState({newNTNumber: this.state.newNTNumber + 1})
             },
             cache: false
         })
@@ -184,7 +186,7 @@ class NonterminalList extends React.Component {
                             var complete = this.props.nonterminals[name].complete;
                             var deep = this.props.nonterminals[name].deep;
                             var newNT = false
-                            if (name.indexOf('$unnamed symbol') != -1){
+                            if (name.indexOf('$symbol') != -1){
                                 newNT = true
                             }
                             return (
