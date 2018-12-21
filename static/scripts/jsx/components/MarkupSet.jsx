@@ -201,7 +201,7 @@ class MarkupSet extends React.Component {
     render() {
         if (this.props.name.indexOf('/this is a new markupset/') != -1){
             return(
-                <ButtonGroup title={this.props.name} style={{padding: '4.5px', backgroundColor: '#F2F2F2'}} className='nohover'>
+                <ButtonGroup title={this.props.name} style={{padding: '4.5px', backgroundColor: '#F2F2F2'}}>
                     <input id="newTagsetNameInputElement" type='text' onChange={this.handleNewNameValueChange} value={this.state.newNameVal} style={{height: '26px', padding: '5px', width: '175px'}} placeholder='Enter tagset name.' autoFocus="true"/>
                     <div style={{'display': 'inline'}}>
                         <Button id="newTagsetNameInputElementButton" onClick={this.handleMarkupSetRename} title="Add tagset" bsSize="small" bsStyle="success" style={{marginBottom: '3px', fontSize: '11px'}} disabled={this.disableNewNameValue()}><Glyphicon glyph="ok"/></Button>
@@ -211,7 +211,7 @@ class MarkupSet extends React.Component {
             )
         } else {
             return (
-                <DropdownButton className="grp-button" id={this.props.name} title={this.props.name} bsStyle={this.isThisTagInCurrentlySelectedNT('/any/') ? 'success' : 'default'} style={{'height': '38px'}} className='nohover'>
+                <DropdownButton className="grp-button" id={this.props.name} title={this.props.name} bsStyle={this.isThisTagInCurrentlySelectedNT('/any/') ? 'success' : 'default'} style={{'height': '38px'}}>
                     <div>
                         <MenuItem key={-1} header={true}>
                             <Button title="Add new tag" onClick={this.handleMarkupAdd.bind(this, this.props.name)}><Glyphicon glyph="plus"/></Button>
