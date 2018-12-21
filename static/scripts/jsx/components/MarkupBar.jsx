@@ -31,7 +31,7 @@ class MarkupBar extends React.Component {
     }
 
     handleMarkupSetAdd() {
-        var newMarkupSetName = '/this is a new markupset/' + Object.keys(this.props.total).length
+        var newMarkupSetName = '/this is a new tagset/' + Object.keys(this.props.total).length
         var object = {"markupSet": newMarkupSetName}
         ajax({
             url: $SCRIPT_ROOT + '/api/markup/addtagset',
