@@ -154,6 +154,8 @@ class NonterminalList extends React.Component {
     }
 
     addNonterminal() {
+        // Reset the filter query, so that the author can see the symbol-definition element
+        this.props.updateSymbolFilterQuery('');
         var newNTName = '$symbol' + this.state.newNTNumber;
         ajax({
             url: $SCRIPT_ROOT + '/api/nonterminal/add',
