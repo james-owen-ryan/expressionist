@@ -183,7 +183,14 @@ class NonterminalList extends React.Component {
                                 onChange={this.updateList}
                                 value={this.props.symbolFilterQuery}
                                 style={{'width': 'calc(100% - 38px)', 'height': '100%', 'padding': '8px'}}
-                                placeholder='Filter list...'/>
+                                placeholder='Filter list...'
+                                autoFocus="true"
+                                // This hack is necessary to keep the cursor at the end of the query upon auto-focus
+                                onFocus={function(e) {
+                                    var val = e.target.value;
+                                    e.target.value = '';
+                                    e.target.value = val;
+                                }}/>
                     </ListGroupItem>
                     {   nonterminals.map((name) => {
                             var complete = this.props.nonterminals[name].complete;
