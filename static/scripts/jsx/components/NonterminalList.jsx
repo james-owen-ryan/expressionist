@@ -75,6 +75,7 @@ class NonterminalList extends React.Component {
         // a production rule whose body includes a terminal symbol for which the filter-query component
         // is a substring
         else if (this.props.symbolFilterQuery.slice(0, 6) == "$text:") {
+            if (this.props.symbolFilterQuery === "$text:") {return []}  // Otherwise every complete symbol matches
             var matches = [];
             var text = this.props.symbolFilterQuery.slice(6);
             for (var i = 0; i < allSymbolNames.length; i++){
