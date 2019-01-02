@@ -39,13 +39,16 @@ class SaveGrammarModal extends React.Component {
     }
 
     handleChange(e){
-        this.state.setCurrentGrammarName(e.target.value);
+        if (e.key !== 'Enter') {
+            this.state.setCurrentGrammarName(e.target.value);
+        }
     }
 
     saveGrammarOnEnter(e) {
         if (this.props.show) {
             if (e.key === 'Enter') {
-                this.saveGrammar()
+                document.getElementById("saveButton").click();
+                e.preventDefault();
             }
         }
     };
@@ -85,7 +88,7 @@ class SaveGrammarModal extends React.Component {
     saveGrammar() {
         // Generate a juicy response (button lights green and fades back to gray)
         document.getElementById('saveButton').style.backgroundColor = 'rgb(87, 247, 224)';
-        document.getElementById('saveButton').innerHTML = 'Saved!'
+        this.setState({'saveGrammarBtnText': 'Saved!'});
         var juicingIntervalFunction = setInterval(this.juiceSaveButton, 1);
         ajax({
             url: $SCRIPT_ROOT + '/api/grammar/save',
@@ -96,9 +99,10 @@ class SaveGrammarModal extends React.Component {
             cache: false,
             success: (status) => {}
         })
+        var that = this;
         setTimeout(function() {
             clearInterval(juicingIntervalFunction);
-            document.getElementById('saveButton').innerHTML = 'Save';
+            that.setState({'saveGrammarBtnText': 'Save'})
             document.getElementById('saveButton').style.backgroundColor = 'rgb(242, 242, 242)';
         }, 1250);
     }
@@ -141,7 +145,7 @@ class SaveGrammarModal extends React.Component {
                     <form>
                         <FormGroup controlId="saveGrammarForm" validationState={this.checkSaveGrammarName()}>
                             <ControlLabel>Grammar Name</ControlLabel>
-                            <FormControl type="text" value={this.state.getCurrentGrammarName()} placeholder="Enter a filename." onChange={this.handleChange}/>
+                            <FormControl type="text" value={this.state.getCurrentGrammarName()} placeholder="Enter a filename." onChange={this.handleChange} autoFocus="true"/>
                             <FormControl.Feedback />
                             <HelpBlock><i>Grammars are saved to /grammars. Saving will overwrite files with the same name.</i></HelpBlock>
                         </FormGroup>
