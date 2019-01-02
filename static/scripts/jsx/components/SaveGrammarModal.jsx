@@ -144,7 +144,7 @@ class SaveGrammarModal extends React.Component {
                 <div style={{padding: '15px'}}>
                     <form>
                         <FormGroup controlId="saveGrammarForm" validationState={this.checkSaveGrammarName()}>
-                            <ControlLabel>Grammar Name</ControlLabel>
+                            <ControlLabel>Grammar name</ControlLabel>
                             <FormControl type="text" value={this.state.getCurrentGrammarName()} placeholder="Enter a filename." onChange={this.handleChange} autoFocus="true"/>
                             <FormControl.Feedback />
                             <HelpBlock><i>Grammars are saved to /grammars. Saving will overwrite files with the same name.</i></HelpBlock>
