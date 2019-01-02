@@ -19,6 +19,7 @@ class ExportGrammarModal extends React.Component {
         this.exportGrammar = this.exportGrammar.bind(this);
         this.checkExportGrammarName = this.checkExportGrammarName.bind(this);
         this.checkDisableExportButton = this.checkDisableExportButton.bind(this);
+        this.exportBundleOnEnter = this.exportBundleOnEnter.bind(this);
         this.juiceExportButton = this.juiceExportButton.bind(this);
         this.state = {
             grammarFileNames: [],
@@ -45,8 +46,19 @@ class ExportGrammarModal extends React.Component {
     }
 
     handleChange(e){
-        this.state.setCurrentGrammarName(e.target.value);
+        if (e.key !== 'Enter') {
+            this.state.setCurrentGrammarName(e.target.value);
+        }
     }
+
+    exportBundleOnEnter(e) {
+        if (this.props.show) {
+            if (e.key === 'Enter') {
+                document.getElementById("exportButton").click();
+                e.preventDefault();
+            }
+        }
+    };
 
     updateGrammarName(filename){
         this.state.setCurrentGrammarName(filename);
@@ -74,7 +86,7 @@ class ExportGrammarModal extends React.Component {
         } else if (this.state.getCurrentGrammarName() == '') {
             return 'error'
         }
-        return 'null'
+        return null
     }
 
     juiceExportButton() {
@@ -107,22 +119,22 @@ class ExportGrammarModal extends React.Component {
             async: true,
             cache: false,
             success: (status) => {
-                this.setState({
-                    'exportGrammarBtnText': 'Exported!',
-                })
+                this.setState({'exportGrammarBtnText': 'Exported!'})
                 // Generate a juicy response (button lights green and fades back to gray)
                 document.getElementById('exportButton').style.backgroundColor = 'rgb(87, 247, 224)';
                 var juicingIntervalFunction = setInterval(this.juiceExportButton, 1);
                 var that = this;
                 setTimeout(function() {
                     clearInterval(juicingIntervalFunction);
-                    that.setState({
-                        'exportGrammarBtnText': 'Export',
-                    })
+                    that.setState({'exportGrammarBtnText': 'Export'})
                     document.getElementById('exportButton').style.backgroundColor = 'rgb(242, 242, 242)';
                 }, 1250);
             }
         })
+    }
+
+    componentDidMount(){
+        document.addEventListener("keydown", this.exportBundleOnEnter, false);
     }
 
     render() {
@@ -135,7 +147,7 @@ class ExportGrammarModal extends React.Component {
                     <form>
                         <FormGroup controlId="exportGrammarForm" validationState={this.checkExportGrammarName()}>
                             <ControlLabel>Bundle name</ControlLabel>
-                            <FormControl type="text" value={this.state.getCurrentGrammarName()} placeholder="Enter a name for your content bundle." onChange={this.handleChange} />
+                            <FormControl type="text" value={this.state.getCurrentGrammarName()} placeholder="Enter a name for your content bundle." onChange={this.handleChange} autoFocus="true"/>
                             <FormControl.Feedback />
                             <HelpBlock><i>Content bundles are exported to /exports. Exporting will overwrite files with the same bundle name.</i></HelpBlock>
                         </FormGroup>
