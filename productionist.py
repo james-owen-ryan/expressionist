@@ -15,7 +15,7 @@ class Productionist(object):
     interface between the game engine and an authored Expressionist grammar.
     """
 
-    def __init__(self, content_bundle_name, content_bundle_directory, probabilistic_mode=False,
+    def __init__(self, content_bundle_name, content_bundle_directory, probabilistic_mode=True,
                  repetition_penalty_mode=True, terse_mode=False, verbosity=1, seed=None):
         """Initialize a Productionist object."""
         # Set the random seed, if one was specified
