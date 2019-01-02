@@ -19,7 +19,7 @@ class TestModal extends React.Component {
 
     constructor(props) {
         super(props);
-        this.toggleTagSetStatus = this.toggleTagSetStatus.bind(this);
+        this.toggleTagsetStatus = this.toggleTagsetStatus.bind(this);
         this.updateTagFrequency = this.updateTagFrequency.bind(this);
         this.toggleTagStatus = this.toggleTagStatus.bind(this);
         this.getTagData = this.getTagData.bind(this);
@@ -106,13 +106,14 @@ class TestModal extends React.Component {
         return tags;
     }
 
-    toggleTagSetStatus(tagset) {
+    toggleTagsetStatus(tagset) {
+        var that = this;
         var updated = this.state.tags.map(function (tagObj){
             if (tagset == tagObj.tagset){
                 return {
                     name: tagObj.name,
                     frequency: tagObj.frequency,
-                    status: this.cycleStatus(tagObj.status),
+                    status: that.cycleStatus(tagObj.status),
                     tagset: tagObj.tagset
                 }
             }
@@ -141,21 +142,18 @@ class TestModal extends React.Component {
     }
 
     toggleTagStatus(tagset, tag) {
-        // only toggle if the active element is a ListGroupItem.
-        if (!document.activeElement.classList.contains("list-group-item")){
-            return false;
-        }
+        var that = this;
         var updated = this.state.tags.map(function (tagObj){
             if (tagObj.name == tag && tagObj.tagset == tagset){
                 return {
                     name: tagObj.name,
                     frequency: tagObj.frequency,
-                    status: this.cycleStatus(tagObj.status),
+                    status: that.cycleStatus(tagObj.status),
                     tagset: tagObj.tagset
                 }
             }
             return tagObj; 
-        }.bind(this))
+        })
         this.setState({tags: updated});
         this.sendTaggedContentRequest(updated);
     }
@@ -169,7 +167,7 @@ class TestModal extends React.Component {
             return 'success'
         }
         else if (currentStatus == 'enabled'){
-            return 'warning'
+            return null
         }
         // assume currentStatus = 'disabled'
         return 'danger'
@@ -221,7 +219,7 @@ class TestModal extends React.Component {
               }
             },
             error: function(err){
-                alert('It seems like you have not built your Productionist grammar into memory yet. See console for more details.');
+                alert('There was an error. Consult your Python console for more details.');
             }
         })
     }
@@ -237,34 +235,22 @@ class TestModal extends React.Component {
                 <Modal.Header closeButton>
                     <Modal.Title>Test Productionist module...</Modal.Title>
                 </Modal.Header>
-                <Grid fluid>
-                  <Row className="show-grid">
-                    <Col xs={6}>
-                        <FormGroup>
-                            <ControlLabel style={{display: 'block', marginLeft: '15px', marginTop: '10px'}}>Bundle Name</ControlLabel>
-                            <FormControl type="text" value={this.state.bundleName} style={{width: '200px', display: 'inline', marginLeft: "15px"}} readOnly={true}/>
-                        </FormGroup>
-                    </Col>
-                    <Col xs={6}>
-                        <Button onClick={this.sendTaggedContentRequest.bind(this, this.state.tags)} bsStyle='warning' style={{padding: '7px 12px', marginTop: '35px'}}>Generate</Button>
-                    </Col>
-                  </Row>
-                </Grid>
+                <Button onClick={this.sendTaggedContentRequest.bind(this, this.state.tags)} title="Submit content request" style={{padding: '7px 12px', marginTop: '35px'}}><Glyphicon glyph="play"/></Button>
                 <div id="tags">
                     <ListGroup id='tagsList' style={{marginBottom: '0px'}}>
                         {
                             Object.keys(this.state.markups).map(function (tagset){
                                 return (
                                     <ListGroupItem bsSize="xsmall" key={tagset} style={{border: 'none'}}>
-                                        <ListGroupItem  title={tagset} bsSize="xsmall" onClick={this.toggleTagSetStatus.bind(this, tagset)}>{tagset}
+                                        <ListGroupItem  title={tagset} bsSize="xsmall" onClick={this.toggleTagsetStatus.bind(this, tagset)}>{tagset}
                                         </ListGroupItem>
                                         {
                                             this.state.markups[tagset].map(function (tag){
                                                 return (
                                                     <div key={tag}>
-                                                        <ListGroupItem title={tag} bsSize="xsmall" className='nohover' bsStyle={this.getTagColorFromStatus(this.getTagData(tagset, tag, "status"))} onClick={this.toggleTagStatus.bind(this, tagset, tag)}>
-                                                            {tag}
-                                                            <FormControl type="number" id={tagset+':'+tag} value={this.getTagData(tagset, tag, "frequency")} onChange={this.updateTagFrequency} style={this.getTagData(tagset, tag, "status") == 'enabled' ? {display: 'inline', width: '100px', height: '20px', float: 'right'} : {display: 'none'}} />
+                                                        <ListGroupItem>
+                                                            <Button title={"Toggle tag status in content request (currently: " + this.getTagData(tagset, tag, "status") + ")"} bsSize="xsmall" bsStyle={this.getTagColorFromStatus(this.getTagData(tagset, tag, "status"))} onClick={this.toggleTagStatus.bind(this, tagset, tag)}>{tag}</Button>
+                                                            <FormControl title="Modify tag utility in content request" type="number" id={tagset+':'+tag} value={this.getTagData(tagset, tag, "frequency")} onChange={this.updateTagFrequency} style={this.getTagData(tagset, tag, "status") == 'enabled' ? {display: 'inline', width: '75px', height: '30px', float: 'right', border: "0px"} : {display: 'none'}} />
                                                         </ListGroupItem>
                                                     </div>
                                                 )
@@ -284,7 +270,7 @@ class TestModal extends React.Component {
                         </div>
                         <div>
                             <div style={{display: 'flex', marginBottom: '5px'}}>
-                              <p>Generated Text</p>
+                              <p>Generated Content Package</p>
                             </div>
                             <Grid fluid>
                               <Row className="show-grid" style={{display: 'flex'}}>
@@ -295,7 +281,7 @@ class TestModal extends React.Component {
                             <div style={{marginTop: '10px', marginBottom: '10px'}}>Tree Expression</div>
                             <Grid fluid>
                               <Row className="show-grid">
-                                <Col xs={12} style={{'white-space': 'pre-wrap'}} className='feedback-bar'>{this.state.probablisticOutputTreeExpression}</Col>
+                                <Col xs={12} style={{'whiteSpace': 'pre-wrap'}} className='feedback-bar'>{this.state.probablisticOutputTreeExpression}</Col>
                               </Row>
                             </Grid>
                         </div>
