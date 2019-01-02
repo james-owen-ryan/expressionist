@@ -1373,11 +1373,11 @@ a:not(.nohover).text-warning:focus {
   color: #66512c;
 }
 .text-danger {
-  color: #a94442;
+  color: #FF9891;
 }
 a:not(.nohover).text-danger:hover,
 a:not(.nohover).text-danger:focus {
-  color: #843534;
+  color: #FF9891;
 }
 .bg-primary {
   color: #fff;
@@ -2574,7 +2574,7 @@ output {
           transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
 }
 .form-control:focus {
-  border-color: #66afe9;
+  border-color: #FFE97F;
   outline: 0;
   -webkit-box-shadow: none;
           box-shadow: none;
@@ -2888,19 +2888,19 @@ select[multiple].input-lg {
   color: #000;
 }
 .has-error .form-control {
-  border-color: #a94442;
+  border-color: #FF9891;
   -webkit-box-shadow: none;
           box-shadow: none;
 }
 .has-error .form-control:focus {
-  border-color: #843534;
+  border-color: #FF9891;
   -webkit-box-shadow: none;
           box-shadow: none;
 }
 .has-error .input-group-addon {
   color: #000;
   background-color: #FF9891;
-  border-color: #a94442;
+  border-color: #FF9891;
 }
 .has-error .form-control-feedback {
   color: #000;
@@ -3040,6 +3040,7 @@ select[multiple].input-lg {
 .btn:not(.nohover):focus,
 .btn.focus {
   color: #000;
+  background-color: #FFE97F;
   text-decoration: none;
 }
 .btn:active,
@@ -5146,7 +5147,7 @@ a.thumbnail.active {
   border-top-color: #e4b9c0;
 }
 .alert-danger .alert-link {
-  color: #843534;
+  color: #FF9891;
 }
 @-webkit-keyframes progress-bar-stripes {
   from {
@@ -5488,7 +5489,7 @@ a.list-group-item-danger.active:not(.nohover):focus,
 button.list-group-item-danger.active:not(.nohover):focus {
   color: #000;
   background-color: #FF9891;
-  border-color: #a94442;
+  border-color: #FF9891;
 }
 .list-group-item-heading {
   margin-top: 0;
@@ -5836,7 +5837,7 @@ button.list-group-item-danger.active:not(.nohover):focus {
 }
 .panel-danger > .panel-heading .badge {
   color: #FF9891;
-  background-color: #a94442;
+  background-color: #FF9891;
 }
 .panel-danger > .panel-footer + .panel-collapse > .panel-body {
   border-bottom-color: #ebccd1;
@@ -5958,8 +5959,7 @@ button.close {
   background-color: #fff;
   -webkit-background-clip: padding-box;
           background-clip: padding-box;
-  border: 1px solid #999;
-  border: 1px solid rgba(0, 0, 0, .2);
+  border: 0px;
   border-radius: 0px;
   outline: 0;
   -webkit-box-shadow: none;
@@ -5985,7 +5985,7 @@ button.close {
 .modal-header {
   min-height: 16.42857143px;
   padding: 15px;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 0px;
 }
 .modal-header .close {
   margin-top: -2px;
