@@ -14,7 +14,7 @@ class FileList extends React.Component {
         };
     }
 
-    componentDidMount() {
+    componentWillUpdate() {
         if (this.props.directory == 'grammars'){
             var endpoint = '/api/grammar/load_dir'
         } else {
