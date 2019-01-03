@@ -397,7 +397,10 @@ class Productionist(object):
         # doesn't pass through any symbols with tags; in this case, Productionist can just randomly
         # select production rules that are not semantically meaningful until it's ground out into
         # a terminal expansion
-        path = [self.grammar.production_rules[int(rule_id)] for rule_id in recipe.path.split(',')]
+        if recipe.path:
+            path = [self.grammar.production_rules[int(rule_id)] for rule_id in recipe.path.split(',')]
+        else:
+            path = []
         # Keep this list handy as the list of remaining rules to execute -- we'll
         # be consuming this as we proceed
         self.remaining_path = list(path)
