@@ -179,7 +179,7 @@ class NonterminalList extends React.Component {
                     <ListGroupItem bsSize='xsmall' key='nonterminalListSearchGroupItem' style={{'padding': '0px'}}>
                         <Button key="ADDNEW" onClick={this.addNonterminal} title="Add new symbol" style={{'height': '35px', 'marginBottom': '2px'}}><Glyphicon glyph="plus"/></Button>
                         <input  id='nonterminalListSearch'
-                                title="Hint: try '$text:[text from symbol expansion]', e.g., '$text:typoo'"
+                                title="Hint: try '$text:[text from symbol rewriting]', e.g., '$text:typoo'"
                                 type='text'
                                 onChange={this.updateList}
                                 value={this.props.symbolFilterQuery}
