@@ -35,7 +35,7 @@ class NonterminalBoard extends React.Component {
         this.props.updateHistory(tag, index)
     }
 
-    handleSetDeep(nonterminal) {
+    handleSetDeep() {
         if (this.props.name != "") {
             var object = {
                 "nonterminal": this.props.name,
@@ -45,7 +45,9 @@ class NonterminalBoard extends React.Component {
                 type: "POST",
                 contentType: "application/json",
                 data: JSON.stringify(object),
-                success: () => this.props.updateFromServer(),
+                success: () => {
+                    this.props.updateFromServer();
+                },
                 cache: false
             })
         }

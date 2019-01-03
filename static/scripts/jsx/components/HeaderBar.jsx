@@ -21,19 +21,15 @@ class HeaderBar extends React.Component {
         this.closeSaveModal = this.closeSaveModal.bind(this);
         this.openExportModal = this.openExportModal.bind(this);
         this.closeExportModal = this.closeExportModal.bind(this);
-        this.openBuildModal = this.openBuildModal.bind(this);
-        this.closeBuildModal = this.closeBuildModal.bind(this);
         this.load = this.load.bind(this);
         this.reset = this.reset.bind(this);
+        this.attemptToBuildProductionist = this.attemptToBuildProductionist.bind(this);
         this.buildProductionist = this.buildProductionist.bind(this);
         this.state = {
             showLoadModal: false,
             showTestModal: false,
             showSaveModal: false,
             showExportModal: false,
-            showBuildModal: false,
-            buildNavTitle: 'Build',
-            buildModalTitle: 'Build Productionist module...',
             bundleName: '',
         };
     }
@@ -54,10 +50,6 @@ class HeaderBar extends React.Component {
         this.setState({showExportModal: true});
     }
 
-    openBuildModal(){
-        this.setState({showBuildModal: true});
-    }
-
     closeTestModal() {
         this.setState({showTestModal: false});
     }
@@ -72,10 +64,6 @@ class HeaderBar extends React.Component {
 
     closeExportModal(){
         this.setState({showExportModal: false});
-    }
-
-    closeBuildModal(){
-        this.setState({showBuildModal: false});
     }
 
     closeSystemVarsModal() {
@@ -113,15 +101,46 @@ class HeaderBar extends React.Component {
         this.props.updateMarkupFeedback([]);
         this.props.updateExpansionFeedback('');
         this.props.updateHistory("'", -1);
-        this.props.update()
+        this.props.update();
+        this.props.disableTestButton();
+        this.props.disableBuildButton();
         this.setState({currentGrammarName: ''})
     }
 
-    buildProductionist(contentBundleName) {
-        this.setState({
-            buildNavTitle: 'Building...',
-            buildModalTitle: 'Building...'
+    attemptToBuildProductionist() {
+        // First, make sure that there is an exported content bundle that shares the same name
+        // with the current grammar (specifically, check for the corresponding .grammar and
+        // .meanings files) -- if not, it's probably because the author changes the filenames
+        // manually, in which case we should alert them of that and suggest that they re-export
+        // to target the desired filenames
+        ajax({
+            url: $SCRIPT_ROOT + '/api/load_bundles',
+            type: "GET",
+            cache: false,
+            success: (data) => {
+                var grammarName = this.props.getCurrentGrammarName();
+                var grammarFileEncountered = false;
+                var meaningsFileEncountered = false;
+                for (var i = 0; i < data.results.length; i++) {
+                    var bundleFileFilename = data.results[i];
+                    if (bundleFileFilename === grammarName + '.grammar') {
+                        grammarFileEncountered = true;
+                    }
+                    else if (bundleFileFilename === grammarName + '.meanings') {
+                        meaningsFileEncountered = true;
+                    }
+                }
+                if (grammarFileEncountered && meaningsFileEncountered) {
+                    this.buildProductionist(grammarName);
+                }
+                else {
+                    alert("A Productionist module could not be built because an exported content bundle corresponding to this grammar could not be found. This means that the following expected files are not in the /exports directory: '" + grammarName + ".grammar' and '" + grammarName + ".meanings'.")
+                }
+            }
         })
+    }
+
+    buildProductionist(contentBundleName) {
         ajax({
             url: $SCRIPT_ROOT + '/api/grammar/build',
             type: "POST",
@@ -130,11 +149,9 @@ class HeaderBar extends React.Component {
             cache: false,
             success: (data) => {
                 this.setState({
-                    bundleName: data.bundleName,
-                    showBuildModal: false,
-                    buildNavTitle: 'Build',
-                    buildModalTitle: 'Build Productionist module...'
+                    bundleName: data.bundleName
                 })
+                this.props.enableTestButton();
             }
         })
     }
@@ -146,10 +163,10 @@ class HeaderBar extends React.Component {
                     <ButtonGroup>
                         <Button title="Start new grammar" onClick={this.reset} bsStyle='primary'>New</Button>
                         <Button title="Load grammar" onClick={this.openLoadModal} bsStyle='primary'>Load</Button>
-                        <Button id="headerBarSaveButton" title="Save grammar" onClick={this.openSaveModal} bsStyle='primary'>Save</Button>
-                        <Button title="Export content bundle" onClick={this.openExportModal} bsStyle='primary'>Export</Button>
-                        <Button title="Build Productionist module" onClick={this.openBuildModal} bsStyle='primary'>{this.state.buildNavTitle}</Button>
-                        <Button title="Test Productionist module" onClick={this.openTestModal} bsStyle='primary'>Test</Button>
+                        <Button title="Save grammar" id="headerBarSaveButton"  onClick={this.openSaveModal} bsStyle='primary'>Save</Button>
+                        <Button title="Export content bundle" disabled={this.props.exportButtonDisabled} onClick={this.openExportModal} bsStyle='primary'>Export</Button>
+                        <Button title="Build Productionist module" disabled={this.props.buildButtonDisabled} onClick={this.attemptToBuildProductionist} bsStyle='primary'>Build</Button>
+                        <Button title="Test Productionist module" disabled={this.props.testButtonDisabled} onClick={this.openTestModal} bsStyle='primary'>Test</Button>
                     </ButtonGroup>
                 </ButtonToolbar>
                 <TestModal show={this.state.showTestModal} onHide={this.closeTestModal} bundleName={this.state.bundleName}></TestModal>
@@ -159,14 +176,8 @@ class HeaderBar extends React.Component {
                     </Modal.Header>
                     <FileList onFileClick={this.load} highlightedFile={this.props.getCurrentGrammarName()} directory='grammars'></FileList>
                 </Modal>
-                <ExportGrammarModal show={this.state.showExportModal} onHide={this.closeExportModal} getCurrentGrammarName={this.props.getCurrentGrammarName} setCurrentGrammarName={this.props.setCurrentGrammarName}></ExportGrammarModal>
+                <ExportGrammarModal show={this.state.showExportModal} onHide={this.closeExportModal} getCurrentGrammarName={this.props.getCurrentGrammarName} setCurrentGrammarName={this.props.setCurrentGrammarName} enableBuildButton={this.props.enableBuildButton}></ExportGrammarModal>
                 <SaveGrammarModal show={this.state.showSaveModal} onHide={this.closeSaveModal} getCurrentGrammarName={this.props.getCurrentGrammarName} setCurrentGrammarName={this.props.setCurrentGrammarName}></SaveGrammarModal>
-                <Modal show={this.state.showBuildModal} onHide={this.closeBuildModal}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>{this.state.buildModalTitle}</Modal.Title>
-                    </Modal.Header>
-                    <FileList onFileClick={this.buildProductionist} highlightedFile={this.props.getCurrentGrammarName()} directory='exports'></FileList>
-                </Modal>
             </div>
         );
     }

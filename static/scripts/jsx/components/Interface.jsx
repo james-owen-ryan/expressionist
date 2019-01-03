@@ -29,6 +29,11 @@ class Interface extends React.Component {
         this.getCurrentGrammarName = this.getCurrentGrammarName.bind(this);
         this.setCurrentGrammarName = this.setCurrentGrammarName.bind(this);
         this.quickSave = this.quickSave.bind(this);
+        this.determineIfExportButtonIsDisabled = this.determineIfExportButtonIsDisabled.bind(this);
+        this.enableBuildButton = this.enableBuildButton.bind(this);
+        this.disableBuildButton = this.disableBuildButton.bind(this);
+        this.enableTestButton = this.enableTestButton.bind(this);
+        this.disableTestButton = this.disableTestButton.bind(this);
         this.state = {
             nonterminals: [],
             markups: [],
@@ -40,7 +45,10 @@ class Interface extends React.Component {
             ruleDefinitionModalIsOpen: false,
             idOfRuleToEdit: null,
             symbolFilterQuery: "",
-            currentGrammarName: 'new'
+            currentGrammarName: 'new',
+            exportButtonDisabled: true,
+            buildButtonDisabled: true,
+            testButtonDisabled: true
         }
     }
 
@@ -71,7 +79,7 @@ class Interface extends React.Component {
         });
     }
 
-    onBackButtonEvent(e){
+    onBackButtonEvent(e) {
         e.preventDefault();
         //this.goBack()
         var nonterminal = this.props.params.nonterminalid
@@ -93,6 +101,7 @@ class Interface extends React.Component {
                 this.setState({nonterminals: data['nonterminals']})
                 this.setState({markups: data['markups']})
                 this.setState({system_vars: data['system_vars']})
+                this.determineIfExportButtonIsDisabled(data['nonterminals'])
             },
             error: (xhr, status, err) => {
                 console.error(this.props.url, status, err.toString())
@@ -100,7 +109,7 @@ class Interface extends React.Component {
         });
     }
 
-    updateHistory(nonterminal, rule){
+    updateHistory(nonterminal, rule) {
         if( nonterminal != '') {
             browserHistory.push('/'+nonterminal+'/'+String(rule))
         } else {
@@ -108,20 +117,49 @@ class Interface extends React.Component {
         }
     }
 
-    updateCurrentNonterminal(newTagOrNonterminal){
+    updateCurrentNonterminal(newTagOrNonterminal) {
         this.setState({current_nonterminal: newTagOrNonterminal});
     }
 
-    updateCurrentRule(newCurrentRule){
+    updateCurrentRule(newCurrentRule) {
         this.setState({current_rule: newCurrentRule});
     }
 
-    updateMarkupFeedback(newMarkupFeedback){
+    updateMarkupFeedback(newMarkupFeedback) {
         this.setState({markup_feedback: newMarkupFeedback});
     }
 
-    updateExpansionFeedback(newExpansionFeedback){
+    updateExpansionFeedback(newExpansionFeedback) {
         this.setState({expansion_feedback: newExpansionFeedback});
+    }
+
+    determineIfExportButtonIsDisabled(nonterminals) {
+        // Disable the 'Export' button only if there are no top-level, complete symbols
+        // in the grammar
+        var disableExportButton = true;
+        for (var symbolName in nonterminals) {
+            if (nonterminals[symbolName].deep && nonterminals[symbolName].rules.length > 0) {
+                disableExportButton = false;
+                break;
+            }
+        }
+        this.setState({exportButtonDisabled: disableExportButton})
+    }
+
+    enableBuildButton() {
+        this.setState({buildButtonDisabled: false});
+    }
+
+    disableBuildButton() {
+        this.setState({buildButtonDisabled: true});
+    }
+
+    enableTestButton() {
+        this.setState({testButtonDisabled: false});
+    }
+
+    disableTestButton() {
+        this.setState({testButtonDisabled: true});
     }
 
     getexpansion(object) {
@@ -206,7 +244,7 @@ class Interface extends React.Component {
         document.getElementById("headerBarSaveButton").style.backgroundColor = "rgb("+r+","+g+","+b+")";
     }
 
-    componentDidMount(){
+    componentDidMount() {
         document.addEventListener("keydown", this.quickSave, false);
     }
 
@@ -259,11 +297,18 @@ class Interface extends React.Component {
                                 updateCurrentRule={this.updateCurrentRule}
                                 updateMarkupFeedback={this.updateMarkupFeedback}
                                 updateExpansionFeedback={this.updateExpansionFeedback}
+                                enableTestButton={this.enableTestButton}
+                                disableTestButton={this.disableTestButton}
+                                enableBuildButton={this.enableBuildButton}
+                                disableBuildButton={this.disableBuildButton}
                                 updateHistory={this.updateHistory}
                                 update={this.updateFromServer}
                                 getCurrentGrammarName={this.getCurrentGrammarName}
                                 setCurrentGrammarName={this.setCurrentGrammarName}
-                                systemVars={this.state.system_vars}/>
+                                systemVars={this.state.system_vars}
+                                exportButtonDisabled={this.state.exportButtonDisabled}
+                                buildButtonDisabled={this.state.buildButtonDisabled}
+                                testButtonDisabled={this.state.testButtonDisabled}/>
                     <div className="muwrap">
                         <div className="show-y-wrapper">
                             <MarkupBar  className="markup-bar"

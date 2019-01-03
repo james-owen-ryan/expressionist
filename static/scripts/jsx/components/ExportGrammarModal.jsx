@@ -119,6 +119,7 @@ class ExportGrammarModal extends React.Component {
             async: true,
             cache: false,
             success: (status) => {
+                this.props.enableBuildButton();
                 this.setState({'exportGrammarBtnText': 'Exported!'})
                 // Generate a juicy response (button lights green and fades back to gray)
                 document.getElementById('exportButton').style.backgroundColor = 'rgb(87, 247, 224)';
