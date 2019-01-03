@@ -84,7 +84,7 @@ class NonterminalBoard extends React.Component {
                 type: "POST",
                 contentType: "application/json",
                 data: JSON.stringify(object),
-                succes: () => {
+                success: () => {
                     this.props.updateCurrentNonterminal("");
                     this.props.updateCurrentRule(-1);
                     this.props.updateFromServer();
