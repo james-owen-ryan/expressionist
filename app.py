@@ -112,11 +112,7 @@ def set_deep():
     data = request.get_json()
     nonterminal = app.flask_grammar.nonterminals.get(data["nonterminal"])
     if nonterminal:
-        if nonterminal.deep:
-            nonterminal.deep = False
-        else:
-            nonterminal.deep = True
-
+        nonterminal.deep = not nonterminal.deep
     return app.flask_grammar.to_json()
 
 
