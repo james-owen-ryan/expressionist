@@ -1,6 +1,6 @@
 var React = require('react')
 var ButtonGroup = require('react-bootstrap').ButtonGroup
-var Button = require('react-bootstrap').Button
+import Button from 'react-bootstrap-button-loader';
 var ButtonToolbar = require('react-bootstrap').ButtonToolbar
 var Modal = require('react-bootstrap').Modal
 var ajax = require('jquery').ajax
@@ -30,7 +30,7 @@ class HeaderBar extends React.Component {
             showTestModal: false,
             showSaveModal: false,
             showExportModal: false,
-            bundleName: '',
+            bundleName: ''
         };
     }
 
@@ -71,15 +71,16 @@ class HeaderBar extends React.Component {
     }
 
     load(filename) {
+        this.props.turnLoadButtonSpinnerOn();
+        this.setState({showLoadModal: false});
         ajax({
             url: $SCRIPT_ROOT + '/api/grammar/from_file',
             type: "POST",
             contentType: "json",
             data: filename,
             success: () => {
-                this.props.update()
+                this.props.update(this.props.turnLoadButtonSpinnerOff)
                 this.setState({
-                    showLoadModal: false,
                     currentGrammarName: filename.replace('.json', '')
                 })
             },
@@ -141,6 +142,7 @@ class HeaderBar extends React.Component {
     }
 
     buildProductionist(contentBundleName) {
+        this.props.turnBuildButtonSpinnerOn();
         ajax({
             url: $SCRIPT_ROOT + '/api/grammar/build',
             type: "POST",
@@ -148,9 +150,8 @@ class HeaderBar extends React.Component {
             data: contentBundleName,
             cache: false,
             success: (data) => {
-                this.setState({
-                    bundleName: data.bundleName
-                })
+                this.setState({bundleName: data.bundleName})
+                this.props.turnBuildButtonSpinnerOff();
                 this.props.enableTestButton();
             }
         })
@@ -162,10 +163,10 @@ class HeaderBar extends React.Component {
                 <ButtonToolbar>
                     <ButtonGroup>
                         <Button title="Start new grammar" onClick={this.reset} bsStyle='primary'>New</Button>
-                        <Button title="Load grammar" onClick={this.openLoadModal} bsStyle='primary'>Load</Button>
+                        <Button title={this.props.loadButtonSpinnerOn ? "Loading grammar..." : "Load grammar"} onClick={this.openLoadModal} bsStyle='primary' spinColor="#000" loading={this.props.loadButtonSpinnerOn}>{this.props.loadButtonSpinnerOn ? "Loading..." : "Load"}</Button>
                         <Button title="Save grammar" id="headerBarSaveButton"  onClick={this.openSaveModal} bsStyle='primary'>Save</Button>
-                        <Button title="Export content bundle" disabled={this.props.exportButtonDisabled} onClick={this.openExportModal} bsStyle='primary'>Export</Button>
-                        <Button title="Build Productionist module" disabled={this.props.buildButtonDisabled} onClick={this.attemptToBuildProductionist} bsStyle='primary'>Build</Button>
+                        <Button title={this.props.exportButtonSpinnerOn ? "Exporting content bundle..." : "Export content bundle"} disabled={this.props.exportButtonDisabled} onClick={this.openExportModal} bsStyle='primary' spinColor="#000" loading={this.props.exportButtonSpinnerOn}>{this.props.exportButtonSpinnerOn ? "Exporting..." : "Export"}</Button>
+                        <Button title={this.props.buildButtonSpinnerOn ? "Building Productionist module..." : "Build Productionist module"} disabled={this.props.buildButtonDisabled} onClick={this.attemptToBuildProductionist} bsStyle='primary' spinColor="#000" loading={this.props.buildButtonSpinnerOn}>{this.props.buildButtonSpinnerOn ? "Building..." : "Build"}</Button>
                         <Button title="Test Productionist module" disabled={this.props.testButtonDisabled} onClick={this.openTestModal} bsStyle='primary'>Test</Button>
                     </ButtonGroup>
                 </ButtonToolbar>
@@ -176,7 +177,7 @@ class HeaderBar extends React.Component {
                     </Modal.Header>
                     <FileList onFileClick={this.load} highlightedFile={this.props.getCurrentGrammarName()} directory='grammars'></FileList>
                 </Modal>
-                <ExportGrammarModal show={this.state.showExportModal} onHide={this.closeExportModal} getCurrentGrammarName={this.props.getCurrentGrammarName} setCurrentGrammarName={this.props.setCurrentGrammarName} enableBuildButton={this.props.enableBuildButton}></ExportGrammarModal>
+                <ExportGrammarModal show={this.state.showExportModal} onHide={this.closeExportModal} getCurrentGrammarName={this.props.getCurrentGrammarName} setCurrentGrammarName={this.props.setCurrentGrammarName} enableBuildButton={this.props.enableBuildButton} exportButtonSpinnerOn={this.props.exportButtonSpinnerOn} turnExportButtonSpinnerOff={this.props.turnExportButtonSpinnerOff} turnExportButtonSpinnerOn={this.props.turnExportButtonSpinnerOn}></ExportGrammarModal>
                 <SaveGrammarModal show={this.state.showSaveModal} onHide={this.closeSaveModal} getCurrentGrammarName={this.props.getCurrentGrammarName} setCurrentGrammarName={this.props.setCurrentGrammarName}></SaveGrammarModal>
             </div>
         );

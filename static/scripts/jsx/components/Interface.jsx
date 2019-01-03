@@ -34,6 +34,12 @@ class Interface extends React.Component {
         this.disableBuildButton = this.disableBuildButton.bind(this);
         this.enableTestButton = this.enableTestButton.bind(this);
         this.disableTestButton = this.disableTestButton.bind(this);
+        this.turnLoadButtonSpinnerOff = this.turnLoadButtonSpinnerOff.bind(this);
+        this.turnLoadButtonSpinnerOn = this.turnLoadButtonSpinnerOn.bind(this);
+        this.turnExportButtonSpinnerOff = this.turnExportButtonSpinnerOff.bind(this);
+        this.turnExportButtonSpinnerOn = this.turnExportButtonSpinnerOn.bind(this);
+        this.turnBuildButtonSpinnerOff = this.turnBuildButtonSpinnerOff.bind(this);
+        this.turnBuildButtonSpinnerOn = this.turnBuildButtonSpinnerOn.bind(this);
         this.state = {
             nonterminals: [],
             markups: [],
@@ -48,7 +54,10 @@ class Interface extends React.Component {
             currentGrammarName: 'new',
             exportButtonDisabled: true,
             buildButtonDisabled: true,
-            testButtonDisabled: true
+            testButtonDisabled: true,
+            loadButtonSpinnerOn: false,
+            exportButtonSpinnerOn: false,
+            buildButtonSpinnerOn: false
         }
     }
 
@@ -92,7 +101,7 @@ class Interface extends React.Component {
         this.setState({current_rule: rule})
     }
 
-    updateFromServer() {
+    updateFromServer(additionalFunctionToExecuteUponSuccess) {
         ajax({
             url: $SCRIPT_ROOT + '/api/default',
             dataType: 'json',
@@ -102,6 +111,9 @@ class Interface extends React.Component {
                 this.setState({markups: data['markups']})
                 this.setState({system_vars: data['system_vars']})
                 this.determineIfExportButtonIsDisabled(data['nonterminals'])
+                if (additionalFunctionToExecuteUponSuccess !== undefined) {
+                    additionalFunctionToExecuteUponSuccess();
+                }
             },
             error: (xhr, status, err) => {
                 console.error(this.props.url, status, err.toString())
@@ -160,6 +172,30 @@ class Interface extends React.Component {
 
     disableTestButton() {
         this.setState({testButtonDisabled: true});
+    }
+
+    turnLoadButtonSpinnerOn() {
+        this.setState({loadButtonSpinnerOn: true});
+    }
+
+    turnLoadButtonSpinnerOff() {
+        this.setState({loadButtonSpinnerOn: false});
+    }
+
+    turnExportButtonSpinnerOn() {
+        this.setState({exportButtonSpinnerOn: true});
+    }
+
+    turnExportButtonSpinnerOff() {
+        this.setState({exportButtonSpinnerOn: false});
+    }
+
+    turnBuildButtonSpinnerOn() {
+        this.setState({buildButtonSpinnerOn: true});
+    }
+
+    turnBuildButtonSpinnerOff() {
+        this.setState({buildButtonSpinnerOn: false});
     }
 
     getexpansion(object) {
@@ -297,10 +333,6 @@ class Interface extends React.Component {
                                 updateCurrentRule={this.updateCurrentRule}
                                 updateMarkupFeedback={this.updateMarkupFeedback}
                                 updateExpansionFeedback={this.updateExpansionFeedback}
-                                enableTestButton={this.enableTestButton}
-                                disableTestButton={this.disableTestButton}
-                                enableBuildButton={this.enableBuildButton}
-                                disableBuildButton={this.disableBuildButton}
                                 updateHistory={this.updateHistory}
                                 update={this.updateFromServer}
                                 getCurrentGrammarName={this.getCurrentGrammarName}
@@ -308,7 +340,20 @@ class Interface extends React.Component {
                                 systemVars={this.state.system_vars}
                                 exportButtonDisabled={this.state.exportButtonDisabled}
                                 buildButtonDisabled={this.state.buildButtonDisabled}
-                                testButtonDisabled={this.state.testButtonDisabled}/>
+                                testButtonDisabled={this.state.testButtonDisabled}
+                                enableTestButton={this.enableTestButton}
+                                disableTestButton={this.disableTestButton}
+                                enableBuildButton={this.enableBuildButton}
+                                disableBuildButton={this.disableBuildButton}
+                                loadButtonSpinnerOn={this.state.loadButtonSpinnerOn}
+                                exportButtonSpinnerOn={this.state.exportButtonSpinnerOn}
+                                buildButtonSpinnerOn={this.state.buildButtonSpinnerOn}
+                                turnLoadButtonSpinnerOff={this.turnLoadButtonSpinnerOff}
+                                turnLoadButtonSpinnerOn={this.turnLoadButtonSpinnerOn}
+                                turnExportButtonSpinnerOff={this.turnExportButtonSpinnerOff}
+                                turnExportButtonSpinnerOn={this.turnExportButtonSpinnerOn}
+                                turnBuildButtonSpinnerOff={this.turnBuildButtonSpinnerOff}
+                                turnBuildButtonSpinnerOn={this.turnBuildButtonSpinnerOn}/>
                     <div className="muwrap">
                         <div className="show-y-wrapper">
                             <MarkupBar  className="markup-bar"
