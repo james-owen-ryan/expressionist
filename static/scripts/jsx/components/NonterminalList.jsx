@@ -11,7 +11,7 @@ class NonterminalList extends React.Component {
     constructor(props) {
         super(props);
         this.clickNonterminalUpdate = this.clickNonterminalUpdate.bind(this);
-        this.updateList = this.updateList.bind(this);
+        this.updateSymbolFilterQuery = this.updateSymbolFilterQuery.bind(this);
         this.formatList = this.formatList.bind(this);
         this.addNonterminal = this.addNonterminal.bind(this);
         this.state = {
@@ -29,7 +29,7 @@ class NonterminalList extends React.Component {
         }
     }
 
-    updateList(e) {
+    updateSymbolFilterQuery(e) {
         this.props.updateSymbolFilterQuery(e.target.value);
     }
 
@@ -107,7 +107,7 @@ class NonterminalList extends React.Component {
                         <input  id='nonterminalListSearch'
                                 title="Hint: try '$text:[text from symbol rewriting]', e.g., '$text:typoo'"
                                 type='text'
-                                onChange={this.updateList}
+                                onChange={this.updateSymbolFilterQuery}
                                 value={this.props.symbolFilterQuery}
                                 style={{'width': 'calc(100% - 38px)', 'height': '100%', 'padding': '8px'}}
                                 placeholder='Filter list...'
