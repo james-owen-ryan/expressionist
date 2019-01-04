@@ -162,7 +162,7 @@ class HeaderBar extends React.Component {
                     <ButtonGroup>
                         <Button title="Start new grammar" onClick={this.reset} bsStyle='primary'>New</Button>
                         <Button title={this.props.loadButtonSpinnerOn ? "Loading grammar..." : "Load grammar"} onClick={this.openLoadModal} bsStyle='primary' spinColor="#000" loading={this.props.loadButtonSpinnerOn}>{this.props.loadButtonSpinnerOn ? "Loading..." : "Load"}</Button>
-                        <Button title="Save grammar (hint: try 'command+s' / 'ctrl+s')" id="headerBarSaveButton"  onClick={this.openSaveModal} bsStyle='primary'>Save</Button>
+                        <Button title="Save grammar (hint: try 'command+s' or 'ctrl+s')" id="headerBarSaveButton"  onClick={this.openSaveModal} bsStyle='primary'>Save</Button>
                         <Button title={this.props.exportButtonSpinnerOn ? "Exporting content bundle..." : "Export content bundle"} disabled={this.props.exportButtonDisabled} onClick={this.openExportModal} bsStyle='primary' spinColor="#000" loading={this.props.exportButtonSpinnerOn}>{this.props.exportButtonSpinnerOn ? "Exporting..." : "Export"}</Button>
                         <Button title={this.props.buildButtonSpinnerOn ? "Building Productionist module..." : "Build Productionist module"} disabled={this.props.buildButtonDisabled} onClick={this.attemptToBuildProductionist} bsStyle='primary' spinColor="#000" loading={this.props.buildButtonSpinnerOn}>{this.props.buildButtonSpinnerOn ? "Building..." : "Build"}</Button>
                         <Button title="Test Productionist module" disabled={this.props.testButtonDisabled} onClick={this.openTestModal} bsStyle='primary'>Test</Button>
