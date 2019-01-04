@@ -90,7 +90,7 @@ class Nonterminal extends React.Component {
                             <input id="newSymbolNameInputElement" type='text' onChange={this.handleNewNameValueChange} value={this.state.newNameVal} style={{'width': 'calc(100% - 80px)', 'height': '35px', 'padding': '8px', 'backgroundColor': 'white'}} placeholder='Enter symbol name.' autoFocus="true"/>
                             <div style={{'marginRight': '10px', 'display': 'inline', 'width': '80px'}}>
                                 <Button id="newSymbolNameInputElementButton" onClick={this.handleNonterminalRename} title={this.disableNewNameValue() ? "Add symbol (disabled: requires at least one character)" : "Add symbol"} bsStyle="default" style={{'marginBottom': '3px', 'padding': '8px 13px', 'height': '35.5px'}} disabled={this.disableNewNameValue()}><Glyphicon glyph="ok"/></Button>
-                                <Button onClick={this.handleNonterminalDelete} title="Remove symbol" style={{'marginBottom': '3px', 'padding': '8px 13px', 'height': '35.5px'}} bsStyle="default"><Glyphicon glyph="remove"/></Button>
+                                <Button onClick={this.handleNonterminalDelete} title="Cancel" style={{'marginBottom': '3px', 'padding': '8px 13px', 'height': '35.5px'}} bsStyle="default"><Glyphicon glyph="remove"/></Button>
                             </div>
                 </ListGroupItem>
             );
