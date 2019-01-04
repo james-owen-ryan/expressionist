@@ -211,7 +211,8 @@ class NonterminalList extends React.Component {
                                                 updateFromServer={this.props.updateFromServer}
                                                 updateCurrentNonterminal={this.props.updateCurrentNonterminal}
                                                 updateHistory={this.props.updateHistory}
-                                                currentRule={this.props.currentRule}>
+                                                currentRule={this.props.currentRule}
+                                                isCurrentNonterminal={name === this.props.currentNonterminalName}>
                                 </Nonterminal>
                             )
                         })

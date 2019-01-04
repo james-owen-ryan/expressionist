@@ -413,7 +413,8 @@ class Interface extends React.Component {
                                         updateMarkupFeedback={this.updateMarkupFeedback}
                                         updateExpansionFeedback={this.updateExpansionFeedback}
                                         updateSymbolFilterQuery={this.updateSymbolFilterQuery}
-                                        symbolFilterQuery={this.state.symbolFilterQuery}>
+                                        symbolFilterQuery={this.state.symbolFilterQuery}
+                                        currentNonterminalName={this.state.current_nonterminal}>
                     </NonterminalList>
                 </div>
                 <div style={{"width": "75%", "height": "30%", position: "absolute", bottom: 0, left:0}}>
