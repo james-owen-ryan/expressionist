@@ -133,7 +133,7 @@ class HeaderBar extends React.Component {
                     this.buildProductionist(grammarName);
                 }
                 else {
-                    alert("A Productionist module could not be built because an exported content bundle corresponding to this grammar could not be found. This means that the following expected files are not in the /exports directory: '" + grammarName + ".grammar' and '" + grammarName + ".meanings'.")
+                    alert("A Productionist module could not be built because an exported content bundle corresponding to this grammar could not be found. This means that the following expected files are not in the /exports directory: '" + grammarName + ".grammar' and '" + grammarName + ".meanings'. Perhaps one or both were deleted or renamed?")
                 }
             }
         })
@@ -163,9 +163,9 @@ class HeaderBar extends React.Component {
                         <Button title="Start new grammar" onClick={this.reset} bsStyle='primary'>New</Button>
                         <Button title={this.props.loadButtonSpinnerOn ? "Loading grammar..." : "Load grammar"} onClick={this.openLoadModal} bsStyle='primary' spinColor="#000" loading={this.props.loadButtonSpinnerOn}>{this.props.loadButtonSpinnerOn ? "Loading..." : "Load"}</Button>
                         <Button title="Save grammar (hint: try 'command+s' or 'ctrl+s')" id="headerBarSaveButton"  onClick={this.openSaveModal} bsStyle='primary'>Save</Button>
-                        <Button title={this.props.exportButtonSpinnerOn ? "Exporting content bundle..." : "Export content bundle"} disabled={this.props.exportButtonDisabled} onClick={this.openExportModal} bsStyle='primary' spinColor="#000" loading={this.props.exportButtonSpinnerOn}>{this.props.exportButtonSpinnerOn ? "Exporting..." : "Export"}</Button>
-                        <Button title={this.props.buildButtonSpinnerOn ? "Building Productionist module..." : "Build Productionist module"} disabled={this.props.buildButtonDisabled} onClick={this.attemptToBuildProductionist} bsStyle='primary' spinColor="#000" loading={this.props.buildButtonSpinnerOn}>{this.props.buildButtonSpinnerOn ? "Building..." : "Build"}</Button>
-                        <Button title="Test Productionist module" disabled={this.props.testButtonDisabled} onClick={this.openTestModal} bsStyle='primary'>Test</Button>
+                        <Button title={this.props.exportButtonSpinnerOn ? "Exporting content bundle..." : this.props.exportButtonDisabled ? "Export content bundle (disabled: requires at least one top-level symbol with a production rule)" : "Export content bundle"} disabled={this.props.exportButtonDisabled} onClick={this.openExportModal} bsStyle='primary' spinColor="#000" loading={this.props.exportButtonSpinnerOn}>{this.props.exportButtonSpinnerOn ? "Exporting..." : "Export"}</Button>
+                        <Button title={this.props.buildButtonSpinnerOn ? "Building Productionist module..." : this.props.buildButtonDisabled ? "Build Productionist module (disabled: requires exported content bundle)" : "Build Productionist module"} disabled={this.props.buildButtonDisabled} onClick={this.attemptToBuildProductionist} bsStyle='primary' spinColor="#000" loading={this.props.buildButtonSpinnerOn}>{this.props.buildButtonSpinnerOn ? "Building..." : "Build"}</Button>
+                        <Button title={this.props.testButtonDisabled ? "Test Productionist module (disabled: requires built Productionist module)" : "Test Productionist module"} disabled={this.props.testButtonDisabled} onClick={this.openTestModal} bsStyle='primary'>Test</Button>
                     </ButtonGroup>
                 </ButtonToolbar>
                 <TestModal show={this.state.showTestModal} onHide={this.closeTestModal} bundleName={this.state.bundleName}></TestModal>
