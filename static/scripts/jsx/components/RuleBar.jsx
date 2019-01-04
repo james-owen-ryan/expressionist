@@ -249,6 +249,10 @@ class RuleBar extends React.Component {
             ruleDefinitionAddButtonIsDisabled = true;
             ruleDefinitionModalButtonHoverText += " (disabled: application rate is missing)"
         }
+        else if (this.state.ruleHeadInputVal === '') {
+            ruleDefinitionAddButtonIsDisabled = true;
+            ruleDefinitionModalButtonHoverText += " (disabled: rule head is missing)"
+        }
         return (
             <div>
                 <div className="btn-test">
