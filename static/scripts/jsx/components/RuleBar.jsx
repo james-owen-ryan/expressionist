@@ -227,14 +227,6 @@ class RuleBar extends React.Component {
             var shortened = rule.expansion.join('').substring(0, 10);
             rules.push(<Button onClick={this.handleRuleClick.bind(this, i)} title="View production rule" key={rule.expansion.join('')+this.props.name} style={i === this.props.currentRule ? {"backgroundColor": "#ffe97f"} : {}}>{shortened}</Button>);
         }, this);
-        var openRuleModalButtonIsDisabled = true;
-        var allSymbolNames = Object.keys(this.props.nonterminals);
-        for (var i = 0; i < allSymbolNames.length; i++){
-            if (allSymbolNames[i].indexOf('$symbol') === -1) {
-                openRuleModalButtonIsDisabled = false;
-                break;
-            }
-        }
         var ruleDefinitionAddButtonIsDisabled = this.props.ruleAlreadyExists(this.state.ruleHeadInputVal, this.state.ruleExpansionInputVal, this.state.ruleApplicationRate);
         if (this.props.idOfRuleToEdit !== null) {
             var ruleDefinitionModalButtonText = 'Update Rule';
@@ -261,7 +253,7 @@ class RuleBar extends React.Component {
             <div>
                 <div className="btn-test">
                         <ButtonGroup>
-                            <Button disabled={openRuleModalButtonIsDisabled} onClick={this.openModal} title="Add new production rule" key="addnew"><Glyphicon glyph="plus"/></Button>
+                            <Button onClick={this.openModal} title="Add new production rule" key="addnew"><Glyphicon glyph="plus"/></Button>
                             {rules}
                         </ButtonGroup>
                 </div>
