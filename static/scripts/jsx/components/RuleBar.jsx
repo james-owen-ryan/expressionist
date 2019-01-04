@@ -22,6 +22,7 @@ class RuleBar extends React.Component {
         this.juiceRuleDefinitionSubmitButton = this.juiceRuleDefinitionSubmitButton.bind(this);
         this.registerRuleBodyInputFocus = this.registerRuleBodyInputFocus.bind(this);
         this.deregisterRuleBodyInputFocus = this.deregisterRuleBodyInputFocus.bind(this);
+        this.formatList = this.formatList.bind(this);
         this.state = {
             showModal: false,
             ruleHeadInputVal: '',
@@ -210,6 +211,13 @@ class RuleBar extends React.Component {
         document.getElementById("submitRuleButton").style.backgroundColor = "rgb("+r+","+g+","+b+")";
     }
 
+    // Returns a sorted array of nonterminal names
+    formatList(symbolNames) {  // 'nonterminals' is an array of nonterminal names
+        return symbolNames.sort(function(a, b){
+            return a.toLowerCase() == b.toLowerCase() ? 0 : +(a.toLowerCase() > b.toLowerCase()) || -1;
+        });
+    }
+
     componentDidMount(){
         document.addEventListener("keydown", this.submitRuleDefinitionOnEnter, false);
     }
@@ -256,6 +264,7 @@ class RuleBar extends React.Component {
             ruleDefinitionAddButtonIsDisabled = true;
             ruleDefinitionModalButtonHoverText += " (disabled: rule head is missing)"
         }
+
         return (
             <div>
                 <div className="btn-test">
@@ -270,13 +279,13 @@ class RuleBar extends React.Component {
                             <Modal.Title>Rule Definition</Modal.Title>
                         </Modal.Header>
                         <div id='nonterminalsListModal' style={{'overflowY': 'scroll', 'marginBottom': '15px', 'borderBottomStyle': 'solid', 'height': '200px'}}>
-                            {   Object.keys(this.props.nonterminals).map((name) => {
+                            {   this.formatList(Object.keys(this.props.nonterminals)).map((name) => {
                                     var color = this.props.nonterminals[name].complete ? "success" : "danger"
                                     return (
                                         <button className={'list-group-item list-group-item-xs nonterminal list-group-item-'.concat(color)}
                                         style={{'margin':'0', 'border':'0px'}}
                                         title={this.state.ruleBodyInputIsActive ? "Add symbol reference" : "Change rule head"}
-                                        onClick={this.handleSymbolReferenceClick.bind(this, name)} key={name}>{name}
+                                        onClick={this.handleSymbolReferenceClick.bind(this, name)} key={name}>{this.props.nonterminals[name].deep ? <Glyphicon glyph="star"/> : ""}{this.props.nonterminals[name].deep ? " " : ""}{name}
                                         </button>
                                     )
                                 })
