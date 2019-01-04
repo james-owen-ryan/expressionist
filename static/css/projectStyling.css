@@ -55,3 +55,8 @@
 .symbol-reference-in-rule-head:hover {
     background-color: #ffe97f;
 }
+
+.symbol-board-header {
+    padding: 8px 10px 16.5px 10px;
+    box-decoration-break: clone;
+}
