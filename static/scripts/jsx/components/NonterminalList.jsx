@@ -12,7 +12,6 @@ class NonterminalList extends React.Component {
         super(props);
         this.clickNonterminalUpdate = this.clickNonterminalUpdate.bind(this);
         this.updateList = this.updateList.bind(this);
-        this.getListOfMatchingSymbolNames = this.getListOfMatchingSymbolNames.bind(this);
         this.formatList = this.formatList.bind(this);
         this.addNonterminal = this.addNonterminal.bind(this);
         this.state = {
@@ -32,79 +31,6 @@ class NonterminalList extends React.Component {
 
     updateList(e) {
         this.props.updateSymbolFilterQuery(e.target.value);
-    }
-
-    // returns an array of nonterminal names that match the symbolFilterQuery.
-    getListOfMatchingSymbolNames() {
-        var allSymbolNames = Object.keys(this.props.nonterminals);
-        // If there's no filter query, all symbols match
-        if (this.props.symbolFilterQuery == ''){
-            return allSymbolNames
-        }
-        // If there's a filter query operating over tags, match all symbols having those tags; here's
-        // an example of such a filter query: '$tags:Moves:greeting & Moves:farewell' (note: these
-        // queries are treated in a case-sensitive manner because tags are case-sensitive)
-        else if (this.props.symbolFilterQuery.slice(0, 6) == "$tags:") {
-            var matches = [];
-            var raw_tags = this.props.symbolFilterQuery.slice(6).split(' $& ');
-            for (var i = 0; i < allSymbolNames.length; i++){
-                var symbolName = allSymbolNames[i];
-                var isMatch = true;
-                for (var j = 0; j < raw_tags.length; j++){
-                    if (!raw_tags[j].includes(':')) {
-                        isMatch = false;
-                    }
-                    else {
-                        var tagset = raw_tags[j].split(':')[0];
-                        var tag = raw_tags[j].split(':')[1];
-                        if (!(tagset in this.props.nonterminals[symbolName]["markup"])) {
-                            isMatch = false;
-                        }
-                        else if (!(this.props.nonterminals[symbolName]["markup"][tagset].includes(tag))) {
-                            isMatch = false;
-                        }
-                    }
-                }
-                if (isMatch){
-                    matches.push(symbolName);
-                }
-            }
-            return matches;
-        }
-        // If there's a filter query operating over symbol expansions, match all symbols that have
-        // a production rule whose body includes a terminal symbol for which the filter-query component
-        // is a substring
-        else if (this.props.symbolFilterQuery.slice(0, 6) == "$text:") {
-            if (this.props.symbolFilterQuery === "$text:") {return []}  // Otherwise every complete symbol matches
-            var matches = [];
-            var text = this.props.symbolFilterQuery.slice(6);
-            for (var i = 0; i < allSymbolNames.length; i++){
-                var symbolName = allSymbolNames[i];
-                var isMatch = false;
-                var productionRules = this.props.nonterminals[symbolName]["rules"];
-                for (var j = 0; j < productionRules.length; j++){
-                    var productionRule = productionRules[j];
-                    for (var k = 0; k < productionRule["expansion"].length; k++){
-                        var symbol = productionRule["expansion"][k];
-                        if (symbol.slice(0, 2) != '[[' && symbol.toLowerCase().indexOf(text.toLowerCase()) != -1) {
-                            isMatch = true;
-                        }
-                    }
-                }
-                if (isMatch){
-                    matches.push(symbolName);
-                }
-            }
-            return matches;
-        }
-        // Lastly, handle conventional filter queries, which simply match against the symbol names (in
-        // a case-insensitive manner)
-        return allSymbolNames.filter( (symbolName) => {
-            // A given symbol is a match if the filter query is a substring of its name
-            var isMatch = symbolName.toLowerCase().indexOf(this.props.symbolFilterQuery.toLowerCase());
-            if (isMatch != -1){ return true; }
-            return false;
-        })
     }
 
     // Returns a sorted array of nonterminal names
@@ -172,7 +98,7 @@ class NonterminalList extends React.Component {
     }
 
     render() {
-        var nonterminals = this.formatList(this.getListOfMatchingSymbolNames());
+        var nonterminals = this.formatList(this.props.getListOfMatchingSymbolNames());
         return (
             <div>
                 <ListGroup id='nonterminalList'>

@@ -41,6 +41,7 @@ class Interface extends React.Component {
         this.turnBuildButtonSpinnerOff = this.turnBuildButtonSpinnerOff.bind(this);
         this.turnBuildButtonSpinnerOn = this.turnBuildButtonSpinnerOn.bind(this);
         this.ruleAlreadyExists = this.ruleAlreadyExists.bind(this);
+        this.getListOfMatchingSymbolNames = this.getListOfMatchingSymbolNames.bind(this);
         this.state = {
             nonterminals: [],
             markups: [],
@@ -281,6 +282,79 @@ class Interface extends React.Component {
         document.getElementById("headerBarSaveButton").style.backgroundColor = "rgb("+r+","+g+","+b+")";
     }
 
+    // returns an array of nonterminal names that match the symbolFilterQuery.
+    getListOfMatchingSymbolNames() {
+        var allSymbolNames = Object.keys(this.state.nonterminals);
+        // If there's no filter query, all symbols match
+        if (this.state.symbolFilterQuery == ''){
+            return allSymbolNames
+        }
+        // If there's a filter query operating over tags, match all symbols having those tags; here's
+        // an example of such a filter query: '$tags:Moves:greeting & Moves:farewell' (note: these
+        // queries are treated in a case-sensitive manner because tags are case-sensitive)
+        else if (this.state.symbolFilterQuery.slice(0, 6) == "$tags:") {
+            var matches = [];
+            var raw_tags = this.state.symbolFilterQuery.slice(6).split(' $& ');
+            for (var i = 0; i < allSymbolNames.length; i++){
+                var symbolName = allSymbolNames[i];
+                var isMatch = true;
+                for (var j = 0; j < raw_tags.length; j++){
+                    if (!raw_tags[j].includes(':')) {
+                        isMatch = false;
+                    }
+                    else {
+                        var tagset = raw_tags[j].split(':')[0];
+                        var tag = raw_tags[j].split(':')[1];
+                        if (!(tagset in this.state.nonterminals[symbolName]["markup"])) {
+                            isMatch = false;
+                        }
+                        else if (!(this.state.nonterminals[symbolName]["markup"][tagset].includes(tag))) {
+                            isMatch = false;
+                        }
+                    }
+                }
+                if (isMatch){
+                    matches.push(symbolName);
+                }
+            }
+            return matches;
+        }
+        // If there's a filter query operating over symbol expansions, match all symbols that have
+        // a production rule whose body includes a terminal symbol for which the filter-query component
+        // is a substring
+        else if (this.state.symbolFilterQuery.slice(0, 6) == "$text:") {
+            if (this.state.symbolFilterQuery === "$text:") {return []}  // Otherwise every complete symbol matches
+            var matches = [];
+            var text = this.state.symbolFilterQuery.slice(6);
+            for (var i = 0; i < allSymbolNames.length; i++){
+                var symbolName = allSymbolNames[i];
+                var isMatch = false;
+                var productionRules = this.state.nonterminals[symbolName]["rules"];
+                for (var j = 0; j < productionRules.length; j++){
+                    var productionRule = productionRules[j];
+                    for (var k = 0; k < productionRule["expansion"].length; k++){
+                        var symbol = productionRule["expansion"][k];
+                        if (symbol.slice(0, 2) != '[[' && symbol.toLowerCase().indexOf(text.toLowerCase()) != -1) {
+                            isMatch = true;
+                        }
+                    }
+                }
+                if (isMatch){
+                    matches.push(symbolName);
+                }
+            }
+            return matches;
+        }
+        // Lastly, handle conventional filter queries, which simply match against the symbol names (in
+        // a case-insensitive manner)
+        return allSymbolNames.filter( (symbolName) => {
+            // A given symbol is a match if the filter query is a substring of its name
+            var isMatch = symbolName.toLowerCase().indexOf(this.state.symbolFilterQuery.toLowerCase());
+            if (isMatch != -1){ return true; }
+            return false;
+        })
+    }
+
     ruleAlreadyExists(ruleHeadName, ruleBody, applicationRate) {
         // Return whether a rule with the given attributes has already been defined
         if (!(ruleHeadName in this.state.nonterminals)) {
@@ -399,7 +473,8 @@ class Interface extends React.Component {
                                     ruleDefinitionModalIsOpen={this.state.ruleDefinitionModalIsOpen}
                                     idOfRuleToEdit={this.state.idOfRuleToEdit}
                                     ruleAlreadyExists={this.ruleAlreadyExists}
-                                    currentRule={this.state.current_rule}/>
+                                    currentRule={this.state.current_rule}
+                                    getListOfMatchingSymbolNames={this.getListOfMatchingSymbolNames}/>
                     </div>
                 </div>
 
@@ -414,7 +489,8 @@ class Interface extends React.Component {
                                         updateExpansionFeedback={this.updateExpansionFeedback}
                                         updateSymbolFilterQuery={this.updateSymbolFilterQuery}
                                         symbolFilterQuery={this.state.symbolFilterQuery}
-                                        currentNonterminalName={this.state.current_nonterminal}>
+                                        currentNonterminalName={this.state.current_nonterminal}
+                                        getListOfMatchingSymbolNames={this.getListOfMatchingSymbolNames}>
                     </NonterminalList>
                 </div>
                 <div style={{"width": "75%", "height": "30%", position: "absolute", bottom: 0, left:0}}>
