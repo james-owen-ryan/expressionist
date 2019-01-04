@@ -40,6 +40,7 @@ class Interface extends React.Component {
         this.turnExportButtonSpinnerOn = this.turnExportButtonSpinnerOn.bind(this);
         this.turnBuildButtonSpinnerOff = this.turnBuildButtonSpinnerOff.bind(this);
         this.turnBuildButtonSpinnerOn = this.turnBuildButtonSpinnerOn.bind(this);
+        this.ruleAlreadyExists = this.ruleAlreadyExists.bind(this);
         this.state = {
             nonterminals: [],
             markups: [],
@@ -280,6 +281,25 @@ class Interface extends React.Component {
         document.getElementById("headerBarSaveButton").style.backgroundColor = "rgb("+r+","+g+","+b+")";
     }
 
+    ruleAlreadyExists(ruleHeadName, ruleBody, applicationRate) {
+        // Return whether a rule with the given attributes has already been defined
+        if (!(ruleHeadName in this.state.nonterminals)) {
+            return false
+        }
+        for (var i = 0; i < this.state.nonterminals[ruleHeadName].rules.length; i++) {
+            var rule = this.state.nonterminals[ruleHeadName].rules[i];
+            if (ruleBody === rule.expansion.join('')) {
+                if (this.state.idOfRuleToEdit !== null) {
+                    if (applicationRate != rule.app_rate) {
+                        return false;
+                    }
+                }
+                return true
+            }
+        }
+        return false
+    }
+
     componentDidMount() {
         document.addEventListener("keydown", this.quickSave, false);
     }
@@ -377,7 +397,8 @@ class Interface extends React.Component {
                                     updateHistory={this.updateHistory}
                                     closeRuleDefinitionModal={this.closeRuleDefinitionModal}
                                     ruleDefinitionModalIsOpen={this.state.ruleDefinitionModalIsOpen}
-                                    idOfRuleToEdit={this.state.idOfRuleToEdit}/>
+                                    idOfRuleToEdit={this.state.idOfRuleToEdit}
+                                    ruleAlreadyExists={this.ruleAlreadyExists}/>
                     </div>
                 </div>
 

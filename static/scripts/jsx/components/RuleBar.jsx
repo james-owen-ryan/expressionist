@@ -13,16 +13,21 @@ class RuleBar extends React.Component {
         this.closeModal = this.closeModal.bind(this);
         this.submitRuleDefinitionOnEnter = this.submitRuleDefinitionOnEnter.bind(this);
         this.handleRuleClick = this.handleRuleClick.bind(this);
-        this.addToRuleExpansion = this.addToRuleExpansion.bind(this);
+        this.handleSymbolReferenceClick = this.handleSymbolReferenceClick.bind(this);
+        this.updateRuleHeadInputVal = this.updateRuleHeadInputVal.bind(this);
         this.updateRuleExpansionInputVal = this.updateRuleExpansionInputVal.bind(this);
         this.updateApplicationRate = this.updateApplicationRate.bind(this);
         this.addRule = this.addRule.bind(this);
         this.editRule = this.editRule.bind(this);
         this.juiceRuleDefinitionSubmitButton = this.juiceRuleDefinitionSubmitButton.bind(this);
+        this.registerRuleBodyInputFocus = this.registerRuleBodyInputFocus.bind(this);
+        this.deregisterRuleBodyInputFocus = this.deregisterRuleBodyInputFocus.bind(this);
         this.state = {
             showModal: false,
+            ruleHeadInputVal: '',
             ruleExpansionInputVal: '',
-            ruleApplicationRate: 1
+            ruleApplicationRate: 1,
+            ruleBodyInputIsActive: false
         }
     }
 
@@ -56,14 +61,39 @@ class RuleBar extends React.Component {
         this.props.updateHistory(this.props.name, index)
     }
 
-    addToRuleExpansion(nonterminalName) {
-        // Insert a reference to the clicked nonterminal at the current cursor position
-        var referenceToClickedNonterminal = this.toExpressionistSyntax(nonterminalName);
-        var cursorPosition = document.getElementById("ruleExpansionInput").selectionStart;
-        var ruleBodySegmentToLeftOfCursor = this.state.ruleExpansionInputVal.slice(0, cursorPosition);
-        var ruleBodySegmentToRightOfCursor = this.state.ruleExpansionInputVal.slice(cursorPosition);
-        var ruleBodyWithReferenceInserted = ruleBodySegmentToLeftOfCursor.concat(referenceToClickedNonterminal).concat(ruleBodySegmentToRightOfCursor);
-        this.setState({ruleExpansionInputVal: ruleBodyWithReferenceInserted});
+    registerRuleBodyInputFocus() {
+        this.setState({ruleBodyInputIsActive: true})
+    }
+
+    deregisterRuleBodyInputFocus() {
+        this.setState({ruleBodyInputIsActive: false})
+    }
+
+    handleSymbolReferenceClick(nonterminalName) {
+        if (this.state.ruleBodyInputIsActive) {
+            // Insert a reference to the clicked nonterminal at the current cursor position in the rule body
+            var referenceToClickedNonterminal = this.toExpressionistSyntax(nonterminalName);
+            var cursorPosition = document.getElementById("ruleExpansionInput").selectionStart;
+            var ruleBodySegmentToLeftOfCursor = this.state.ruleExpansionInputVal.slice(0, cursorPosition);
+            var ruleBodySegmentToRightOfCursor = this.state.ruleExpansionInputVal.slice(cursorPosition);
+            var ruleBodyWithReferenceInserted = ruleBodySegmentToLeftOfCursor.concat(referenceToClickedNonterminal).concat(ruleBodySegmentToRightOfCursor);
+            this.setState({ruleExpansionInputVal: ruleBodyWithReferenceInserted});
+            // TODO THIS DOESN'T APPEAR TO BE WORKING
+            document.getElementById("ruleExpansionInput").focus();
+            document.getElementById("ruleExpansionInput").setSelectionRange(cursorPosition+referenceToClickedNonterminal.length, cursorPosition+referenceToClickedNonterminal.length)
+        }
+        else {
+            // Change the rule head to the clicked nonterminal
+            this.setState({ruleHeadInputVal: nonterminalName});
+            document.getElementById("ruleHeadInput").focus();
+            document.getElementById("ruleHeadInput").setSelectionRange(0, nonterminalName.length);
+        }
+    }
+
+    updateRuleHeadInputVal(e) {
+        if (e.target.value.indexOf('\n') === -1) {
+            this.setState({ruleHeadInputVal: e.target.value})
+        }
     }
 
     updateRuleExpansionInputVal(e) {
@@ -83,6 +113,7 @@ class RuleBar extends React.Component {
 
     addRule() {
         // Send the new rule definition to the server
+        var ruleHeadName = this.state.ruleHeadInputVal;
         var appRate = this.state.ruleApplicationRate;
         var expansion = this.state.ruleExpansionInputVal;
         if (expansion != '') {
@@ -96,9 +127,9 @@ class RuleBar extends React.Component {
                 ruleApplicationRate: 1
             })
             var object = {
-                "rule": expansion,
-                "app_rate": appRate,
-                "nonterminal": this.props.name  // current_nonterminal
+                "rule body": expansion,
+                "application rate": appRate,
+                "rule head name": ruleHeadName
             }
             ajax({
                 url: $SCRIPT_ROOT + '/api/rule/add',
@@ -126,14 +157,16 @@ class RuleBar extends React.Component {
     editRule() {
         document.getElementById('submitRuleButton').style.backgroundColor = 'rgb(87, 247, 224)';
         document.getElementById('submitRuleButton').innerHTML = 'Updated!'
+        var ruleHeadName = this.state.ruleHeadInputVal;
         var appRate = this.state.ruleApplicationRate;
         var expansion = this.state.ruleExpansionInputVal;
         if (expansion != '') {
             var object = {
-                "rule_id": this.props.idOfRuleToEdit,
-                "rule": expansion,
-                "app_rate": appRate,
-                "nonterminal": this.props.name  // current_nonterminal
+                "rule id": this.props.idOfRuleToEdit,
+                "rule body": expansion,
+                "application rate": appRate,
+                "rule head name": ruleHeadName,
+                "original rule head name": this.props.name
             }
             ajax({
                 url: $SCRIPT_ROOT + '/api/rule/edit',
@@ -155,7 +188,7 @@ class RuleBar extends React.Component {
     }
 
     juiceRuleDefinitionSubmitButton() {
-        // This function gradually fades the rule-definition submit button ("Add Rule" or "Edit Rule")
+        // This function gradually fades the rule-definition submit button ("Add Rule" or "Update Rule")
         // from our palette green, rgb(87, 247, 224), to our palette gray, rgb(242, 242, 242)
         var currentButtonRgbValues = document.getElementById("submitRuleButton").style.backgroundColor;
         var extractedRgbComponents = currentButtonRgbValues.match(/\d+/g);
@@ -179,6 +212,7 @@ class RuleBar extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
+        this.setState({ruleHeadInputVal: this.props.name})
         if (nextProps.idOfRuleToEdit !== null) {
             this.setState({
                 ruleExpansionInputVal: nextProps.rules[nextProps.idOfRuleToEdit].expansion.join(''),
@@ -195,6 +229,15 @@ class RuleBar extends React.Component {
                                title="View production rule"
                                key={rule.expansion.join('') + this.props.name}>{shortened}</Button>);
         }, this);
+        var openRuleModalButtonIsDisabled = true;
+        var allSymbolNames = Object.keys(this.props.nonterminals);
+        for (var i = 0; i < allSymbolNames.length; i++){
+            if (allSymbolNames[i].indexOf('$symbol') === -1) {
+                openRuleModalButtonIsDisabled = false;
+                break;
+            }
+        }
+        var ruleDefinitionAddButtonIsDisabled = this.props.ruleAlreadyExists(this.state.ruleHeadInputVal, this.state.ruleExpansionInputVal, this.state.ruleApplicationRate);
         if (this.props.idOfRuleToEdit !== null) {
             var ruleDefinitionModalButtonText = 'Update Rule';
             var ruleDefinitionModalButtonHoverText = 'Update rule';
@@ -205,30 +248,16 @@ class RuleBar extends React.Component {
             var ruleDefinitionModalButtonHoverText = 'Add rule';
             var ruleDefinitionModalButtonCallback = this.addRule;
         }
-        var openRuleModalButtonIsDisabled = true;
-        var allSymbolNames = Object.keys(this.props.nonterminals);
-        for (var i = 0; i < allSymbolNames.length; i++){
-            if (allSymbolNames[i].indexOf('$symbol') === -1) {
-                openRuleModalButtonIsDisabled = false;
-                break;
-            }
+        if (ruleDefinitionAddButtonIsDisabled) {
+            ruleDefinitionModalButtonHoverText += " (disabled: rule already exists)"
         }
-        var ruleDefinitionAddButtonIsDisabled = false;
-        if (this.state.ruleExpansionInputVal !== '' && this.state.ruleApplicationRate !== '') {
-            this.props.rules.forEach(function (rule, i) {
-                var ruleBodyString = rule.expansion.join('');
-                if (this.state.ruleExpansionInputVal === ruleBodyString) {
-                    ruleDefinitionAddButtonIsDisabled = true;
-                    if (this.props.idOfRuleToEdit !== null) {
-                        if (rule.app_rate != this.state.ruleApplicationRate) {
-                            ruleDefinitionAddButtonIsDisabled = false;
-                        }
-                    }
-                }
-            }, this);
-        }
-        else {
+        else if (this.state.ruleExpansionInputVal === '') {
             ruleDefinitionAddButtonIsDisabled = true;
+            ruleDefinitionModalButtonHoverText += " (disabled: rule body is empty)"
+        }
+        else if (this.state.ruleApplicationRate === '') {
+            ruleDefinitionAddButtonIsDisabled = true;
+            ruleDefinitionModalButtonHoverText += " (disabled: application rate is missing)"
         }
         return (
             <div>
@@ -249,19 +278,21 @@ class RuleBar extends React.Component {
                                     return (
                                         <button className={'list-group-item list-group-item-xs nonterminal list-group-item-'.concat(color)}
                                         style={{'margin':'0', 'border':'0px'}}
-                                        title="Add symbol reference"
-                                        onClick={this.addToRuleExpansion.bind(this, name)} key={name}>{name}
+                                        title={this.state.ruleBodyInputIsActive ? "Add symbol reference" : "Change rule head"}
+                                        onClick={this.handleSymbolReferenceClick.bind(this, name)} key={name}>{name}
                                         </button>
                                     )
                                 })
                             }
                         </div>
                         <div style={{'textAlign': 'center'}}>
-                            <p title="This is what the symbol (rule head) will be rewritten as (rule body) when this rule is executed." style={{'fontWeight': '300', 'fontSize': '16px'}}>Rewrite As</p>
-                            <textarea id='ruleExpansionInput' type='text' title="This is what the symbol (rule head) will be rewritten as (rule body) when this rule is executed." value={this.state.ruleExpansionInputVal} onChange={this.updateRuleExpansionInputVal} style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '100px', 'marginTop': '10px', 'marginBottom': '15px', 'fontSize': '18px', 'padding': '0 12px', backgroundColor: '#f2f2f2'}} autoFocus="true"/>
-                            <p title="This number specifies how often this rule will be randomly selected relative to any sibling rules (a higher number increases the chance)." style={{'fontWeight': '300', 'fontSize': '16px'}}>Application Rate</p>
-                            <input title="This number specifies how often this rule will be randomly selected relative to any sibling rules (a higher number increases the chance)." id='appRateModal' type='text' value={this.state.ruleApplicationRate} onChange={this.updateApplicationRate}
-                            style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '43px', 'marginBottom': '25px', 'fontSize': '18px', 'padding': '0 12px'}}/>
+                            <p title="This is the symbol that will be rewritten by executing this rule." style={{'fontWeight': '300', 'fontSize': '16px'}}>Rule head</p>
+                            <textarea id='ruleHeadInput' type='text' title="This is the symbol that will be rewritten by executing this rule." value={this.state.ruleHeadInputVal} onChange={this.updateRuleHeadInputVal} onFocus={this.deregisterRuleBodyInputFocus} style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '43px', 'marginTop': '10px', 'marginBottom': '15px', 'fontSize': '18px', 'padding': '8px 12px', backgroundColor: '#f2f2f2'}}/>
+                            <p title="This is what the rule head will be rewritten as (rule body) when this rule is executed." style={{'fontWeight': '300', 'fontSize': '16px'}}>Rule body</p>
+                            <textarea id='ruleExpansionInput' type='text' title="This is what the symbol (rule head) will be rewritten as (rule body) when this rule is executed." value={this.state.ruleExpansionInputVal} onChange={this.updateRuleExpansionInputVal} onFocus={this.registerRuleBodyInputFocus} style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '100px', 'marginTop': '10px', 'marginBottom': '15px', 'fontSize': '18px', 'padding': '0 12px', backgroundColor: '#f2f2f2'}} autoFocus="true"/>
+                            <p title="This number specifies how often this rule will be randomly selected relative to any sibling rules (a higher number increases the chance)." style={{'fontWeight': '300', 'fontSize': '16px'}}>Application rate</p>
+                            <input title="This number specifies how often this rule will be randomly selected relative to any sibling rules (a higher number increases the chance)." id='appRateModal' type='text' value={this.state.ruleApplicationRate} onChange={this.updateApplicationRate} onFocus={this.deregisterRuleBodyInputFocus} style={{'width': '50px', 'border': '0px solid #d7d7d7', 'height': '43px', 'marginBottom': '25px', 'fontSize': '18px', 'padding': '0 12px', 'textAlign': 'center'}}/>
+                            <br/>
                             <Button id="submitRuleButton" title={ruleDefinitionModalButtonHoverText} disabled={ruleDefinitionAddButtonIsDisabled} bsStyle="primary" bsSize="large" style={{'marginBottom': '25px'}} onClick={ruleDefinitionModalButtonCallback}>{ruleDefinitionModalButtonText}</Button>
                         </div>
                     </Modal>

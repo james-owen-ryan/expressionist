@@ -80,9 +80,7 @@ class HeaderBar extends React.Component {
             data: filename,
             success: () => {
                 this.props.update(this.props.turnLoadButtonSpinnerOff)
-                this.setState({
-                    currentGrammarName: filename.replace('.json', '')
-                })
+                this.props.setCurrentGrammarName(filename)
             },
             cache: false
         })
@@ -105,7 +103,7 @@ class HeaderBar extends React.Component {
         this.props.update();
         this.props.disableTestButton();
         this.props.disableBuildButton();
-        this.setState({currentGrammarName: ''})
+        this.props.setCurrentGrammarName("");
     }
 
     attemptToBuildProductionist() {

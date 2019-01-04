@@ -141,22 +141,44 @@ def swap_rule():
 @app.route('/api/rule/add', methods=['POST'])
 def add_rule():
     data = request.get_json()
-    rule = data['rule']  # Right-hand side of the rule (the expansion)
-    app_rate = int(data['app_rate'])
-    nonterminal = nonterminal_symbol.NonterminalSymbol(data["nonterminal"])
-    app.flask_grammar.add_rule(nonterminal, grammar.parse_rule(rule), app_rate)
+    rule_head_name = data['rule head name']
+    rule_body = data['rule body']
+    application_rate = int(data['application rate'])
+    try:
+        rule_head_object = app.flask_grammar.nonterminals[rule_head_name]
+    except KeyError:
+        rule_head_object = nonterminal_symbol.NonterminalSymbol(rule_head_name)
+        app.flask_grammar.add_nonterminal(rule_head_object)
+    app.flask_grammar.add_rule(rule_head_object, grammar.parse_rule(rule_body), application_rate)
     return app.flask_grammar.to_json()
 
 
 @app.route('/api/rule/edit', methods=['POST'])
 def edit_rule():
     data = request.get_json()
-    rule = data['rule']  # Right-hand side of the rule (the expansion)
-    app_rate = int(data['app_rate'])
-    nonterminal = data['nonterminal']
-    rule_id = int(data['rule_id'])
-    app.flask_grammar.modify_application_rate(nonterminal_symbol.NonterminalSymbol(nonterminal), rule_id, app_rate)
-    app.flask_grammar.modify_rule_expansion(rule_id, nonterminal_symbol.NonterminalSymbol(nonterminal), grammar.parse_rule(rule), app_rate)
+    rule_head_name = data['rule head name']
+    original_rule_head_name = data['original rule head name']
+    rule_body = data['rule body']
+    application_rate = int(data['application rate'])
+    rule_id = int(data['rule id'])
+    if rule_head_name == original_rule_head_name:
+        # Simply update the application rate and expansion
+        app.flask_grammar.modify_application_rate(
+            nonterminal_symbol.NonterminalSymbol(rule_head_name), rule_id, application_rate
+        )
+        app.flask_grammar.modify_rule_expansion(
+            rule_id, nonterminal_symbol.NonterminalSymbol(rule_head_name),
+            grammar.parse_rule(rule_body), application_rate
+        )
+    else:
+        # Delete the old rule and create a new one that is associated with the new rule head
+        app.flask_grammar.remove_rule_by_index(nonterminal_symbol.NonterminalSymbol(original_rule_head_name), rule_id)
+        try:
+            new_rule_head_object = app.flask_grammar.nonterminals[rule_head_name]
+        except KeyError:
+            new_rule_head_object = nonterminal_symbol.NonterminalSymbol(rule_head_name)
+            app.flask_grammar.add_nonterminal(new_rule_head_object)
+        app.flask_grammar.add_rule(new_rule_head_object, grammar.parse_rule(rule_body), application_rate)
     return app.flask_grammar.to_json()
 
 
