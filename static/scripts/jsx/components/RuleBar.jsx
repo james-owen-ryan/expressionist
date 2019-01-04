@@ -32,14 +32,17 @@ class RuleBar extends React.Component {
     }
 
     openModal() {
-        this.setState({showModal: true});
+        this.setState({
+            showModal: true,
+            ruleHeadInputVal: this.props.name,
+            ruleExpansionInputVal: '',
+            ruleApplicationRate: 1,
+        });
     }
 
     closeModal() {
         this.setState({
-            showModal: false,
-            ruleExpansionInputVal: '',
-            ruleApplicationRate: 1
+            showModal: false
         });
         this.props.closeRuleDefinitionModal();
     }
@@ -212,7 +215,7 @@ class RuleBar extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        this.setState({ruleHeadInputVal: this.props.name})
+//        this.setState({ruleHeadInputVal: this.props.name})
         if (nextProps.idOfRuleToEdit !== null) {
             this.setState({
                 ruleExpansionInputVal: nextProps.rules[nextProps.idOfRuleToEdit].expansion.join(''),
