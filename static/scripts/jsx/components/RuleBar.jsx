@@ -225,9 +225,7 @@ class RuleBar extends React.Component {
         var rules = [];
         this.props.rules.forEach(function (rule, i) {
             var shortened = rule.expansion.join('').substring(0, 10);
-            rules.push(<Button onClick={this.handleRuleClick.bind(this, i)}
-                               title="View production rule"
-                               key={rule.expansion.join('') + this.props.name}>{shortened}</Button>);
+            rules.push(<Button onClick={this.handleRuleClick.bind(this, i)} title="View production rule" key={rule.expansion.join('')+this.props.name} style={i === this.props.currentRule ? {"backgroundColor": "#ffe97f"} : {}}>{shortened}</Button>);
         }, this);
         var openRuleModalButtonIsDisabled = true;
         var allSymbolNames = Object.keys(this.props.nonterminals);

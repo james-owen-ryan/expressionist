@@ -398,7 +398,8 @@ class Interface extends React.Component {
                                     closeRuleDefinitionModal={this.closeRuleDefinitionModal}
                                     ruleDefinitionModalIsOpen={this.state.ruleDefinitionModalIsOpen}
                                     idOfRuleToEdit={this.state.idOfRuleToEdit}
-                                    ruleAlreadyExists={this.ruleAlreadyExists}/>
+                                    ruleAlreadyExists={this.ruleAlreadyExists}
+                                    currentRule={this.state.current_rule}/>
                     </div>
                 </div>
 
