@@ -98,11 +98,12 @@ class RuleBoard extends React.Component {
             <div>
                 <div style={{"width": "70%", "margin": "0 auto"}}>
                     <h2>
-                        <span className="symbol-reference-in-rule-head" title="View rule head" onClick={this.handleRuleClickThrough.bind(this, this.props.name)}>{this.props.name}</span> <Glyphicon title='"may be rewritten as"' glyph="circle-arrow-right" style={{"fontSize": "20px"}}/>
+                        <span className="symbol-reference-in-rule-head" title="View rule head" onClick={this.handleRuleClickThrough.bind(this, this.props.name)}>{this.props.name}</span>
                         <br></br>
                         <Button bsStyle="default" title="Test rule execution" onClick={this.handleExpandRule}><Glyphicon glyph="play"/></Button>
                         <Button bsStyle="default" title="Edit rule" onClick={this.prepareForRuleDefinitionEdit}><Glyphicon glyph="pencil"/></Button>
                         <Button bsStyle="danger" title="Delete rule" onClick={this.onRuleDelete}><Glyphicon glyph="trash"/></Button>
+                        <Glyphicon title='"may be rewritten as"' glyph="circle-arrow-right" style={{"fontSize": "25px", "left": "10px", "top": "5px"}}/>
                     </h2>
                 </div>
                 <div style={{"width": "70%", "margin": "0 auto", "height": "35vh", "overflowY": "auto"}}>
