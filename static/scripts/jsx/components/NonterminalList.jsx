@@ -113,7 +113,7 @@ class NonterminalList extends React.Component {
         var symbolDefinition = [];
         for (var i = 0; i < nonterminals.length; i++){
             var symbolName = nonterminals[i];
-            if (symbolName.indexOf('$symbol') != -1){
+            if (symbolName.indexOf('$symbol') !== -1){
                 symbolDefinition.push(symbolName);
             }
         }
@@ -143,7 +143,7 @@ class NonterminalList extends React.Component {
         var allOtherSymbols = [];
         for (var i = 0; i < nonterminals.length; i++){
             var symbolName = nonterminals[i];
-            if (this.props.nonterminals[symbolName].deep == false && this.props.nonterminals[symbolName].complete == true){
+            if (this.props.nonterminals[symbolName].deep == false && this.props.nonterminals[symbolName].complete == true && symbolName.indexOf('$symbol') === -1){
                 allOtherSymbols.push(symbolName);
             }
         }
