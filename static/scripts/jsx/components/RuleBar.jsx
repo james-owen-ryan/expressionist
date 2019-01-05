@@ -296,7 +296,7 @@ class RuleBar extends React.Component {
                                     e.target.value = '';
                                     e.target.value = val;
                                 }}/>
-                        <div id='nonterminalsListModal' style={{'overflowY': 'scroll', 'marginBottom': '15px', 'borderBottomStyle': 'solid', 'height': '200px'}}>
+                        <div id='nonterminalsListModal' style={{'overflowY': 'scroll', 'marginBottom': '15px', 'height': '200px'}}>
                             {   this.formatList(this.props.getListOfMatchingSymbolNames(this.state.ruleDefinitionSymbolFilterQuery)).map((name) => {
                                     var color = this.props.nonterminals[name].complete ? "success" : "danger"
                                     return (
