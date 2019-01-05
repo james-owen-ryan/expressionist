@@ -156,7 +156,7 @@ class ExportGrammarModal extends React.Component {
                         </FormGroup>
                     </form>
                     <FileList onFileClick={this.updateGrammarName} highlightedFile={this.state.getCurrentGrammarName()} height='200px' directory='exports'></FileList>
-                    <Button id="exportButton" title={this.props.exportButtonSpinnerOn ? "Exporting content bundle..." : "Export content bundle"} onClick={this.exportGrammar} type="submit" style={{marginTop: '15px'}} bsStyle={this.setExportButtonStyle()} spinColor="#000" loading={this.props.exportButtonSpinnerOn} disabled={this.checkDisableExportButton()}>{this.state.exportModalButtonText}</Button>
+                    <Button id="exportButton" title={this.props.exportButtonSpinnerOn ? "Exporting content bundle (to /exports)..." : "Export content bundle (to /exports)"} onClick={this.exportGrammar} type="submit" style={{marginTop: '15px'}} bsStyle={this.setExportButtonStyle()} spinColor="#000" loading={this.props.exportButtonSpinnerOn} disabled={this.checkDisableExportButton()}>{this.state.exportModalButtonText}</Button>
                 </div>
             </Modal>
 
