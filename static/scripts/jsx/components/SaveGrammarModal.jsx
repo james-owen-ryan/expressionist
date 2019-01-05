@@ -151,7 +151,7 @@ class SaveGrammarModal extends React.Component {
                         </FormGroup>
                     </form>
                     <FileList onFileClick={this.updateGrammarName} highlightedFile={this.state.getCurrentGrammarName() + '.json'} height='200px' directory='grammars'></FileList>
-                    <Button id="saveButton" onClick={this.saveGrammar} style={{marginTop: '15px'}} bsStyle={this.setSaveButtonStyle()} disabled={this.disableSaveButton()}>{this.state.saveGrammarBtnText}</Button>
+                    <Button title="Save grammar file (to /grammars)" id="saveButton" onClick={this.saveGrammar} style={{marginTop: '15px'}} bsStyle={this.setSaveButtonStyle()} disabled={this.disableSaveButton()}>{this.state.saveGrammarBtnText}</Button>
                 </div>
             </Modal>
 
