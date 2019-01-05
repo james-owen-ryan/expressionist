@@ -302,7 +302,7 @@ class RuleBar extends React.Component {
                                     return (
                                         <button className={'list-group-item list-group-item-xs nonterminal list-group-item-'.concat(color)}
                                         style={{'margin':'0', 'border':'0px'}}
-                                        title={this.state.ruleBodyInputIsActive ? "Add symbol reference" : "Change rule head"}
+                                        title={this.state.ruleBodyInputIsActive ? "Insert symbol reference (hint: when editing rule head, clicking here changes it to the selected symbol)" : "Change rule head (hint: when editing rule body, clicking here inserts the selected symbol)"}
                                         onClick={this.handleSymbolReferenceClick.bind(this, name)} key={name}>{this.props.nonterminals[name].deep ? <Glyphicon glyph="star"/> : ""}{this.props.nonterminals[name].deep ? " " : ""}{name}
                                         </button>
                                     )
