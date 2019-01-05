@@ -185,7 +185,7 @@ class MarkupSet extends React.Component {
                 <Button title="Search for tag usages" id={"tagSearchButton:"+tag} style={{backgroundColor: "#57F7E0"}} onClick={this.handleTagSearch.bind(this, this.props.name, tag)} onMouseEnter={this.toggleBackgroundColor.bind(this, "tagSearchButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")} onMouseLeave={this.toggleBackgroundColor.bind(this, "tagSearchButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")}><Glyphicon glyph="search"/></Button>
                 <Button title="Rename tag" id={"tagEditButton:"+tag} style={{backgroundColor: "#57F7E0"}} onClick={this.handleTagRename.bind(this, this.props.name, tag)} onMouseEnter={this.toggleBackgroundColor.bind(this, "tagEditButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")} onMouseLeave={this.toggleBackgroundColor.bind(this, "tagEditButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")}><Glyphicon glyph="pencil"/></Button>
                 <Button title="Delete tag" id={"tagDeleteButton:"+tag} style={{backgroundColor: "#57F7E0"}} onClick={this.handleTagDelete.bind(this, this.props.name, tag)} onMouseEnter={this.toggleBackgroundColor.bind(this, "tagDeleteButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")} onMouseLeave={this.toggleBackgroundColor.bind(this, "tagDeleteButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")}><Glyphicon glyph="trash"/></Button>
-                <Button title="Remove tag from current symbol" id={"tagToggleButton:"+tag} style={{backgroundColor: "#57F7E0", padding: "0", paddingLeft: "10px", textAlign: "left", height: "32px", width: "calc(100% - 111px"}} key={tag} onClick={this.handleMarkupClick.bind(this, this.props.name, tag)} onMouseEnter={this.toggleBackgroundColor.bind(this, "tagToggleButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")} onMouseLeave={this.toggleBackgroundColor.bind(this, "tagToggleButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")}>{tag}</Button>
+                <Button title="Remove tag from current symbol" id={"tagToggleButton:"+tag} style={{backgroundColor: "#57F7E0", padding: "0px 10px 0px 10px", textAlign: "left", height: "32px", width: "calc(100% - 111px"}} key={tag} onClick={this.handleMarkupClick.bind(this, this.props.name, tag)} onMouseEnter={this.toggleBackgroundColor.bind(this, "tagToggleButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")} onMouseLeave={this.toggleBackgroundColor.bind(this, "tagToggleButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")}>{tag}</Button>
             </MenuItem>;
         }
         else {
@@ -193,7 +193,7 @@ class MarkupSet extends React.Component {
                 <Button title="Search for tag usages" onClick={this.handleTagSearch.bind(this, this.props.name, tag)}><Glyphicon glyph="search"/></Button>
                 <Button title="Rename tag" onClick={this.handleTagRename.bind(this, this.props.name, tag)}><Glyphicon glyph="pencil"/></Button>
                 <Button title="Delete tag" onClick={this.handleTagDelete.bind(this, this.props.name, tag)}><Glyphicon glyph="trash"/></Button>
-                <Button title={noCurrentNonterminal ? "Attach tag to current symbol (disabled: no current symbol)" : "Attach tag to current symbol"} disabled={noCurrentNonterminal} style={{padding: '0', padding: "0", paddingLeft: "10px", textAlign: "left", height: "32px", width: "calc(100% - 111px"}} onClick={this.handleMarkupClick.bind(this, this.props.name, tag)} key={tag}>{tag}</Button>
+                <Button title={noCurrentNonterminal ? "Attach tag to current symbol (disabled: no current symbol)" : "Attach tag to current symbol"} disabled={noCurrentNonterminal} style={{padding: "0px 10px 0px 10px", textAlign: "left", height: "32px", width: "calc(100% - 111px"}} onClick={this.handleMarkupClick.bind(this, this.props.name, tag)} key={tag}>{tag}</Button>
             </MenuItem>;
         }
     }
@@ -214,7 +214,7 @@ class MarkupSet extends React.Component {
     render() {
         if (this.props.name.indexOf('/this is a new tagset/') != -1){
             return (
-                <ButtonGroup style={{padding: '4.5px', backgroundColor: '#F2F2F2'}}>
+                <ButtonGroup style={{padding: '4.5px', backgroundColor: '#F2F2F2', }}>
                     <input id="newTagsetNameInputElement" type='text' onChange={this.handleNewNameValueChange} value={this.state.newNameVal} style={{height: '26px', padding: '5px', width: '175px'}} placeholder='Enter tagset name.' autoFocus="true"/>
                     <div style={{'display': 'inline'}}>
                         <Button id="newTagsetNameInputElementButton" onClick={this.handleMarkupSetRename} title="Add tagset" bsSize="small" bsStyle="default" style={{marginBottom: '3px', fontSize: '11px'}} disabled={this.disableNewNameValue()}><Glyphicon glyph="ok"/></Button>
@@ -238,7 +238,7 @@ class MarkupSet extends React.Component {
             return (
                 <DropdownButton className="grp-button" id={this.props.name} title={this.props.name} bsStyle={this.prepareTagDropdownItemComponent('/any/') ? 'success' : 'default'} style={{'height': '38px'}}>
                     <div>
-                        <MenuItem key={-1} header={true}>
+                        <MenuItem key={-1} header={true} style={{"backgroundColor": "transparent"}}>
                             <Button title="Add new tag" onClick={this.handleMarkupAdd.bind(this, this.props.name)}><Glyphicon glyph="plus"/></Button>
                             <Button title="Rename tagset" onClick={this.handleTagsetRenameRequest}><Glyphicon glyph="pencil"/></Button>
                             <Button title="Delete tagset" onClick={this.handleTagsetDelete.bind(this, this.props.name)}><Glyphicon glyph="trash"/></Button>

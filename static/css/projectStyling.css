@@ -2,8 +2,9 @@
     height: auto;
     max-height: 300px;
     overflow-x: auto;
-    width: 500px;
-    background-color: #f2f2f2;
+    min-width: 112px;
+    max-width: 600px;
+    background-color: #fff;
     border: 0;
     margin: 0;
     padding: 0px;
@@ -15,6 +16,11 @@
 
 .dropdown-menu > li > a {
     padding: 0px;
+    background-color: #f2f2f2;
+}
+
+.dropdown-menu > li > a:hover {
+    background-color: #ffe97f;
 }
 
 .btn-test {
