@@ -231,6 +231,7 @@ class RuleBar extends React.Component {
     componentWillReceiveProps(nextProps) {
         if (nextProps.idOfRuleToEdit !== null) {
             this.setState({
+                ruleHeadInputVal: nextProps.name,
                 ruleExpansionInputVal: nextProps.rules[nextProps.idOfRuleToEdit].expansion.join(''),
                 ruleApplicationRate: nextProps.rules[nextProps.idOfRuleToEdit].app_rate
             });
