@@ -219,7 +219,14 @@ class RuleBar extends React.Component {
 
     // Returns a sorted array of nonterminal names
     formatList(symbolNames) {  // 'nonterminals' is an array of nonterminal names
-        return symbolNames.sort(function(a, b){
+        var symbolNamesExcludingNewlyDefinedOnes = [];
+        for (var i = 0; i < symbolNames.length; i++){
+            var symbolName = symbolNames[i];
+            if (symbolName.indexOf('$symbol') === -1){
+                symbolNamesExcludingNewlyDefinedOnes.push(symbolName);
+            }
+        }
+        return symbolNamesExcludingNewlyDefinedOnes.sort(function(a, b){
             return a.toLowerCase() == b.toLowerCase() ? 0 : +(a.toLowerCase() > b.toLowerCase()) || -1;
         });
     }
