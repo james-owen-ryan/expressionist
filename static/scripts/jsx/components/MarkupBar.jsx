@@ -63,7 +63,8 @@ class MarkupBar extends React.Component {
                                       name={total[outer]}
                                       present_nt={present_nt}
                                       current_set={this.props.total[total[outer]]}
-                                      updateSymbolFilterQuery={this.props.updateSymbolFilterQuery}/>)
+                                      updateSymbolFilterQuery={this.props.updateSymbolFilterQuery}
+                                      currentNonterminal={this.props.currentNonterminal}/>)
         }
         return(
             <ButtonGroup className="btn-test">

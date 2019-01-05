@@ -21,7 +21,7 @@ class MarkupSet extends React.Component {
         this.handleNewNameValueChange = this.handleNewNameValueChange.bind(this);
         this.handleTagsetDelete = this.handleTagsetDelete.bind(this);
         this.handleRenameTagsetCancel = this.handleRenameTagsetCancel.bind(this);
-        this.isThisTagInCurrentlySelectedNT = this.isThisTagInCurrentlySelectedNT.bind(this);
+        this.prepareTagDropdownItemComponent = this.prepareTagDropdownItemComponent.bind(this);
         this.submitTagsetNameOnEnterKeypress = this.submitTagsetNameOnEnterKeypress.bind(this);
         this.toggleBackgroundColor = this.toggleBackgroundColor.bind(this);
         this.state = {
@@ -175,11 +175,11 @@ class MarkupSet extends React.Component {
         return false
     }
 
-    isThisTagInCurrentlySelectedNT(tag){
+    prepareTagDropdownItemComponent(tag){
+        var noCurrentNonterminal = (this.props.currentNonterminal == "");
         if (tag == '/any/'){
             return !!this.props.current_set.filter((tag) => this.props.present_nt.indexOf(tag) != -1).length
         }
-
         if (this.props.present_nt.indexOf(tag) != -1) {
             return <MenuItem>
                 <Button title="Search for tag usages" id={"tagSearchButton:"+tag} style={{backgroundColor: "#57F7E0"}} onClick={this.handleTagSearch.bind(this, this.props.name, tag)} onMouseEnter={this.toggleBackgroundColor.bind(this, "tagSearchButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")} onMouseLeave={this.toggleBackgroundColor.bind(this, "tagSearchButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")}><Glyphicon glyph="search"/></Button>
@@ -193,7 +193,7 @@ class MarkupSet extends React.Component {
                 <Button title="Search for tag usages" onClick={this.handleTagSearch.bind(this, this.props.name, tag)}><Glyphicon glyph="search"/></Button>
                 <Button title="Rename tag" onClick={this.handleTagRename.bind(this, this.props.name, tag)}><Glyphicon glyph="pencil"/></Button>
                 <Button title="Delete tag" onClick={this.handleTagDelete.bind(this, this.props.name, tag)}><Glyphicon glyph="trash"/></Button>
-                <Button title="Attach tag to current symbol" style={{padding: '0', padding: "0", paddingLeft: "10px", textAlign: "left", height: "32px", width: "calc(100% - 111px"}} onClick={this.handleMarkupClick.bind(this, this.props.name, tag)} key={tag}>{tag}</Button>
+                <Button title={noCurrentNonterminal ? "Attach tag to current symbol (disabled: no current symbol)" : "Attach tag to current symbol"} disabled={noCurrentNonterminal} style={{padding: '0', padding: "0", paddingLeft: "10px", textAlign: "left", height: "32px", width: "calc(100% - 111px"}} onClick={this.handleMarkupClick.bind(this, this.props.name, tag)} key={tag}>{tag}</Button>
             </MenuItem>;
         }
     }
@@ -236,7 +236,7 @@ class MarkupSet extends React.Component {
         }
         else {
             return (
-                <DropdownButton className="grp-button" id={this.props.name} title={this.props.name} bsStyle={this.isThisTagInCurrentlySelectedNT('/any/') ? 'success' : 'default'} style={{'height': '38px'}}>
+                <DropdownButton className="grp-button" id={this.props.name} title={this.props.name} bsStyle={this.prepareTagDropdownItemComponent('/any/') ? 'success' : 'default'} style={{'height': '38px'}}>
                     <div>
                         <MenuItem key={-1} header={true}>
                             <Button title="Add new tag" onClick={this.handleMarkupAdd.bind(this, this.props.name)}><Glyphicon glyph="plus"/></Button>
@@ -244,7 +244,7 @@ class MarkupSet extends React.Component {
                             <Button title="Delete tagset" onClick={this.handleTagsetDelete.bind(this, this.props.name)}><Glyphicon glyph="trash"/></Button>
                         </MenuItem>
                     </div>
-                    { this.props.current_set.sort().map((tag) => this.isThisTagInCurrentlySelectedNT(tag)) }
+                    { this.props.current_set.sort().map((tag) => this.prepareTagDropdownItemComponent(tag)) }
                 </DropdownButton>
             );
         }

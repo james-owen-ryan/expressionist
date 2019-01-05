@@ -79,8 +79,14 @@ class HeaderBar extends React.Component {
             contentType: "json",
             data: filename,
             success: () => {
-                this.props.update(this.props.turnLoadButtonSpinnerOff)
-                this.props.setCurrentGrammarName(filename)
+                this.props.updateCurrentNonterminal('');
+                this.props.updateMarkupFeedback([]);
+                this.props.updateExpansionFeedback('');
+                this.props.updateHistory("'", -1);
+                this.props.update(this.props.turnLoadButtonSpinnerOff);
+                this.props.disableTestButton();
+                this.props.disableBuildButton();
+                this.props.setCurrentGrammarName(filename);
             },
             cache: false
         })
