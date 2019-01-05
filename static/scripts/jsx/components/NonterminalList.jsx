@@ -98,7 +98,7 @@ class NonterminalList extends React.Component {
     }
 
     render() {
-        var nonterminals = this.formatList(this.props.getListOfMatchingSymbolNames());
+        var nonterminals = this.formatList(this.props.getListOfMatchingSymbolNames(this.props.symbolFilterQuery));
         return (
             <div>
                 <ListGroup id='nonterminalList'>

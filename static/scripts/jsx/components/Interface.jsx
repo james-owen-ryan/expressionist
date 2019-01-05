@@ -283,18 +283,18 @@ class Interface extends React.Component {
     }
 
     // returns an array of nonterminal names that match the symbolFilterQuery.
-    getListOfMatchingSymbolNames() {
+    getListOfMatchingSymbolNames(symbolFilterQuery) {
         var allSymbolNames = Object.keys(this.state.nonterminals);
         // If there's no filter query, all symbols match
-        if (this.state.symbolFilterQuery == ''){
+        if (symbolFilterQuery == ''){
             return allSymbolNames
         }
         // If there's a filter query operating over tags, match all symbols having those tags; here's
         // an example of such a filter query: '$tags:Moves:greeting & Moves:farewell' (note: these
         // queries are treated in a case-sensitive manner because tags are case-sensitive)
-        else if (this.state.symbolFilterQuery.slice(0, 6) == "$tags:") {
+        else if (symbolFilterQuery.slice(0, 6) == "$tags:") {
             var matches = [];
-            var raw_tags = this.state.symbolFilterQuery.slice(6).split(' $& ');
+            var raw_tags = symbolFilterQuery.slice(6).split(' $& ');
             for (var i = 0; i < allSymbolNames.length; i++){
                 var symbolName = allSymbolNames[i];
                 var isMatch = true;
@@ -322,10 +322,10 @@ class Interface extends React.Component {
         // If there's a filter query operating over symbol expansions, match all symbols that have
         // a production rule whose body includes a terminal symbol for which the filter-query component
         // is a substring
-        else if (this.state.symbolFilterQuery.slice(0, 6) == "$text:") {
-            if (this.state.symbolFilterQuery === "$text:") {return []}  // Otherwise every complete symbol matches
+        else if (symbolFilterQuery.slice(0, 6) == "$text:") {
+            if (symbolFilterQuery === "$text:") {return []}  // Otherwise every complete symbol matches
             var matches = [];
-            var text = this.state.symbolFilterQuery.slice(6);
+            var text = symbolFilterQuery.slice(6);
             for (var i = 0; i < allSymbolNames.length; i++){
                 var symbolName = allSymbolNames[i];
                 var isMatch = false;
@@ -349,7 +349,7 @@ class Interface extends React.Component {
         // a case-insensitive manner)
         return allSymbolNames.filter( (symbolName) => {
             // A given symbol is a match if the filter query is a substring of its name
-            var isMatch = symbolName.toLowerCase().indexOf(this.state.symbolFilterQuery.toLowerCase());
+            var isMatch = symbolName.toLowerCase().indexOf(symbolFilterQuery.toLowerCase());
             if (isMatch != -1){ return true; }
             return false;
         })
@@ -392,7 +392,6 @@ class Interface extends React.Component {
                     var referents = current["referents"];
                     referents = referents.map(this.getexpansion.bind(this))
                 }
-
                 board = <NonterminalBoard   updateMarkupFeedback={this.updateMarkupFeedback}
                                             updateExpansionFeedback={this.updateExpansionFeedback}
                                             updateHistory={this.updateHistory}

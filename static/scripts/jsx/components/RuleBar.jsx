@@ -23,12 +23,14 @@ class RuleBar extends React.Component {
         this.registerRuleBodyInputFocus = this.registerRuleBodyInputFocus.bind(this);
         this.deregisterRuleBodyInputFocus = this.deregisterRuleBodyInputFocus.bind(this);
         this.formatList = this.formatList.bind(this);
+        this.updateRuleDefinitionSymbolFilterQuery = this.updateRuleDefinitionSymbolFilterQuery.bind(this);
         this.state = {
             showModal: false,
             ruleHeadInputVal: '',
             ruleExpansionInputVal: '',
             ruleApplicationRate: 1,
-            ruleBodyInputIsActive: false
+            ruleBodyInputIsActive: false,
+            ruleDefinitionSymbolFilterQuery: ''
         }
     }
 
@@ -46,6 +48,10 @@ class RuleBar extends React.Component {
             showModal: false
         });
         this.props.closeRuleDefinitionModal();
+    }
+
+    updateRuleDefinitionSymbolFilterQuery(e) {
+        this.setState({ruleDefinitionSymbolFilterQuery: e.target.value})
     }
 
     submitRuleDefinitionOnEnter(e) {
@@ -223,7 +229,6 @@ class RuleBar extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
-//        this.setState({ruleHeadInputVal: this.props.name})
         if (nextProps.idOfRuleToEdit !== null) {
             this.setState({
                 ruleExpansionInputVal: nextProps.rules[nextProps.idOfRuleToEdit].expansion.join(''),
@@ -278,8 +283,21 @@ class RuleBar extends React.Component {
                         <Modal.Header closeButton>
                             <Modal.Title>Rule Definition</Modal.Title>
                         </Modal.Header>
+                        <input  id='ruleDefinitionNonterminalListSearch'
+                                title="Hint: try '$text:[text from symbol rewriting]', e.g., '$text:typoo'"
+                                type='text'
+                                onChange={this.updateRuleDefinitionSymbolFilterQuery}
+                                value={this.state.ruleDefinitionSymbolFilterQuery}
+                                style={{'width': '100%', 'height': '43px', 'fontSize': '18px', 'padding': '0 12px'}}
+                                placeholder='Filter list...'
+                                // This hack is necessary to keep the cursor at the end of the query upon auto-focus
+                                onFocus={function(e) {
+                                    var val = e.target.value;
+                                    e.target.value = '';
+                                    e.target.value = val;
+                                }}/>
                         <div id='nonterminalsListModal' style={{'overflowY': 'scroll', 'marginBottom': '15px', 'borderBottomStyle': 'solid', 'height': '200px'}}>
-                            {   this.formatList(Object.keys(this.props.nonterminals)).map((name) => {
+                            {   this.formatList(this.props.getListOfMatchingSymbolNames(this.state.ruleDefinitionSymbolFilterQuery)).map((name) => {
                                     var color = this.props.nonterminals[name].complete ? "success" : "danger"
                                     return (
                                         <button className={'list-group-item list-group-item-xs nonterminal list-group-item-'.concat(color)}
