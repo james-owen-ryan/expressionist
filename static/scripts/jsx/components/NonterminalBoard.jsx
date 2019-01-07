@@ -22,9 +22,10 @@ class NonterminalBoard extends React.Component {
         var idx = object.index
         var symbol = object.symbol
         return <ListGroupItem
+            title="View symbol usage"
             key={object.index}
             style={{"border": "0px"}}
-            onClick={this.handleNonterminalRuleClickThrough.bind(this, symbol, idx)}>{object['expansion']}</ListGroupItem>
+            onClick={this.handleNonterminalRuleClickThrough.bind(this, symbol, idx)}>{object['symbol']} <Glyphicon glyph="circle-arrow-right" style={{"top": "1px"}}/> {object['expansion']}</ListGroupItem>
     }
 
     handleNonterminalRuleClickThrough(tag, index) {
