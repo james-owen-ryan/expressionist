@@ -14,6 +14,7 @@ class NonterminalList extends React.Component {
         this.updateSymbolFilterQuery = this.updateSymbolFilterQuery.bind(this);
         this.formatList = this.formatList.bind(this);
         this.addNonterminal = this.addNonterminal.bind(this);
+        this.clearSymbolFilterQuery = this.clearSymbolFilterQuery.bind(this);
         this.state = {
             newNTNumber: 0
         }
@@ -31,6 +32,10 @@ class NonterminalList extends React.Component {
 
     updateSymbolFilterQuery(e) {
         this.props.updateSymbolFilterQuery(e.target.value);
+    }
+
+    clearSymbolFilterQuery() {
+        this.props.updateSymbolFilterQuery("");
     }
 
     // Returns a sorted array of nonterminal names
@@ -109,7 +114,7 @@ class NonterminalList extends React.Component {
                                 type='text'
                                 onChange={this.updateSymbolFilterQuery}
                                 value={this.props.symbolFilterQuery}
-                                style={{'width': 'calc(100% - 38px)', 'height': '100%', 'padding': '8px'}}
+                                style={{'width': 'calc(100% - 38px - 38px)', 'height': '100%', 'padding': '8px'}}
                                 placeholder='Filter list...'
                                 autoFocus="true"
                                 // This hack is necessary to keep the cursor at the end of the query upon auto-focus
@@ -118,6 +123,7 @@ class NonterminalList extends React.Component {
                                     e.target.value = '';
                                     e.target.value = val;
                                 }}/>
+                        {this.props.symbolFilterQuery ? <Button onClick={this.clearSymbolFilterQuery} title="Clear filter" style={{'height': '35px', 'marginBottom': '2px'}}><Glyphicon glyph="remove"/></Button> : ""}
                     </ListGroupItem>
                     {   nonterminals.map((name) => {
                             var complete = this.props.nonterminals[name].complete;
