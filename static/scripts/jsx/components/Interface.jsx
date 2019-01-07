@@ -28,7 +28,7 @@ class Interface extends React.Component {
         this.updateSymbolFilterQuery = this.updateSymbolFilterQuery.bind(this);
         this.getCurrentGrammarName = this.getCurrentGrammarName.bind(this);
         this.setCurrentGrammarName = this.setCurrentGrammarName.bind(this);
-        this.quickSave = this.quickSave.bind(this);
+        this.handlePotentialHotKeyPress = this.handlePotentialHotKeyPress.bind(this);
         this.determineIfExportButtonIsDisabled = this.determineIfExportButtonIsDisabled.bind(this);
         this.enableBuildButton = this.enableBuildButton.bind(this);
         this.disableBuildButton = this.disableBuildButton.bind(this);
@@ -42,7 +42,11 @@ class Interface extends React.Component {
         this.turnBuildButtonSpinnerOn = this.turnBuildButtonSpinnerOn.bind(this);
         this.ruleAlreadyExists = this.ruleAlreadyExists.bind(this);
         this.getListOfMatchingSymbolNames = this.getListOfMatchingSymbolNames.bind(this);
+        this.attemptToBuildProductionist = this.attemptToBuildProductionist.bind(this);
+        this.buildProductionist = this.buildProductionist.bind(this);
         this.state = {
+            currentGrammarName: 'new',
+            bundleName: '',
             nonterminals: [],
             markups: [],
             system_vars: [],
@@ -53,13 +57,15 @@ class Interface extends React.Component {
             ruleDefinitionModalIsOpen: false,
             idOfRuleToEdit: null,
             symbolFilterQuery: "",
-            currentGrammarName: 'new',
             exportButtonDisabled: true,
             buildButtonDisabled: true,
             testButtonDisabled: true,
             loadButtonSpinnerOn: false,
             exportButtonSpinnerOn: false,
-            buildButtonSpinnerOn: false
+            buildButtonSpinnerOn: false,
+            headerBarSaveButtonIsJuicing: false,
+            headerBarExportButtonIsJuicing: false,
+            headerBarBuildButtonIsJuicing: false,
         }
     }
 
@@ -228,23 +234,65 @@ class Interface extends React.Component {
         this.setState({currentGrammarName: grammarName.replace(".json", "")});
     }
 
-    quickSave(e) {
-        var quickSaveHotKeyMatch = false;
-        // Check if ctrl+s/command+s was pressed
+    handlePotentialHotKeyPress(e) {
+        // Check for a hot-key match (ctrl/command+{g,o,s,e,b,/,d})
+        var quickNewHotKeyMatch = false;  // g
+        var quickLoadHotKeyMatch = false;  // o
+        var quickSaveHotKeyMatch = false;  // s
+        var quickExportHotKeyMatch = false;  // e
+        var quickBuildHotKeyMatch = false;  // b
+        var quickTestHotKeyMatch = false;  // y
+        var quickRuleDefineHotKeyMatch = false; // d
         if (e.ctrlKey || e.metaKey) {
             switch (String.fromCharCode(e.which).toLowerCase()) {
+            case 'g':
+                e.preventDefault();
+                quickNewHotKeyMatch = true;
+            case 'o':
+                e.preventDefault();
+                quickLoadHotKeyMatch = true;
             case 's':
                 e.preventDefault();
                 quickSaveHotKeyMatch = true;
                 break;
+            case 'e':
+                e.preventDefault();
+                quickExportHotKeyMatch = true;
+                break;
+            case 'b':
+                e.preventDefault();
+                quickBuildHotKeyMatch = true;
+                break;
+            case 'y':
+                e.preventDefault();
+                quickTestHotKeyMatch = true;
+                break;
+            case 'd':
+                e.preventDefault();
+                quickRuleDefineHotKeyMatch = true;
+                break;
             }
         }
-        // If it was, do a quick save by overwriting the current grammar file
-        if (quickSaveHotKeyMatch) {
+        // Quick new: simulate clicking of the 'New' button
+        if (quickNewHotKeyMatch) {
+            document.getElementById("headerBarNewButton").click();
+        }
+        // Quick load: simulate clicking of the 'Load' button
+        else if (quickLoadHotKeyMatch) {
+            document.getElementById("headerBarLoadButton").click();
+        }
+        // Quick rule define: simulate clicking of the '+' button for creating a new rule
+        else if (quickRuleDefineHotKeyMatch) {
+            document.getElementById("addRuleButton").click();
+        }
+        // Quick test: simulate clicking of the 'Test' button
+        else if (quickTestHotKeyMatch) {
+            document.getElementById("headerBarTestButton").click();
+        }
+        // Quick save: do a quick save by overwriting the current grammar file
+        else if (quickSaveHotKeyMatch) {
             // Generate a juicy response (button lights green and fades back to gray)
-            document.getElementById('headerBarSaveButton').style.backgroundColor = 'rgb(87, 247, 224)';
-            document.getElementById('headerBarSaveButton').innerHTML = 'Saved!'
-            var juicingIntervalFunction = setInterval(this.juiceSaveButton, 1);
+            this.setState({headerBarSaveButtonIsJuicing: true});
             ajax({
                 url: $SCRIPT_ROOT + '/api/grammar/save',
                 type: "POST",
@@ -253,33 +301,37 @@ class Interface extends React.Component {
                 async: true,
                 cache: false,
                 success: (status) => {}
-            })
+            });
+            var that = this;
             setTimeout(function() {
-                clearInterval(juicingIntervalFunction);
-                document.getElementById('headerBarSaveButton').innerHTML = 'Save';
-                document.getElementById('headerBarSaveButton').style.backgroundColor = 'rgb(242, 242, 242)';
-            }, 1250);
+                that.setState({headerBarSaveButtonIsJuicing: false});
+            }, 1000);
         }
-    }
-
-    juiceSaveButton() {
-        // This function gradually fades the save button from our palette green (rgb(87, 247, 224))
-        // to our palette gray (rgb(242, 242, 242))
-        var currentButtonRgbValues = document.getElementById("headerBarSaveButton").style.backgroundColor;
-        var extractedRgbComponents = currentButtonRgbValues.match(/\d+/g);
-        var r = extractedRgbComponents[0];
-        var g = extractedRgbComponents[1];
-        var b = extractedRgbComponents[2];
-        if (r < 242){
-            r++;
+        // Quick export: do a quick export by overwriting the current content-bundle files
+        else if (quickExportHotKeyMatch) {
+            this.turnExportButtonSpinnerOn();
+            ajax({
+                url: $SCRIPT_ROOT + '/api/grammar/export',
+                type: "POST",
+                contentType: "text/plain",
+                data: this.getCurrentGrammarName(),
+                async: true,
+                cache: false,
+                success: (status) => {
+                    this.turnExportButtonSpinnerOff();
+                    this.setState({headerBarExportButtonIsJuicing: true});
+                    this.enableBuildButton();
+                    var that = this;
+                    setTimeout(function() {
+                        that.setState({headerBarExportButtonIsJuicing: false});
+                    }, 1000);
+                }
+            })
         }
-        if (g > 242){
-            g--;
+        // Quick build: build a Productionist
+        else if (quickBuildHotKeyMatch) {
+            this.attemptToBuildProductionist();
         }
-        if (b < 242){
-            b++;
-        }
-        document.getElementById("headerBarSaveButton").style.backgroundColor = "rgb("+r+","+g+","+b+")";
     }
 
     // returns an array of nonterminal names that match the symbolFilterQuery.
@@ -374,8 +426,61 @@ class Interface extends React.Component {
         return false
     }
 
+    attemptToBuildProductionist() {
+        // First, make sure that there is an exported content bundle that shares the same name
+        // with the current grammar (specifically, check for the corresponding .grammar and
+        // .meanings files) -- if not, it's probably because the author changes the filenames
+        // manually, in which case we should alert them of that and suggest that they re-export
+        // to target the desired filenames
+        ajax({
+            url: $SCRIPT_ROOT + '/api/load_bundles',
+            type: "GET",
+            cache: false,
+            success: (data) => {
+                var grammarName = this.getCurrentGrammarName();
+                var grammarFileEncountered = false;
+                var meaningsFileEncountered = false;
+                for (var i = 0; i < data.results.length; i++) {
+                    var bundleFileFilename = data.results[i];
+                    if (bundleFileFilename === grammarName + '.grammar') {
+                        grammarFileEncountered = true;
+                    }
+                    else if (bundleFileFilename === grammarName + '.meanings') {
+                        meaningsFileEncountered = true;
+                    }
+                }
+                if (grammarFileEncountered && meaningsFileEncountered) {
+                    this.buildProductionist(grammarName);
+                }
+                else {
+                    alert("A Productionist module could not be built because an exported content bundle corresponding to this grammar could not be found. This means that the following expected files are not in the /exports directory: '" + grammarName + ".grammar' and '" + grammarName + ".meanings'. Perhaps one or both were deleted or renamed?")
+                }
+            }
+        })
+    }
+
+    buildProductionist(contentBundleName) {
+        this.turnBuildButtonSpinnerOn();
+        ajax({
+            url: $SCRIPT_ROOT + '/api/grammar/build',
+            type: "POST",
+            contentType: "text/plain",
+            data: contentBundleName,
+            cache: false,
+            success: (data) => {
+                this.turnBuildButtonSpinnerOff();
+                this.setState({bundleName: contentBundleName, headerBarBuildButtonIsJuicing: true});
+                this.enableTestButton();
+                var that = this;
+                setTimeout(function() {
+                    that.setState({headerBarBuildButtonIsJuicing: false});
+                }, 1000);
+            }
+        })
+    }
+
     componentDidMount() {
-        document.addEventListener("keydown", this.quickSave, false);
+        document.addEventListener("keydown", this.handlePotentialHotKeyPress, false);
     }
 
     render() {
@@ -430,6 +535,7 @@ class Interface extends React.Component {
                                 update={this.updateFromServer}
                                 getCurrentGrammarName={this.getCurrentGrammarName}
                                 setCurrentGrammarName={this.setCurrentGrammarName}
+                                bundleName={this.state.bundleName}
                                 systemVars={this.state.system_vars}
                                 exportButtonDisabled={this.state.exportButtonDisabled}
                                 buildButtonDisabled={this.state.buildButtonDisabled}
@@ -446,7 +552,11 @@ class Interface extends React.Component {
                                 turnExportButtonSpinnerOff={this.turnExportButtonSpinnerOff}
                                 turnExportButtonSpinnerOn={this.turnExportButtonSpinnerOn}
                                 turnBuildButtonSpinnerOff={this.turnBuildButtonSpinnerOff}
-                                turnBuildButtonSpinnerOn={this.turnBuildButtonSpinnerOn}/>
+                                turnBuildButtonSpinnerOn={this.turnBuildButtonSpinnerOn}
+                                headerBarSaveButtonIsJuicing={this.state.headerBarSaveButtonIsJuicing}
+                                headerBarExportButtonIsJuicing={this.state.headerBarExportButtonIsJuicing}
+                                headerBarBuildButtonIsJuicing={this.state.headerBarBuildButtonIsJuicing}
+                                attemptToBuildProductionist={this.attemptToBuildProductionist}/>
                     <div className="muwrap">
                         <div className="show-y-wrapper">
                             <MarkupBar  className="markup-bar"

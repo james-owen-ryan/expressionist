@@ -282,7 +282,7 @@ class RuleBar extends React.Component {
             <div>
                 <div className="btn-test">
                         <ButtonGroup>
-                            <Button onClick={this.openModal} title="Add new production rule" key="addnew"><Glyphicon glyph="plus"/></Button>
+                            <Button id="addRuleButton" onClick={this.openModal} title="Define new production rule (hot key: 'command+d' or 'ctrl+d')" key="addnew"><Glyphicon glyph="plus"/></Button>
                             {rules}
                         </ButtonGroup>
                 </div>

@@ -23,14 +23,11 @@ class HeaderBar extends React.Component {
         this.closeExportModal = this.closeExportModal.bind(this);
         this.load = this.load.bind(this);
         this.reset = this.reset.bind(this);
-        this.attemptToBuildProductionist = this.attemptToBuildProductionist.bind(this);
-        this.buildProductionist = this.buildProductionist.bind(this);
         this.state = {
             showLoadModal: false,
-            showTestModal: false,
             showSaveModal: false,
             showExportModal: false,
-            bundleName: ''
+            showTestModal: false
         };
     }
 
@@ -112,69 +109,20 @@ class HeaderBar extends React.Component {
         this.props.setCurrentGrammarName("");
     }
 
-    attemptToBuildProductionist() {
-        // First, make sure that there is an exported content bundle that shares the same name
-        // with the current grammar (specifically, check for the corresponding .grammar and
-        // .meanings files) -- if not, it's probably because the author changes the filenames
-        // manually, in which case we should alert them of that and suggest that they re-export
-        // to target the desired filenames
-        ajax({
-            url: $SCRIPT_ROOT + '/api/load_bundles',
-            type: "GET",
-            cache: false,
-            success: (data) => {
-                var grammarName = this.props.getCurrentGrammarName();
-                var grammarFileEncountered = false;
-                var meaningsFileEncountered = false;
-                for (var i = 0; i < data.results.length; i++) {
-                    var bundleFileFilename = data.results[i];
-                    if (bundleFileFilename === grammarName + '.grammar') {
-                        grammarFileEncountered = true;
-                    }
-                    else if (bundleFileFilename === grammarName + '.meanings') {
-                        meaningsFileEncountered = true;
-                    }
-                }
-                if (grammarFileEncountered && meaningsFileEncountered) {
-                    this.buildProductionist(grammarName);
-                }
-                else {
-                    alert("A Productionist module could not be built because an exported content bundle corresponding to this grammar could not be found. This means that the following expected files are not in the /exports directory: '" + grammarName + ".grammar' and '" + grammarName + ".meanings'. Perhaps one or both were deleted or renamed?")
-                }
-            }
-        })
-    }
-
-    buildProductionist(contentBundleName) {
-        this.props.turnBuildButtonSpinnerOn();
-        ajax({
-            url: $SCRIPT_ROOT + '/api/grammar/build',
-            type: "POST",
-            contentType: "text/plain",
-            data: contentBundleName,
-            cache: false,
-            success: (data) => {
-                this.setState({bundleName: data.bundleName})
-                this.props.turnBuildButtonSpinnerOff();
-                this.props.enableTestButton();
-            }
-        })
-    }
-
     render() {
         return (
             <div>
                 <ButtonToolbar>
                     <ButtonGroup>
-                        <Button title="Start new grammar" onClick={this.reset} bsStyle='primary'>New</Button>
-                        <Button title={this.props.loadButtonSpinnerOn ? "Loading grammar..." : "Load grammar"} onClick={this.openLoadModal} bsStyle='primary' spinColor="#000" loading={this.props.loadButtonSpinnerOn}>{this.props.loadButtonSpinnerOn ? "Loading..." : "Load"}</Button>
-                        <Button title="Save grammar (hint: try 'command+s' or 'ctrl+s')" id="headerBarSaveButton"  onClick={this.openSaveModal} bsStyle='primary'>Save</Button>
-                        <Button title={this.props.exportButtonSpinnerOn ? "Exporting content bundle..." : this.props.exportButtonDisabled ? "Export content bundle (disabled: requires at least one top-level symbol with a production rule)" : "Export content bundle"} disabled={this.props.exportButtonDisabled} onClick={this.openExportModal} bsStyle='primary' spinColor="#000" loading={this.props.exportButtonSpinnerOn}>{this.props.exportButtonSpinnerOn ? "Exporting..." : "Export"}</Button>
-                        <Button title={this.props.buildButtonSpinnerOn ? "Building Productionist module..." : this.props.buildButtonDisabled ? "Build Productionist module (disabled: requires exported content bundle)" : "Build Productionist module"} disabled={this.props.buildButtonDisabled} onClick={this.attemptToBuildProductionist} bsStyle='primary' spinColor="#000" loading={this.props.buildButtonSpinnerOn}>{this.props.buildButtonSpinnerOn ? "Building..." : "Build"}</Button>
-                        <Button title={this.props.testButtonDisabled ? "Test Productionist module (disabled: requires built Productionist module)" : "Test Productionist module"} disabled={this.props.testButtonDisabled} onClick={this.openTestModal} bsStyle='primary'>Test</Button>
+                        <Button id="headerBarNewButton" title="Start new grammar (hot key: 'command+g' or 'ctrl+g')" onClick={this.reset} bsStyle='primary'>New</Button>
+                        <Button id="headerBarLoadButton" title={this.props.loadButtonSpinnerOn ? "Loading grammar..." : "Load grammar (hot key: 'command+o' or 'ctrl+o')"} onClick={this.openLoadModal} bsStyle='primary' spinColor="#000" loading={this.props.loadButtonSpinnerOn}>{this.props.loadButtonSpinnerOn ? "Loading..." : "Load"}</Button>
+                        <Button title="Save grammar (hot key: 'command+s' or 'ctrl+s')" onClick={this.openSaveModal} bsStyle={this.props.headerBarSaveButtonIsJuicing ? 'success' : 'primary'}>{this.props.headerBarSaveButtonIsJuicing ? "Saved!" : "Save"}</Button>
+                        <Button title={this.props.exportButtonSpinnerOn ? "Exporting content bundle..." : this.props.exportButtonDisabled ? "Export content bundle (disabled: requires at least one top-level symbol with a production rule)" : "Export content bundle (hot key: 'command+e' or 'ctrl+e')"} disabled={this.props.exportButtonDisabled} onClick={this.openExportModal} bsStyle={this.props.headerBarExportButtonIsJuicing ? 'success' : 'primary'} spinColor="#000" loading={this.props.exportButtonSpinnerOn}>{this.props.exportButtonSpinnerOn ? "Exporting..." : this.props.headerBarExportButtonIsJuicing ? "Exported!" : "Export"}</Button>
+                        <Button title={this.props.buildButtonSpinnerOn ? "Building Productionist module..." : this.props.buildButtonDisabled ? "Build Productionist module (disabled: requires exported content bundle)" : "Build Productionist module (hot key: 'command+b' or 'ctrl+b')"} disabled={this.props.buildButtonDisabled} onClick={this.props.attemptToBuildProductionist} bsStyle={this.props.headerBarBuildButtonIsJuicing ? 'success' : 'primary'} spinColor="#000" loading={this.props.buildButtonSpinnerOn}>{this.props.buildButtonSpinnerOn ? "Building..." : this.props.headerBarBuildButtonIsJuicing ? "Built!" : "Build"}</Button>
+                        <Button id="headerBarTestButton" title={this.props.testButtonDisabled ? "Test Productionist module (disabled: requires built Productionist module)" : "Test Productionist module (hot key: 'command+y' or 'ctrl+y')"} disabled={this.props.testButtonDisabled} onClick={this.openTestModal} bsStyle='primary'>Test</Button>
                     </ButtonGroup>
                 </ButtonToolbar>
-                <TestModal show={this.state.showTestModal} onHide={this.closeTestModal} bundleName={this.state.bundleName}></TestModal>
+                <TestModal show={this.state.showTestModal} onHide={this.closeTestModal} bundleName={this.props.bundleName}></TestModal>
                 <Modal show={this.state.showLoadModal} onHide={this.closeLoadModal}>
                     <Modal.Header closeButton>
                         <Modal.Title>Load grammar...</Modal.Title>
