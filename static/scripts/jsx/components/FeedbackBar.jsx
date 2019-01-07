@@ -29,8 +29,10 @@ class FeedbackBar extends React.Component {
         }
         var markups_str = ""
         if (this.props.markup) {
-            this.props.markup.forEach(function (tags) {
-                markups_str += '* ' + tags + '<br>'
+            var tags = this.props.markup;
+            tags.sort();
+            tags.forEach(function (tag) {
+                markups_str += '* ' + tag + '<br>'
             })
         }
         return (
