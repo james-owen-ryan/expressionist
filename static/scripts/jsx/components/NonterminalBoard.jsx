@@ -150,7 +150,7 @@ class NonterminalBoard extends React.Component {
 
                 <div style={{"width": "70%", "margin": "0 auto"}}>
                     <Panel>
-                        <ListGroup style={{"maxHeight": "320px", "overflowY": "auto"}}>
+                        <ListGroup style={{"maxHeight": "20vh", "overflowY": "auto"}}>
                             {referents}
                         </ListGroup>
                     </Panel>
