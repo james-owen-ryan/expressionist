@@ -511,6 +511,7 @@ class Interface extends React.Component {
             else {
                 board = <RuleBoard  name={this.state.current_nonterminal}
                                     currentRule={this.state.current_rule}
+                                    nonterminals={this.state.nonterminals}
                                     updateFromServer={this.updateFromServer}
                                     updateCurrentNonterminal={this.updateCurrentNonterminal}
                                     updateCurrentRule={this.updateCurrentRule}

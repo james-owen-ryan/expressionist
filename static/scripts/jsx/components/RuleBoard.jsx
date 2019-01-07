@@ -82,15 +82,15 @@ class RuleBoard extends React.Component {
     render() {
         var expansion_arr = [];
         var length = this.props.expansion.length;
-        var symbol;
-        for(var i = 0; i < length; i++) {
-            symbol = this.props.expansion[i]
-            if (symbol.indexOf('[[') != -1) {
-                var tag = symbol.slice(2,-2);
-                expansion_arr.push(<span className="symbol-reference-in-rule-body" title="View symbol" onClick={this.handleRuleClickThrough.bind(this, symbol.slice(2,-2))}>{symbol}</span>)
+        var symbolReference;
+        for (var i = 0; i < length; i++) {
+            symbolReference = this.props.expansion[i];
+            if (symbolReference.indexOf('[[') != -1) {
+                var symbolName = symbolReference.slice(2,-2);
+                expansion_arr.push(<span className={this.props.nonterminals[symbolName].rules.length === 0 ? "incomplete-symbol-reference-in-rule-body" : "symbol-reference-in-rule-body"} title="View symbol" onClick={this.handleRuleClickThrough.bind(this, symbolName)}>{symbolReference}</span>)
             }
             else {
-                expansion_arr.push(<span>{symbol}</span>)
+                expansion_arr.push(<span>{symbolReference}</span>)
             }
         }
 

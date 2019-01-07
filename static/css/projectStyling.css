@@ -51,6 +51,15 @@
     background-color: #ffe97f;
 }
 
+.incomplete-symbol-reference-in-rule-body {
+    background-color: #ff9891;
+    cursor: pointer;
+}
+
+.incomplete-symbol-reference-in-rule-body:hover {
+    background-color: #ffe97f;
+}
+
 .symbol-reference-in-rule-head {
     background-color: #f2f2f2;
     cursor: pointer;
