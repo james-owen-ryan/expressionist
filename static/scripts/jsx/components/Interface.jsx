@@ -565,7 +565,8 @@ class Interface extends React.Component {
                                         updateFromServer={this.updateFromServer}
                                         nonterminals={this.state.nonterminals}
                                         total={this.state.markups}
-                                        updateSymbolFilterQuery={this.updateSymbolFilterQuery}/>
+                                        updateSymbolFilterQuery={this.updateSymbolFilterQuery}
+                                        currentNonterminalName={this.state.current_nonterminal}/>
                         </div>
                     </div>
                     {board}

@@ -11,23 +11,27 @@ class MarkupSet extends React.Component {
     constructor(props) {
         super(props);
         this.handleMarkupClick = this.handleMarkupClick.bind(this);
-        this.handleMarkupAdd = this.handleMarkupAdd.bind(this);
         this.handleMarkupSetRename = this.handleMarkupSetRename.bind(this);
         this.handleTagsetRenameRequest = this.handleTagsetRenameRequest.bind(this);
         this.handleTagRename = this.handleTagRename.bind(this);
         this.handleTagDelete = this.handleTagDelete.bind(this);
         this.handleTagSearch = this.handleTagSearch.bind(this);
-        this.disableNewNameValue = this.disableNewNameValue.bind(this);
-        this.handleNewNameValueChange = this.handleNewNameValueChange.bind(this);
+        this.disableNewTagsetNameValue = this.disableNewTagsetNameValue.bind(this);
+        this.handleNewTagsetNameChange = this.handleNewTagsetNameChange.bind(this);
         this.handleTagsetDelete = this.handleTagsetDelete.bind(this);
         this.handleRenameTagsetCancel = this.handleRenameTagsetCancel.bind(this);
         this.prepareTagDropdownItemComponent = this.prepareTagDropdownItemComponent.bind(this);
-        this.submitTagsetNameOnEnterKeypress = this.submitTagsetNameOnEnterKeypress.bind(this);
+        this.handleEnterKeypress = this.handleEnterKeypress.bind(this);
         this.toggleBackgroundColor = this.toggleBackgroundColor.bind(this);
+        this.prepareForTagsetModification = this.prepareForTagsetModification.bind(this);
         this.state = {
-            newNameVal: '',
-            renameTagsetNow: false
+            newTagsetName: '',
+            renameTagsetNow: false,
         }
+    }
+
+    prepareForTagsetModification() {
+        this.props.openAddTagModal(this.props.name);
     }
 
     handleMarkupClick(set, tag) {
@@ -48,31 +52,10 @@ class MarkupSet extends React.Component {
         }
     }
 
-    handleMarkupAdd(set) {
-        var markupTag = window.prompt("Enter tag name.")
-        if (markupTag) {
-            //ensure tag does not exist in tagset
-            if (this.props.markups[set].indexOf(markupTag) === -1) {
-                var object = {
-                    "markupSet": set,
-                    "tag": markupTag
-                }
-                ajax({
-                    url: $SCRIPT_ROOT + '/api/markup/addtag',
-                    type: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify(object),
-                    success: () => this.props.updateFromServer(),
-                    cache: false
-                })
-            }
-        }
-    }
-
     handleMarkupSetRename(toggleRename) {
         var object = {
             "oldset": this.props.name,
-            "newset": this.state.newNameVal
+            "newset": this.state.newTagsetName
         }
         ajax({
             url: $SCRIPT_ROOT + '/api/markup/renameset',
@@ -86,7 +69,7 @@ class MarkupSet extends React.Component {
 
     handleTagsetRenameRequest() {
         this.setState({
-            newNameVal: this.props.name,
+            newTagsetName: this.props.name,
             renameTagsetNow: true
         })
     }
@@ -134,8 +117,8 @@ class MarkupSet extends React.Component {
         this.props.updateSymbolFilterQuery(query);
     }
 
-    handleNewNameValueChange(e) {
-        this.setState({'newNameVal': e.target.value})
+    handleNewTagsetNameChange(e) {
+        this.setState({'newTagsetName': e.target.value})
     }
 
     handleTagsetDelete(){
@@ -160,16 +143,8 @@ class MarkupSet extends React.Component {
         this.setState({renameTagsetNow: false})
     }
 
-    submitTagsetNameOnEnterKeypress(e) {
-        if (document.activeElement.id === "newTagsetNameInputElement") {
-            if (e.key === 'Enter') {
-                document.getElementById("newTagsetNameInputElementButton").click();
-            }
-        }
-    };
-
-    disableNewNameValue(){
-        if (this.state.newNameVal == '' || this.props.markups[this.state.newNameVal] != undefined){
+    disableNewTagsetNameValue(){
+        if (this.state.newTagsetName == '' || this.props.markups[this.state.newTagsetName] != undefined){
             return true
         }
         return false
@@ -181,7 +156,7 @@ class MarkupSet extends React.Component {
             return !!this.props.current_set.filter((tag) => this.props.present_nt.indexOf(tag) != -1).length
         }
         if (this.props.present_nt.indexOf(tag) != -1) {
-            return <MenuItem>
+            return <MenuItem key={this.props.current_set + ":" + tag}>
                 <Button title="Search for tag usages" id={"tagSearchButton:"+tag} style={{backgroundColor: "#57F7E0"}} onClick={this.handleTagSearch.bind(this, this.props.name, tag)} onMouseEnter={this.toggleBackgroundColor.bind(this, "tagSearchButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")} onMouseLeave={this.toggleBackgroundColor.bind(this, "tagSearchButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")}><Glyphicon glyph="search"/></Button>
                 <Button title="Rename tag" id={"tagEditButton:"+tag} style={{backgroundColor: "#57F7E0"}} onClick={this.handleTagRename.bind(this, this.props.name, tag)} onMouseEnter={this.toggleBackgroundColor.bind(this, "tagEditButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")} onMouseLeave={this.toggleBackgroundColor.bind(this, "tagEditButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")}><Glyphicon glyph="pencil"/></Button>
                 <Button title="Delete tag" id={"tagDeleteButton:"+tag} style={{backgroundColor: "#57F7E0"}} onClick={this.handleTagDelete.bind(this, this.props.name, tag)} onMouseEnter={this.toggleBackgroundColor.bind(this, "tagDeleteButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")} onMouseLeave={this.toggleBackgroundColor.bind(this, "tagDeleteButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")}><Glyphicon glyph="trash"/></Button>
@@ -189,7 +164,7 @@ class MarkupSet extends React.Component {
             </MenuItem>;
         }
         else {
-            return <MenuItem>
+            return <MenuItem key={this.props.current_set + ":" + tag}>
                 <Button title="Search for tag usages" onClick={this.handleTagSearch.bind(this, this.props.name, tag)}><Glyphicon glyph="search"/></Button>
                 <Button title="Rename tag" onClick={this.handleTagRename.bind(this, this.props.name, tag)}><Glyphicon glyph="pencil"/></Button>
                 <Button title="Delete tag" onClick={this.handleTagDelete.bind(this, this.props.name, tag)}><Glyphicon glyph="trash"/></Button>
@@ -207,17 +182,25 @@ class MarkupSet extends React.Component {
         }
     }
 
+    handleEnterKeypress(e) {
+        if (e.key === 'Enter') {
+            if (document.activeElement.id === "newTagsetNameInputElement") {
+                document.getElementById("newTagsetNameInputElementButton").click();
+            }
+         }
+    }
+
     componentDidMount(){
-        document.addEventListener("keydown", this.submitTagsetNameOnEnterKeypress, false);
+        document.addEventListener("keydown", this.handleEnterKeypress, false);
     }
 
     render() {
         if (this.props.name.indexOf('/this is a new tagset/') != -1){
             return (
                 <ButtonGroup style={{padding: '4.5px', backgroundColor: '#F2F2F2', }}>
-                    <input id="newTagsetNameInputElement" type='text' onChange={this.handleNewNameValueChange} value={this.state.newNameVal} style={{height: '26px', padding: '5px', width: '175px'}} placeholder='Enter tagset name.' autoFocus="true"/>
+                    <input id="newTagsetNameInputElement" type='text' onChange={this.handleNewTagsetNameChange} value={this.state.newTagsetName} style={{height: '26px', padding: '5px', width: '175px'}} placeholder='Enter tagset name.' autoFocus="true"/>
                     <div style={{'display': 'inline'}}>
-                        <Button id="newTagsetNameInputElementButton" onClick={this.handleMarkupSetRename} title={this.disableNewNameValue() ? "Add tagset (disabled: empty tagset name)" : "Add tagset"} bsSize="small" bsStyle="default" style={{marginBottom: '3px', fontSize: '11px'}} disabled={this.disableNewNameValue()}><Glyphicon glyph="ok"/></Button>
+                        <Button id="newTagsetNameInputElementButton" onClick={this.handleMarkupSetRename} title={this.disableNewTagsetNameValue() ? "Add tagset (disabled: empty tagset name)" : "Add tagset"} bsSize="small" bsStyle="default" style={{marginBottom: '3px', fontSize: '11px'}} disabled={this.disableNewTagsetNameValue()}><Glyphicon glyph="ok"/></Button>
                         <Button onClick={this.handleTagsetDelete} title="Cancel" bsSize="small" bsStyle="default" style={{marginBottom: '3px', fontSize: '11px'}}><Glyphicon glyph="remove"/></Button>
                     </div>
                 </ButtonGroup>
@@ -226,9 +209,9 @@ class MarkupSet extends React.Component {
         else if (this.state.renameTagsetNow) {
             return (
                 <ButtonGroup style={{padding: '4.5px', backgroundColor: '#F2F2F2'}}>
-                    <input id="newTagsetNameInputElement" type='text' onChange={this.handleNewNameValueChange} value={this.state.newNameVal} style={{height: '26px', padding: '5px', width: '175px'}} placeholder='Enter new tagset name.' autoFocus="true"/>
+                    <input id="newTagsetNameInputElement" type='text' onChange={this.handleNewTagsetNameChange} value={this.state.newTagsetName} style={{height: '26px', padding: '5px', width: '175px'}} placeholder='Enter new tagset name.' autoFocus="true"/>
                     <div style={{'display': 'inline'}}>
-                        <Button id="newTagsetNameInputElementButton" onClick={this.handleMarkupSetRename} title={this.disableNewNameValue() ? "Rename tagset (disabled: name hasn't changed)" : "Rename tagset"} bsSize="small" bsStyle="default" style={{marginBottom: '3px', fontSize: '11px'}} disabled={this.disableNewNameValue()}><Glyphicon glyph="ok"/></Button>
+                        <Button id="newTagsetNameInputElementButton" onClick={this.handleMarkupSetRename} title={this.disableNewTagsetNameValue() ? "Rename tagset (disabled: name hasn't changed)" : "Rename tagset"} bsSize="small" bsStyle="default" style={{marginBottom: '3px', fontSize: '11px'}} disabled={this.disableNewTagsetNameValue()}><Glyphicon glyph="ok"/></Button>
                         <Button onClick={this.handleRenameTagsetCancel} title="Cancel" bsSize="small" bsStyle="default" style={{marginBottom: '3px', fontSize: '11px'}}><Glyphicon glyph="remove"/></Button>
                     </div>
                 </ButtonGroup>
@@ -239,7 +222,7 @@ class MarkupSet extends React.Component {
                 <DropdownButton className="grp-button" id={this.props.name} title={this.props.name} bsStyle={this.prepareTagDropdownItemComponent('/any/') ? 'success' : 'default'} style={{'height': '38px'}}>
                     <div>
                         <MenuItem key={-1} header={true} style={{"backgroundColor": "transparent"}}>
-                            <Button title="Add new tag" onClick={this.handleMarkupAdd.bind(this, this.props.name)}><Glyphicon glyph="plus"/></Button>
+                            <Button title="Create new tag" onClick={this.prepareForTagsetModification}><Glyphicon glyph="plus"/></Button>
                             <Button title="Rename tagset" onClick={this.handleTagsetRenameRequest}><Glyphicon glyph="pencil"/></Button>
                             <Button title="Delete tagset" onClick={this.handleTagsetDelete.bind(this, this.props.name)}><Glyphicon glyph="trash"/></Button>
                         </MenuItem>
