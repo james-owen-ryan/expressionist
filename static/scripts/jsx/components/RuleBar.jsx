@@ -291,7 +291,9 @@ class RuleBar extends React.Component {
                         <Modal.Header closeButton>
                             <Modal.Title>Rule Definition</Modal.Title>
                         </Modal.Header>
-                        <input  id='ruleDefinitionNonterminalListSearch'
+                        {Object.keys(this.props.nonterminals).some(function (name) {return name.indexOf("$symbol") === -1})
+                            ?
+                            <input  id='ruleDefinitionNonterminalListSearch'
                                 title="Hint: try '$text:[text from symbol rewriting]', e.g., '$text:typoo'"
                                 type='text'
                                 onChange={this.updateRuleDefinitionSymbolFilterQuery}
@@ -303,7 +305,10 @@ class RuleBar extends React.Component {
                                     var val = e.target.value;
                                     e.target.value = '';
                                     e.target.value = val;
-                                }}/>
+                            }}/>
+                            :
+                            ""
+                        }
                         <div id='nonterminalsListModal' style={{'overflowY': 'scroll', 'marginBottom': '15px', 'height': '200px'}}>
                             {   this.formatList(this.props.getListOfMatchingSymbolNames(this.state.ruleDefinitionSymbolFilterQuery)).map((name) => {
                                     var color = this.props.nonterminals[name].complete ? "success" : "danger"

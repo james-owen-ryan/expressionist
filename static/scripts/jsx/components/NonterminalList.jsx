@@ -109,7 +109,9 @@ class NonterminalList extends React.Component {
                 <ListGroup id='nonterminalList'>
                     <ListGroupItem bsSize='xsmall' key='nonterminalListSearchGroupItem' style={{'padding': '0px'}}>
                         <Button key="ADDNEW" onClick={this.addNonterminal} title="Add new symbol" style={{'height': '35px', 'marginBottom': '2px'}}><Glyphicon glyph="plus"/></Button>
-                        <input  id='nonterminalListSearch'
+                        {nonterminals.some(function (name) {return name.indexOf("$symbol") === -1})
+                            ?
+                            <input  id='nonterminalListSearch'
                                 title="Hint: try '$text:[text from symbol rewriting]', e.g., '$text:typoo'"
                                 type='text'
                                 onChange={this.updateSymbolFilterQuery}
@@ -122,7 +124,10 @@ class NonterminalList extends React.Component {
                                     var val = e.target.value;
                                     e.target.value = '';
                                     e.target.value = val;
-                                }}/>
+                            }}/>
+                            :
+                            ""
+                        }
                         {this.props.symbolFilterQuery ? <Button onClick={this.clearSymbolFilterQuery} title="Clear filter" style={{'height': '35px', 'marginBottom': '2px'}}><Glyphicon glyph="remove"/></Button> : ""}
                     </ListGroupItem>
                     {   nonterminals.map((name) => {
