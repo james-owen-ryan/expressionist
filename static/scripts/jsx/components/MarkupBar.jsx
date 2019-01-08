@@ -11,6 +11,7 @@ class MarkupBar extends React.Component {
     constructor(props) {
         super(props);
         this.addNewTag = this.addNewTag.bind(this);
+        this.renameTag = this.renameTag.bind(this);
         this.handleMarkupSetAdd = this.handleMarkupSetAdd.bind(this);
         this.openAddTagModal = this.openAddTagModal.bind(this);
         this.closeAddTagModal = this.closeAddTagModal.bind(this);
@@ -27,7 +28,7 @@ class MarkupBar extends React.Component {
             newMarkupSets: Object.keys(this.props.total).length,
             showTagDefinitionModal: false,
             newTagName: '',
-            nameOfTagsetBeingAddedTo: '',
+            nameOfTagsetBeingModified: '',
             attachNewTagToCurrentSymbol: false
         }
     }
@@ -51,14 +52,21 @@ class MarkupBar extends React.Component {
         })
     }
 
-    openAddTagModal(nameOfTagsetBeingAddedTo) {
-        this.setState({showTagDefinitionModal: true, nameOfTagsetBeingAddedTo: nameOfTagsetBeingAddedTo});
+    openAddTagModal(nameOfTagsetBeingModified, tagBeingRenamed) {
+        this.setState({
+            showTagDefinitionModal: true,
+            nameOfTagsetBeingModified: nameOfTagsetBeingModified,
+            tagBeingRenamed: tagBeingRenamed
+        });
+        if (tagBeingRenamed !== null) {
+            this.setState({newTagName: tagBeingRenamed});
+        }
     }
 
     closeAddTagModal() {
         this.setState({
             showTagDefinitionModal: false,
-            nameOfTagsetBeingAddedTo: "",
+            nameOfTagsetBeingModified: "",
             newTagName: "",
             attachNewTagToCurrentSymbol: false
         });
@@ -66,7 +74,7 @@ class MarkupBar extends React.Component {
 
     addNewTag() {
         var object = {
-            "markupSet": this.state.nameOfTagsetBeingAddedTo,
+            "markupSet": this.state.nameOfTagsetBeingModified,
             "tag": this.state.newTagName
         }
         ajax({
@@ -79,7 +87,7 @@ class MarkupBar extends React.Component {
                 if (this.state.attachNewTagToCurrentSymbol) {
                     var newObject = {
                         "nonterminal": this.props.currentNonterminal,
-                        "markupSet": this.state.nameOfTagsetBeingAddedTo,
+                        "markupSet": this.state.nameOfTagsetBeingModified,
                         "tag": this.state.newTagName
                     }
                     ajax({
@@ -92,6 +100,23 @@ class MarkupBar extends React.Component {
                     })
                 }
             },
+            cache: false
+        })
+    }
+
+    renameTag() {
+        var newTagName = this.state.newTagName;
+        var object = {
+            "markupset": this.state.nameOfTagsetBeingModified,
+            "oldtag": this.state.tagBeingRenamed,
+            "newtag": this.state.newTagName
+        }
+        ajax({
+            url: $SCRIPT_ROOT +'/api/markup/renametag',
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(object),
+            success: () => this.props.updateFromServer(),
             cache: false
         })
     }
@@ -125,7 +150,7 @@ class MarkupBar extends React.Component {
     handleEnterKeypress(e) {
         if (e.key === 'Enter') {
             if (this.state.showTagDefinitionModal) {
-                document.getElementById("submitNewTagButton").click();
+                document.getElementById("submitTagButton").click();
             }
          }
     }
@@ -166,7 +191,15 @@ class MarkupBar extends React.Component {
                                       current_set={this.props.total[total[outer]]}
                                       updateSymbolFilterQuery={this.props.updateSymbolFilterQuery}
                                       currentNonterminal={this.props.currentNonterminal}
-                                      openAddTagModal={this.openAddTagModal}/>)
+                                      openAddTagModal={this.openAddTagModal}/
+            >)
+            var submitTagButtonHoverText = this.state.tagBeingRenamed ? "Rename tag" : "Create tag"
+            if (this.state.newTagName === "") {
+                submitTagButtonHoverText += " (disabled: no tag name)";
+            }
+            else if (this.props.total[this.state.nameOfTagsetBeingModified].includes(this.state.newTagName)) {
+                submitTagButtonHoverText += " (disabled: tag already exists)";
+            }
         }
         return(
             <div>
@@ -178,12 +211,12 @@ class MarkupBar extends React.Component {
                 </ButtonGroup>
                 <Modal show={this.state.showTagDefinitionModal} onHide={this.closeAddTagModal}>
                     <Modal.Header closeButton>
-                        <Modal.Title>Add Tag</Modal.Title>
+                        <Modal.Title>Tag Definition</Modal.Title>
                     </Modal.Header>
                     <div id='existingTagsList' style={{'overflowY': 'scroll', 'marginBottom': '15px', 'maxHeight': '40vh', 'padding': '15px 30px 0px 30px'}}>
-                        {this.state.nameOfTagsetBeingAddedTo
+                        {this.state.nameOfTagsetBeingModified
                             ?
-                            this.props.total[this.state.nameOfTagsetBeingAddedTo].map((name) => {return (<Button style={{'margin':'0', 'border':'0px', "width": "100%", "textAlign": "left", 'overflowY': 'scroll'}} title="Copy tag name" onClick={this.handleExistingTagClick.bind(this, name)} key={name}>{name}</Button>)})
+                            this.props.total[this.state.nameOfTagsetBeingModified].map((name) => {return (<Button style={{'margin':'0', 'border':'0px', "width": "100%", "textAlign": "left", 'overflowY': 'scroll'}} title="Copy tag name" onClick={this.handleExistingTagClick.bind(this, name)} key={name}>{name}</Button>)})
                             :
                             ""
                         }
@@ -197,7 +230,7 @@ class MarkupBar extends React.Component {
                             :
                             ""
                         }
-                        <Button id="submitNewTagButton" title={this.state.newTagName === "" ? "Create tag (disabled: no tag name)" : this.props.total[this.state.nameOfTagsetBeingAddedTo].includes(this.state.newTagName) ? "Create tag (disabled: tag already exists)" : "Create tag"} disabled={this.state.newTagName === "" || this.props.total[this.state.nameOfTagsetBeingAddedTo].includes(this.state.newTagName)} bsStyle="primary" bsSize="large" style={{'marginBottom': '25px'}} onClick={this.addNewTag}>Create Tag</Button>
+                        <Button id="submitTagButton" title={submitTagButtonHoverText} disabled={this.state.newTagName === "" || this.props.total[this.state.nameOfTagsetBeingModified].includes(this.state.newTagName)} bsStyle="primary" bsSize="large" style={{'marginBottom': '25px'}} onClick={this.state.tagBeingRenamed ? this.renameTag : this.addNewTag}>{this.state.tagBeingRenamed ? "Rename tag" : "Create Tag"}</Button>
                     </div>
                 </Modal>
             </div>
