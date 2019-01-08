@@ -224,7 +224,7 @@ class MarkupBar extends React.Component {
                     <div style={{'textAlign': 'center'}}>
                         <textarea id='newTagNameInput' type='text' title="Enter tag name." value={this.state.newTagName} onChange={this.updateNewTagNameVal} style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '86px', 'marginTop': '10px', 'marginBottom': '15px', 'fontSize': '18px', 'padding': '8px 12px', backgroundColor: '#f2f2f2'}} autoFocus="true"/>
                         <br/>
-                        {this.props.currentNonterminalName
+                        {(this.props.currentNonterminalName && (!this.state.tagBeingRenamed))
                             ?
                             <label title="This determines whether the newly created tag will be attached to the current symbol upon being created." style={{"fontWeight": "normal", "position": "absolute", "left": "0px", "padding": "20px 0px 21px 31px"}}><input title="This determines whether the newly created tag will be attached to the current symbol upon being created." name="isGoing" type="checkbox" checked={this.state.attachNewTagToCurrentSymbol} onChange={this.toggleAttachNewTagToCurrentSymbol}/> Attach to current symbol</label>
                             :
