@@ -191,9 +191,10 @@ class MarkupBar extends React.Component {
                                       current_set={this.props.total[total[outer]]}
                                       updateSymbolFilterQuery={this.props.updateSymbolFilterQuery}
                                       currentNonterminal={this.props.currentNonterminal}
-                                      openAddTagModal={this.openAddTagModal}/
-            >)
-            var submitTagButtonHoverText = this.state.tagBeingRenamed ? "Rename tag" : "Create tag"
+                                      openAddTagModal={this.openAddTagModal}
+                                      currentRule={this.props.currentRule}
+            />)
+            var submitTagButtonHoverText = this.state.tagBeingRenamed ? "Rename tag" : "Create tag";
             if (this.state.newTagName === "") {
                 submitTagButtonHoverText += " (disabled: no tag name)";
             }
@@ -222,7 +223,7 @@ class MarkupBar extends React.Component {
                         }
                     </div>
                     <div style={{'textAlign': 'center'}}>
-                        <textarea id='newTagNameInput' type='text' title="Enter tag name." value={this.state.newTagName} onChange={this.updateNewTagNameVal} style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '86px', 'marginTop': '10px', 'marginBottom': '15px', 'fontSize': '18px', 'padding': '8px 12px', backgroundColor: '#f2f2f2'}} autoFocus="true"/>
+                        <textarea id='newTagNameInput' type='text' title="Enter tag name." value={this.state.newTagName} onChange={this.updateNewTagNameVal} style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '86px', 'marginTop': '10px', 'marginBottom': '15px', 'fontSize': '18px', 'padding': '8px 12px', 'backgroundColor': '#f2f2f2'}} autoFocus="true"/>
                         <br/>
                         {(this.props.currentNonterminalName && (!this.state.tagBeingRenamed))
                             ?

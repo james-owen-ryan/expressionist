@@ -491,7 +491,7 @@ class Interface extends React.Component {
             var current = this.state.nonterminals[this.state.current_nonterminal]
             def_rules = this.state.nonterminals[this.state.current_nonterminal].rules
             // Check which board we need to render
-            if (this.state.current_rule == -1 || current.rules[this.state.current_rule] == null ) {
+            if (this.state.current_rule === -1 || current.rules[this.state.current_rule] === null ) {
                 var referents = []
                 if ("referents" in current)  {
                     var referents = current["referents"];
@@ -566,7 +566,8 @@ class Interface extends React.Component {
                                         nonterminals={this.state.nonterminals}
                                         total={this.state.markups}
                                         updateSymbolFilterQuery={this.updateSymbolFilterQuery}
-                                        currentNonterminalName={this.state.current_nonterminal}/>
+                                        currentNonterminalName={this.state.current_nonterminal}
+                                        currentRule={this.state.current_rule}/>
                         </div>
                     </div>
                     {board}
