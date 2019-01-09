@@ -48,7 +48,8 @@ class RuleBar extends React.Component {
 
     closeModal() {
         this.setState({
-            showModal: false
+            showModal: false,
+            connectNewRuleHeadToCurrentSymbol: false
         });
         this.props.closeRuleDefinitionModal();
     }
