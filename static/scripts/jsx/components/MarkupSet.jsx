@@ -145,7 +145,7 @@ class MarkupSet extends React.Component {
         }
         if (ruleBeingWorkedOn) {
             if (this.props.present_nt.indexOf(tag) != -1) {
-                tagAttachButtonsHoverTextDisabledSnippet = " (disabled: to detach from rule head, go to that symbol)"
+                tagAttachButtonsHoverTextDisabledSnippet = " (disabled: to remove tag from rule head, go to that symbol)"
             }
             else {
                 tagAttachButtonsHoverTextDisabledSnippet = " (disabled: can't attach tags to rules)"
