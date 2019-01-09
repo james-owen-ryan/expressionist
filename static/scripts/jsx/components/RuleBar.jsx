@@ -24,13 +24,15 @@ class RuleBar extends React.Component {
         this.deregisterRuleBodyInputFocus = this.deregisterRuleBodyInputFocus.bind(this);
         this.formatList = this.formatList.bind(this);
         this.updateRuleDefinitionSymbolFilterQuery = this.updateRuleDefinitionSymbolFilterQuery.bind(this);
+        this.toggleConnectNewRuleHeadToCurrentSymbol = this.toggleConnectNewRuleHeadToCurrentSymbol.bind(this);
         this.state = {
             showModal: false,
             ruleHeadInputVal: '',
             ruleExpansionInputVal: '',
             ruleApplicationRate: 1,
             ruleBodyInputIsActive: false,
-            ruleDefinitionSymbolFilterQuery: ''
+            ruleDefinitionSymbolFilterQuery: '',
+            connectNewRuleHeadToCurrentSymbol: false
         }
     }
 
@@ -40,6 +42,7 @@ class RuleBar extends React.Component {
             ruleHeadInputVal: this.props.name,
             ruleExpansionInputVal: '',
             ruleApplicationRate: 1,
+            connectNewRuleHeadToCurrentSymbol: false
         });
     }
 
@@ -52,6 +55,10 @@ class RuleBar extends React.Component {
 
     updateRuleDefinitionSymbolFilterQuery(e) {
         this.setState({ruleDefinitionSymbolFilterQuery: e.target.value})
+    }
+
+    toggleConnectNewRuleHeadToCurrentSymbol() {
+        this.setState({connectNewRuleHeadToCurrentSymbol: !this.state.connectNewRuleHeadToCurrentSymbol})
     }
 
     submitRuleDefinitionOnEnter(e) {
@@ -194,6 +201,28 @@ class RuleBar extends React.Component {
                 },
                 cache: false
             })
+            if (this.state.connectNewRuleHeadToCurrentSymbol) {
+                var object = {
+                    "rule body": "[[" + this.state.ruleHeadInputVal + "]]",
+                    "application rate": 1,
+                    "rule head name": this.props.name
+                }
+                ajax({
+                    url: $SCRIPT_ROOT + '/api/rule/add',
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(object),
+                    success: () => {
+                        this.props.updateCurrentNonterminal(this.props.name);
+                        this.props.updateCurrentRule(-1);
+                        this.props.updateMarkupFeedback([]);
+                        this.props.updateExpansionFeedback('');
+                        this.props.updateHistory(this.props.name, -1);
+                        this.props.updateFromServer();
+                    },
+                    cache: false
+                })
+            }
         }
     }
 
@@ -277,7 +306,9 @@ class RuleBar extends React.Component {
             ruleDefinitionAddButtonIsDisabled = true;
             ruleDefinitionModalButtonHoverText += " (disabled: rule head is missing)"
         }
-
+        // If the rule is being edited to have a new rule head that is itself a new nonterminal symbol, display a checkbox that affords wrapping
+        // the rule as a new symbol (corresponding to the new rule head head); this is a common authoring move that one carries out when she
+        // wishes to apply tags to a production rule, which can only be done by creating a new symbol corresponding to that rule
         return (
             <div>
                 <div className="btn-test">
@@ -330,6 +361,12 @@ class RuleBar extends React.Component {
                             <p title="This number specifies how often this rule will be randomly selected relative to any sibling rules (a higher number increases the chance)." style={{'fontWeight': '300', 'fontSize': '16px'}}>Application rate</p>
                             <input title="This number specifies how often this rule will be randomly selected relative to any sibling rules (a higher number increases the chance)." id='appRateModal' type='text' value={this.state.ruleApplicationRate} onChange={this.updateApplicationRate} onFocus={this.deregisterRuleBodyInputFocus} style={{'width': '50px', 'border': '0px solid #d7d7d7', 'height': '43px', 'marginBottom': '25px', 'fontSize': '18px', 'padding': '0 12px', 'textAlign': 'center'}}/>
                             <br/>
+                            {((this.props.idOfRuleToEdit !== null) && (!Object.keys(this.props.nonterminals).includes(this.state.ruleHeadInputVal)))
+                                ?
+                                <label title={"If checked, the following production rule will also be created: '" + this.props.name + " -> [[" + this.state.ruleHeadInputVal + "]]'. This can be used as a way of attaching tags to a production rule, which requires it to be associated with a dedicated symbol."} style={{"fontWeight": "normal", "position": "absolute", "left": "0px", "padding": "20px 0px 21px 31px"}}><input title={"If checked, the following production rule will also be created: '" + this.props.name + " -> [[" + this.state.ruleHeadInputVal + "]]'. This can be used as a way of attaching tags to a production rule, which requires it to be associated with a dedicated symbol."} name="isGoing" type="checkbox" checked={this.state.connectNewRuleHeadToCurrentSymbol} onChange={this.toggleConnectNewRuleHeadToCurrentSymbol}/> Connect to current symbol</label>
+                                :
+                                ""
+                            }
                             <Button id="submitRuleButton" title={ruleDefinitionModalButtonHoverText} disabled={ruleDefinitionAddButtonIsDisabled} bsStyle="primary" bsSize="large" style={{'marginBottom': '25px'}} onClick={ruleDefinitionModalButtonCallback}>{ruleDefinitionModalButtonText}</Button>
                         </div>
                     </Modal>
