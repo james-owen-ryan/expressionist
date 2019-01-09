@@ -163,6 +163,23 @@ class RuleBar extends React.Component {
                 },
                 cache: false
             })
+            if (this.state.connectNewRuleHeadToCurrentSymbol) {
+                var object = {
+                    "rule body": "[[" + ruleHeadName + "]]",
+                    "application rate": 1,
+                    "rule head name": this.props.name
+                }
+                ajax({
+                    url: $SCRIPT_ROOT + '/api/rule/add',
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(object),
+                    success: () => {
+                        this.props.updateFromServer();
+                    },
+                    cache: false
+                })
+            }
             setTimeout(function() {
                 clearInterval(juicingIntervalFunction);
                 document.getElementById('submitRuleButton').innerHTML = 'Add Rule';
@@ -361,7 +378,7 @@ class RuleBar extends React.Component {
                             <p title="This number specifies how often this rule will be randomly selected relative to any sibling rules (a higher number increases the chance)." style={{'fontWeight': '300', 'fontSize': '16px'}}>Application rate</p>
                             <input title="This number specifies how often this rule will be randomly selected relative to any sibling rules (a higher number increases the chance)." id='appRateModal' type='text' value={this.state.ruleApplicationRate} onChange={this.updateApplicationRate} onFocus={this.deregisterRuleBodyInputFocus} style={{'width': '50px', 'border': '0px solid #d7d7d7', 'height': '43px', 'marginBottom': '25px', 'fontSize': '18px', 'padding': '0 12px', 'textAlign': 'center'}}/>
                             <br/>
-                            {((this.props.idOfRuleToEdit !== null) && (!Object.keys(this.props.nonterminals).includes(this.state.ruleHeadInputVal)))
+                            {(this.state.ruleHeadInputVal !== '' && this.state.ruleHeadInputVal !== this.props.name)
                                 ?
                                 <label title={"If checked, the following production rule will also be created: '" + this.props.name + " -> [[" + this.state.ruleHeadInputVal + "]]'. This can be used as a way of attaching tags to a production rule, which requires it to be associated with a dedicated symbol."} style={{"fontWeight": "normal", "position": "absolute", "left": "0px", "padding": "20px 0px 21px 31px"}}><input title={"If checked, the following production rule will also be created: '" + this.props.name + " -> [[" + this.state.ruleHeadInputVal + "]]'. This can be used as a way of attaching tags to a production rule, which requires it to be associated with a dedicated symbol."} name="isGoing" type="checkbox" checked={this.state.connectNewRuleHeadToCurrentSymbol} onChange={this.toggleConnectNewRuleHeadToCurrentSymbol}/> Connect to current symbol</label>
                                 :
