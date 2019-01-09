@@ -278,7 +278,7 @@ class Interface extends React.Component {
             document.getElementById("headerBarNewButton").click();
         }
         // Quick load: simulate clicking of the 'Load' button
-        else if (quickLoadHotKeyMatch) {
+        else if (quickLoadHotKeyMatch && !this.state.loadButtonSpinnerOn) {
             document.getElementById("headerBarLoadButton").click();
         }
         // Quick rule define: simulate clicking of the '+' button for creating a new rule
@@ -286,7 +286,7 @@ class Interface extends React.Component {
             document.getElementById("addRuleButton").click();
         }
         // Quick test: simulate clicking of the 'Test' button
-        else if (quickTestHotKeyMatch) {
+        else if (quickTestHotKeyMatch && !this.state.testButtonDisabled) {
             document.getElementById("headerBarTestButton").click();
         }
         // Quick save: do a quick save by overwriting the current grammar file
@@ -308,7 +308,7 @@ class Interface extends React.Component {
             }, 1000);
         }
         // Quick export: do a quick export by overwriting the current content-bundle files
-        else if (quickExportHotKeyMatch) {
+        else if (quickExportHotKeyMatch && !this.state.exportButtonSpinnerOn && !this.state.exportButtonDisabled) {
             this.turnExportButtonSpinnerOn();
             ajax({
                 url: $SCRIPT_ROOT + '/api/grammar/export',
@@ -329,7 +329,7 @@ class Interface extends React.Component {
             })
         }
         // Quick build: build a Productionist
-        else if (quickBuildHotKeyMatch) {
+        else if (quickBuildHotKeyMatch && !this.state.buildButtonSpinnerOn && !this.state.buildButtonDisabled) {
             this.attemptToBuildProductionist();
         }
     }
