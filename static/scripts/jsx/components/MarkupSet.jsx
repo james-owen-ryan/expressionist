@@ -34,7 +34,8 @@ class MarkupSet extends React.Component {
         this.props.openAddTagModal(this.props.name, null);
     }
 
-    handleMarkupClick(set, tag) {
+    handleMarkupClick(set, tag, event) {
+        event.stopPropagation();
         if (this.props.currentNonterminal != "") {
             var object = {
                 "nonterminal": this.props.currentNonterminal,
@@ -156,10 +157,10 @@ class MarkupSet extends React.Component {
         }
         if (this.props.present_nt.indexOf(tag) != -1) {
             return <MenuItem key={this.props.current_set + ":" + tag}>
-                <Button title="Search for tag usages" id={"tagSearchButton:"+tag} style={{backgroundColor: "#57F7E0"}} onClick={this.handleTagSearch.bind(this, this.props.name, tag)} onMouseEnter={this.toggleBackgroundColor.bind(this, "tagSearchButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")} onMouseLeave={this.toggleBackgroundColor.bind(this, "tagSearchButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")}><Glyphicon glyph="search"/></Button>
-                <Button title="Rename tag" id={"tagEditButton:"+tag} style={{backgroundColor: "#57F7E0"}} onClick={this.handleTagRenameRequest.bind(this, this.props.name, tag)} onMouseEnter={this.toggleBackgroundColor.bind(this, "tagEditButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")} onMouseLeave={this.toggleBackgroundColor.bind(this, "tagEditButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")}><Glyphicon glyph="pencil"/></Button>
-                <Button title="Delete tag" id={"tagDeleteButton:"+tag} style={{backgroundColor: "#57F7E0"}} onClick={this.handleTagDelete.bind(this, this.props.name, tag)} onMouseEnter={this.toggleBackgroundColor.bind(this, "tagDeleteButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")} onMouseLeave={this.toggleBackgroundColor.bind(this, "tagDeleteButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")}><Glyphicon glyph="trash"/></Button>
-                <Button title={"Remove tag from current symbol" + tagAttachButtonsHoverTextDisabledSnippet} id={"tagToggleButton:"+tag} disabled={tagAttachmentDisabled} style={{backgroundColor: "#57F7E0", padding: "0px 10px 0px 10px", textAlign: "left", height: "32px", width: "calc(100% - 111px"}} key={tag} onClick={this.handleMarkupClick.bind(this, this.props.name, tag)} onMouseEnter={this.toggleBackgroundColor.bind(this, "tagToggleButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")} onMouseLeave={this.toggleBackgroundColor.bind(this, "tagToggleButton:"+tag, "rgb(87, 247, 224)", "rgb(255, 233, 127)")}>{tag}</Button>
+                <Button title="Search for tag usages" id={"tagSearchButton:"+tag} bsStyle="success" onClick={this.handleTagSearch.bind(this, this.props.name, tag)}><Glyphicon glyph="search"/></Button>
+                <Button title="Rename tag" id={"tagEditButton:"+tag} bsStyle="success" onClick={this.handleTagRenameRequest.bind(this, this.props.name, tag)}><Glyphicon glyph="pencil"/></Button>
+                <Button title="Delete tag" id={"tagDeleteButton:"+tag} bsStyle="success" onClick={this.handleTagDelete.bind(this, this.props.name, tag)}><Glyphicon glyph="trash"/></Button>
+                <Button title={"Remove tag from current symbol" + tagAttachButtonsHoverTextDisabledSnippet} id={"tagToggleButton:"+tag} disabled={tagAttachmentDisabled} bsStyle="success" style={{padding: "0px 10px 0px 10px", textAlign: "left", height: "32px", width: "calc(100% - 111px"}} key={tag} onClick={this.handleMarkupClick.bind(this, this.props.name, tag)}>{tag}</Button>
             </MenuItem>;
         }
         else {
@@ -172,12 +173,12 @@ class MarkupSet extends React.Component {
         }
     }
 
-    toggleBackgroundColor(componentId, color1, color2) {
-        if (document.getElementById(componentId).style.backgroundColor === color1) {
-            document.getElementById(componentId).style.backgroundColor = color2
+    toggleBackgroundColor(componentId) {
+        if (document.getElementById(componentId).style.backgroundColor === "#f2f2f2") {
+            document.getElementById(componentId).style.backgroundColor = "#57F7E0"
         }
         else {
-            document.getElementById(componentId).style.backgroundColor = color1
+            document.getElementById(componentId).style.backgroundColor = "f2f2f2"
         }
     }
 
