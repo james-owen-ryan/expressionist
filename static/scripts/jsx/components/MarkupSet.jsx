@@ -22,7 +22,6 @@ class MarkupSet extends React.Component {
         this.handleRenameTagsetCancel = this.handleRenameTagsetCancel.bind(this);
         this.prepareTagDropdownItemComponent = this.prepareTagDropdownItemComponent.bind(this);
         this.handleEnterKeypress = this.handleEnterKeypress.bind(this);
-        this.toggleBackgroundColor = this.toggleBackgroundColor.bind(this);
         this.prepareForTagsetModification = this.prepareForTagsetModification.bind(this);
         this.state = {
             newTagsetName: '',
@@ -170,15 +169,6 @@ class MarkupSet extends React.Component {
                 <Button title="Delete tag" onClick={this.handleTagDelete.bind(this, this.props.name, tag)}><Glyphicon glyph="trash"/></Button>
                 <Button title={"Attach tag to current symbol" + tagAttachButtonsHoverTextDisabledSnippet} disabled={tagAttachmentDisabled} style={{padding: "0px 10px 0px 10px", textAlign: "left", height: "32px", width: "calc(100% - 111px"}} onClick={this.handleMarkupClick.bind(this, this.props.name, tag)} key={tag}>{tag}</Button>
             </MenuItem>;
-        }
-    }
-
-    toggleBackgroundColor(componentId) {
-        if (document.getElementById(componentId).style.backgroundColor === "#f2f2f2") {
-            document.getElementById(componentId).style.backgroundColor = "#57F7E0"
-        }
-        else {
-            document.getElementById(componentId).style.backgroundColor = "f2f2f2"
         }
     }
 
