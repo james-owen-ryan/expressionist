@@ -1,3 +1,7 @@
+.modal {
+    max-height: 90%;
+}
+
 .dropdown-menu {
     height: auto;
     max-height: 300px;
@@ -27,19 +31,27 @@
     overflow-y: visible;
 }
 
-.feedback-bar {
+.btn-xs {
+    border-radius: 0px;
+    text-align: left;
+    height: 30px;
+    padding: 0px 5px 0px 5px;
+    overflow-x: scroll;
+}
+
+.test-modal-feedback-bar {
     background-color: #fff;
-    border: 10px solid #f2f2f2;
+    border: 4px solid #f2f2f2;
     overflow: auto;
     padding: 10px;
 }
 
-.feedback-bar-left {
-    border-right: 5px solid #f2f2f2;
+.test-modal-feedback-bar-left {
+    border-right: 2px solid #f2f2f2;
 }
 
-.feedback-bar-right {
-    border-left: 5px solid #f2f2f2;
+.test-modal-feedback-bar-right {
+    border-left: 2px solid #f2f2f2;
 }
 
 .symbol-reference-in-rule-body {
@@ -74,4 +86,9 @@
 .symbol-board-header {
     padding: 8px 10px 16.5px 10px;
     box-decoration-break: clone;
+}
+
+.test-productionist-module-modal {
+    display: block;
+    width: 75%;
 }

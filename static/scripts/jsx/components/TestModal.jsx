@@ -3,7 +3,6 @@ var ListGroupItem = require('react-bootstrap').ListGroupItem
 var ListGroup = require('react-bootstrap').ListGroup
 var Glyphicon = require('react-bootstrap').Glyphicon
 var OverlayTrigger = require('react-bootstrap').OverlayTrigger
-var Popover = require('react-bootstrap').Popover
 var FormControl = require('react-bootstrap').FormControl
 var FormGroup = require('react-bootstrap').FormGroup
 var ControlLabel = require('react-bootstrap').ControlLabel
@@ -26,6 +25,7 @@ class TestModal extends React.Component {
         this.getTagColorFromStatus = this.getTagColorFromStatus.bind(this);
         this.cycleStatus = this.cycleStatus.bind(this);
         this.sendTaggedContentRequest = this.sendTaggedContentRequest.bind(this);
+        this.toggleTagsetExpandOrCollapse = this.toggleTagsetExpandOrCollapse.bind(this);
         this.state = {
             grammarFileNames: [],
             markups: {},
@@ -37,73 +37,15 @@ class TestModal extends React.Component {
             probablisticOutputTags: [],
             probablisticOutputTreeExpression: '',
             probablisticOutputBracketedExpression: '',
-            outputError: false
+            outputError: false,
+            tagsetIsExpanded: {}
         };
     }
 
-    componentWillReceiveProps(nextProps) {
-        if (nextProps.bundleName != ''){
-            this.setState({
-                bundleName: nextProps.bundleName,
-                tags: this.getTagsFromBundle(nextProps.bundleName)
-            })
-            this.setMarkupsFromBundle(nextProps.bundleName)
-        }else{
-            this.setState({bundleName: nextProps.bundleName})
-        }
-    }
-
-    setMarkupsFromBundle(bundleName) {
-        var grammar = null;
-        ajax({
-            url: $SCRIPT_ROOT + '/api/load_bundle',
-            type: "POST",
-            contentType: "application/json",
-            data: bundleName,
-            cache: false,
-            success: (data) => {
-                grammar = JSON.parse(data);
-                var tagsets = {}
-                for (var i = 0; i < Object.keys(grammar.id_to_tag).length; i++){
-                    var str = grammar.id_to_tag[i];
-                    var tagset = str.substr(0,str.indexOf(':'));
-                    var tag = str.substr(str.indexOf(':')+1);
-                    if (tagsets[tagset] == undefined){
-                        tagsets[tagset] = [tag];
-                    }else{
-                        tagsets[tagset] = tagsets[tagset].concat(tag);
-                    }
-                }
-                this.setState({markups: tagsets})
-            }
-        })
-    }
-
-    getTagsFromBundle(bundleName) {
-        var grammar = null;
-        ajax({
-            url: $SCRIPT_ROOT + '/api/load_bundle',
-            type: "POST",
-            contentType: "application/json",
-            data: bundleName,
-            async: false,
-            cache: false,
-            success: function(data){
-                grammar = data;
-            }
-        })
-        grammar = JSON.parse(grammar);
-        var tags = []
-        for (var i = 0; i < Object.keys(grammar.id_to_tag).length; i++){
-            var str = grammar.id_to_tag[i];
-            tags.push({
-                name: str.split(':')[1],
-                frequency: 0,
-                status: 'enabled',
-                tagset: str.split(':')[0]
-            });
-        }
-        return tags;
+    toggleTagsetExpandOrCollapse(tagset) {
+        var tagsetIsExpanded = this.state.tagsetIsExpanded;
+        tagsetIsExpanded[tagset] = !tagsetIsExpanded[tagset];
+        this.setState({tagsetIsExpanded: tagsetIsExpanded})
     }
 
     toggleTagsetStatus(tagset) {
@@ -206,9 +148,13 @@ class TestModal extends React.Component {
             success: (data) => {
               if (data != 'The content request cannot be satisfied by the exported content bundle.'){
                 data = JSON.parse(data)
+                var sortedTags = data.tags.sort();
+                for (var i = 0; i < sortedTags.length; i++) {
+                    sortedTags[i]  = "* " + sortedTags[i];
+                }
                 this.setState({
                   probablisticOutputText: data.text,
-                  probablisticOutputTags: data.tags,
+                  probablisticOutputTags: sortedTags,
                   probablisticOutputTreeExpression: data.treeExpression,
                   probablisticOutputBracketedExpression: data.bracketedExpression,
                   outputError: false,
@@ -224,68 +170,138 @@ class TestModal extends React.Component {
         })
     }
 
+    getTagsFromBundle(bundleName) {
+        var grammar = null;
+        ajax({
+            url: $SCRIPT_ROOT + '/api/load_bundle',
+            type: "POST",
+            contentType: "application/json",
+            data: bundleName,
+            async: false,
+            cache: false,
+            success: function(data){
+                grammar = data;
+            }
+        })
+        grammar = JSON.parse(grammar);
+        var tags = []
+        for (var i = 0; i < Object.keys(grammar.id_to_tag).length; i++){
+            var str = grammar.id_to_tag[i];
+            tags.push({
+                name: str.split(':')[1],
+                frequency: 0,
+                status: 'enabled',
+                tagset: str.split(':')[0]
+            });
+        }
+        return tags;
+    }
+
+    setMarkupsFromBundle(bundleName) {
+        var grammar = null;
+        ajax({
+            url: $SCRIPT_ROOT + '/api/load_bundle',
+            type: "POST",
+            contentType: "application/json",
+            data: bundleName,
+            cache: false,
+            success: (data) => {
+                grammar = JSON.parse(data);
+                var tagsets = {}
+                for (var i = 0; i < Object.keys(grammar.id_to_tag).length; i++){
+                    var str = grammar.id_to_tag[i];
+                    var tagset = str.substr(0, str.indexOf(':'));
+                    var tag = str.substr(str.indexOf(':')+1);
+                    if (tagsets[tagset] == undefined){
+                        tagsets[tagset] = [tag];
+                    }
+                    else{
+                        tagsets[tagset] = tagsets[tagset].concat(tag);
+                    }
+                }
+                this.setState({markups: tagsets})
+            }
+        })
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.bundleName !== ''){
+            var tagObjects = this.getTagsFromBundle(nextProps.bundleName);
+            var tagsetIsExpanded = {};
+            for (var i = 0; i < tagObjects.length; i++) {
+                if (!(tagObjects[i].tagset in tagsetIsExpanded)) {
+                    tagsetIsExpanded[tagObjects[i].tagset] = false;
+                }
+            }
+            this.setState({
+                bundleName: nextProps.bundleName,
+                tags: tagObjects,
+                tagsetIsExpanded: tagsetIsExpanded
+            });
+            this.setMarkupsFromBundle(nextProps.bundleName);
+        }
+        else {
+            // This happens when the tool starts up, since this modal is actually constructed at that time
+            this.setState({bundleName: nextProps.bundleName})
+        }
+    }
+
     render() {
-        const instructionsPopover = (
-            <Popover id="instructions-popover" title="Instructions">
-                This is the bundle name that you typed into the Build window.
-            </Popover>
-        )
         return (
-            <Modal show={this.props.show} onHide={this.props.onHide}>
+            <Modal show={this.props.show} onHide={this.props.onHide} dialogClassName="test-productionist-module-modal">
                 <Modal.Header closeButton>
                     <Modal.Title>Test Productionist module...</Modal.Title>
                 </Modal.Header>
-                <Button onClick={this.sendTaggedContentRequest.bind(this, this.state.tags)} title="Submit content request" style={{padding: '7px 12px', marginTop: '35px'}}><Glyphicon glyph="play"/></Button>
+                <Alert bsStyle="danger" style={setErrorWarningStyle(this.state.outputError)}>
+                  Content request is unsatisfiable.
+                </Alert>
+                <div>
+                    <div style={{display: 'flex', marginBottom: '5px'}}>
+                      <p style={{width: "100%", textAlign: "center"}}>Generated Content Package</p>
+                    </div>
+                    <Grid fluid>
+                      <Row className="show-grid" style={{display: 'flex'}}>
+                        <Col xs={6} className='test-modal-feedback-bar test-modal-feedback-bar-left'>{this.state.probablisticOutputText}</Col>
+                        <Col xs={6} className='test-modal-feedback-bar test-modal-feedback-bar-right'>{this.state.probablisticOutputTags.map( (tagset) => <div>{tagset}</div> )}</Col>
+                      </Row>
+                    </Grid>
+                    <div style={{marginTop: '10px', marginBottom: '10px', width: "100%", textAlign: "center"}}>Tree Expression</div>
+                    <Grid fluid>
+                      <Row className="show-grid">
+                        <Col xs={12} style={{'whiteSpace': 'pre-wrap', 'marginBottom': '20px'}} className='test-modal-feedback-bar'>{this.state.probablisticOutputTreeExpression}</Col>
+                      </Row>
+                    </Grid>
+                </div>
+                <Button onClick={this.sendTaggedContentRequest.bind(this, this.state.tags)} title="Submit content request" style={{padding: '7px 12px', width: "15%", left: "42.5%", height: "50px", fontSize: "25px", position: "relative"}}><Glyphicon glyph="play"/></Button>
                 <div id="tags">
+                    <p style={{marginTop: '10px', marginBottom: '10px', width: "100%", textAlign: "center"}}>Content Request</p>
                     <ListGroup id='tagsList' style={{marginBottom: '0px'}}>
                         {
                             Object.keys(this.state.markups).map(function (tagset){
                                 return (
-                                    <ListGroupItem bsSize="xsmall" key={tagset} style={{border: 'none'}}>
-                                        <ListGroupItem  title={tagset} bsSize="xsmall" onClick={this.toggleTagsetStatus.bind(this, tagset)}>{tagset}
-                                        </ListGroupItem>
-                                        {
+                                    <ListGroupItem bsSize="xsmall" key={tagset} style={{border: '0px'}}>
+                                        <ListGroupItem title="Toggle status in content request for all tags in this tagset" bsSize="xsmall" onClick={this.toggleTagsetStatus.bind(this, tagset)} style={{border: '0px', width: "calc(100% - 38px)"}}>{tagset}</ListGroupItem>
+                                        <Button title={this.state.tagsetIsExpanded[tagset] ? "Collapse tagset" : "Expand tagset"} onClick={this.toggleTagsetExpandOrCollapse.bind(this, tagset)}><Glyphicon glyph={this.state.tagsetIsExpanded[tagset] ? "menu-up" : "menu-down"}/></Button>
+                                        {this.state.tagsetIsExpanded[tagset]
+                                            ?
                                             this.state.markups[tagset].map(function (tag){
                                                 return (
-                                                    <div key={tag}>
-                                                        <ListGroupItem>
-                                                            <Button title={"Toggle tag status in content request (currently: " + this.getTagData(tagset, tag, "status") + ")"} bsSize="xsmall" bsStyle={this.getTagColorFromStatus(this.getTagData(tagset, tag, "status"))} onClick={this.toggleTagStatus.bind(this, tagset, tag)}>{tag}</Button>
-                                                            <FormControl title="Modify tag utility in content request" type="number" id={tagset+':'+tag} value={this.getTagData(tagset, tag, "frequency")} onChange={this.updateTagFrequency} style={this.getTagData(tagset, tag, "status") == 'enabled' ? {display: 'inline', width: '75px', height: '30px', float: 'right', border: "0px"} : {display: 'none'}} />
+                                                    <div key={tagset + ":" + tag}>
+                                                        <ListGroupItem style={{border: '0px', padding: "0px"}}>
+                                                            <Button title={"Toggle tag status in content request (currently: " + this.getTagData(tagset, tag, "status") + ")"} bsSize="xsmall" bsStyle={this.getTagColorFromStatus(this.getTagData(tagset, tag, "status"))} onClick={this.toggleTagStatus.bind(this, tagset, tag)} style={{width: "calc(100% - 50px)", padding: "0px 5px 0px 5px", marginBotton: "0px"}}>{tag}</Button>
+                                                            <FormControl title="Modify tag utility in content request" type="number" id={tagset+':'+tag} value={this.getTagData(tagset, tag, "frequency")} onChange={this.updateTagFrequency} style={this.getTagData(tagset, tag, "status") == 'enabled' ? {display: 'inline', width: '50px', height: '30px', float: 'right', border: "0px", "padding": "5px"} : {display: 'none'}} />
                                                         </ListGroupItem>
                                                     </div>
                                                 )
                                             }.bind(this))
+                                            :
+                                            ""
                                         }
                                     </ListGroupItem>
                                 )
                             }.bind(this))
                         }
                     </ListGroup>
-                    <div id='outputs' style={{marginLeft: '15px', marginTop: '10px', marginRight: '15px', marginBottom: '10px'}}>
-                        <Alert bsStyle="danger" style={setErrorWarningStyle(this.state.outputError)}>
-                          Content request is unsatisfiable.
-                        </Alert>
-                        <div style={{marginBottom: '10px'}}>
-                          Output #{this.state.numOutputs}
-                        </div>
-                        <div>
-                            <div style={{display: 'flex', marginBottom: '5px'}}>
-                              <p>Generated Content Package</p>
-                            </div>
-                            <Grid fluid>
-                              <Row className="show-grid" style={{display: 'flex'}}>
-                                <Col xs={6} className='feedback-bar feedback-bar-left'>{this.state.probablisticOutputText}</Col>
-                                <Col xs={6} className='feedback-bar feedback-bar-right'>{this.state.probablisticOutputTags.map( (tagset) => <div>{tagset}</div> )}</Col>
-                              </Row>
-                            </Grid>
-                            <div style={{marginTop: '10px', marginBottom: '10px'}}>Tree Expression</div>
-                            <Grid fluid>
-                              <Row className="show-grid">
-                                <Col xs={12} style={{'whiteSpace': 'pre-wrap'}} className='feedback-bar'>{this.state.probablisticOutputTreeExpression}</Col>
-                              </Row>
-                            </Grid>
-                        </div>
-                    </div>
                 </div>
             </Modal>
         );
