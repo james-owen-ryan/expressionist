@@ -34,7 +34,7 @@ class MarkupSet extends React.Component {
     }
 
     handleMarkupClick(set, tag, event) {
-        event.stopPropagation();
+        event.stopPropagation();  // Prevents the dropdown from closing
         if (this.props.currentNonterminal != "") {
             var object = {
                 "nonterminal": this.props.currentNonterminal,
