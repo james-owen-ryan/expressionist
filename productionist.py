@@ -428,10 +428,14 @@ class Productionist(object):
         # Select a production rule
         if self.remaining_path and self.remaining_path[0] in nonterminal_symbol.production_rules:
             next_rule = self.remaining_path.pop(0)
-        else:
+        elif nonterminal_symbol.production_rules:
             if self.verbosity > 1:
                 print "{whitespace}Selecting wildcard rule...".format(whitespace='  ' * n_tabs_for_debug)
             next_rule = self._select_wildcard_production_rule(nonterminal_symbol=nonterminal_symbol)
+        else:
+            # No production rules have been authored for this symbol, so return a reference
+            # to the symbol itself (in the style of the Expressionist feedback bar)
+            return "Error: No rules on symbol '{symbol}'".format(symbol=nonterminal_symbol.name)
         return self._execute_production_rule(rule=next_rule, n_tabs_for_debug=n_tabs_for_debug+1)
 
     def _select_wildcard_production_rule(self, nonterminal_symbol):
