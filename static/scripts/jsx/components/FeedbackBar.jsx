@@ -24,12 +24,12 @@ class FeedbackBar extends React.Component {
 
     render() {
         var derivation_str = ""
-        if (this.props.derivation) {
-            derivation_str = this.props.derivation
+        if (this.props.text) {
+            derivation_str = this.props.text
         }
         var markups_str = ""
-        if (this.props.markup) {
-            var tags = this.props.markup;
+        if (this.props.tags) {
+            var tags = this.props.tags;
             tags.sort();
             tags.forEach(function (tag) {
                 markups_str += '* ' + tag + '<br>'
@@ -40,7 +40,7 @@ class FeedbackBar extends React.Component {
                 <div title="Text in generated content package" id="Derivation"
                      style={{"backgroundColor": "#fff", "border": "10px solid #f2f2f2", "borderRight": "0px solid #fff", "float": "left", "height": "100%", "width": "50%", "overflow": "auto", "padding": "10px", "paddingRight": "0px"}}>
                     <div style={{"paddingRight": "10px"}}>{derivation_str}</div>
-                    {/* <div style={{"position": "absolute", "bottom": "10px", "right": "0px"}}><Button onClick={this.openTreeExpressionModal} title="View tree expression" disabled={this.props.derivation ? false : true}><Glyphicon glyph="tree-conifer"/></Button></div> */}
+                    {/* <div style={{"position": "absolute", "bottom": "10px", "right": "0px"}}><Button onClick={this.openTreeExpressionModal} title="View tree expression" disabled={this.props.text ? false : true}><Glyphicon glyph="tree-conifer"/></Button></div> */}
                 </div>
                 <div title="Tags in generated content package" id="Markup"
                      style={{"backgroundColor": "#fff", "border": "10px solid #f2f2f2", "borderRight": "0px solid #fff", "height": "100%", "float": "left", "width": "50%", "overflow": "auto", "padding": "10px"}}>

@@ -24,8 +24,8 @@ class NonterminalList extends React.Component {
         if (this.props.nonterminals[position]) {
             this.props.updateCurrentNonterminal(position);
             this.props.updateCurrentRule(-1);
-            this.props.updateMarkupFeedback([]);
-            this.props.updateExpansionFeedback("");
+            this.props.updateGeneratedContentPackageTags([]);
+            this.props.updateGeneratedContentPackageText("");
             this.props.updateHistory(position, -1);
         }
     }

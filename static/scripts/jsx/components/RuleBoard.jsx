@@ -7,24 +7,24 @@ class RuleBoard extends React.Component {
 
     constructor(props) {
         super(props);
-        this.handleExpandRule = this.handleExpandRule.bind(this);
+        this.handleExecuteRule = this.handleExecuteRule.bind(this);
         this.handleRuleClickThrough = this.handleRuleClickThrough.bind(this);
         this.onRuleDelete = this.onRuleDelete.bind(this);
         this.handleAppModify = this.handleAppModify.bind(this);
         this.prepareForRuleDefinitionEdit = this.prepareForRuleDefinitionEdit.bind(this);
     }
 
-    handleExpandRule() {
+    handleExecuteRule() {
         ajax({
             url: $SCRIPT_ROOT + '/api/rule/expand',
             type: 'POST',
             contentType: "application/json",
-            data: JSON.stringify({"nonterminal": this.props.name, "index": this.props.currentRule}),
+            data: JSON.stringify({"nonterminal": this.props.currentSymbolName, "index": this.props.currentRule}),
             dataType: 'json',
             cache: false,
             success: (data) => {
-                this.props.updateExpansionFeedback(data.derivation);
-                this.props.updateMarkupFeedback(data.markup);
+                this.props.updateGeneratedContentPackageText(data.derivation);
+                this.props.updateGeneratedContentPackageText(data.markup);
             },
             error: (xhr, status, err) => {
                 console.error(this.props.url, status, err.toString());
@@ -35,15 +35,15 @@ class RuleBoard extends React.Component {
     handleRuleClickThrough(tag){
         this.props.updateCurrentNonterminal(tag);
         this.props.updateCurrentRule(-1);
-        this.props.updateMarkupFeedback([]);
-        this.props.updateExpansionFeedback('');
+        this.props.updateGeneratedContentPackageText([]);
+        this.props.updateGeneratedContentPackageText('');
         this.props.updateHistory(tag, -1);
     }
 
     onRuleDelete() {
         var object = {
             "rule": this.props.currentRule,
-            "nonterminal": this.props.name
+            "nonterminal": this.props.currentSymbolName
         }
         ajax({
             url: $SCRIPT_ROOT + '/api/rule/delete',
@@ -53,7 +53,7 @@ class RuleBoard extends React.Component {
             success: () => {
                 this.props.updateCurrentRule(this.props.currentRule-1)
                 this.props.updateFromServer()
-                this.props.updateHistory(this.props.name, -1)
+                this.props.updateHistory(this.props.currentSymbolName, -1)
             },
             cache: false
         })
@@ -61,9 +61,9 @@ class RuleBoard extends React.Component {
 
     handleAppModify() {
         var index = this.props.currentRule;
-        var app_rate = window.prompt("Enter a new application rate.");
-        if (!isNaN(app_rate)) {
-            var object = {"rule": index, "nonterminal": this.props.name, "app_rate": app_rate}
+        var applicationRate = window.prompt("Enter a new application rate.");
+        if (!isNaN(applicationRate)) {
+            var object = {"rule": index, "nonterminal": this.props.currentSymbolName, "applicationRate": applicationRate}
             ajax({
                 url: $SCRIPT_ROOT + '/api/rule/set_app',
                 type: "POST",
@@ -76,7 +76,7 @@ class RuleBoard extends React.Component {
     }
 
     prepareForRuleDefinitionEdit() {
-        this.props.openRuleDefinitionModal(this.props.currentRule)
+        this.props.openRuleDefinitionModal(this.props.currentRule);
     }
 
     render() {
@@ -98,9 +98,9 @@ class RuleBoard extends React.Component {
             <div>
                 <div style={{"width": "70%", "margin": "0 auto"}}>
                     <h2>
-                        <span className="symbol-reference-in-rule-head" title="View rule head" onClick={this.handleRuleClickThrough.bind(this, this.props.name)}>{this.props.name}</span>
+                        <span className="symbol-reference-in-rule-head" title="View rule head" onClick={this.handleRuleClickThrough.bind(this, this.props.currentSymbolName)}>{this.props.currentSymbolName}</span>
                         <br></br>
-                        <Button id="playButton" bsStyle="default" title="Test rule execution (hot key: 'command+Enter' or 'ctrl+Enter')" onClick={this.handleExpandRule}><Glyphicon glyph="play"/></Button>
+                        <Button id="playButton" bsStyle="default" title="Test rule execution (hot key: 'command+Enter' or 'ctrl+Enter')" onClick={this.handleExecuteRule}><Glyphicon glyph="play"/></Button>
                         <Button id="editRuleButton" bsStyle="default" title="Edit rule (hot key: 'command+shift+d' or 'ctrl+shift+d')" onClick={this.prepareForRuleDefinitionEdit}><Glyphicon glyph="pencil"/></Button>
                         <Button bsStyle="danger" title="Delete rule" onClick={this.onRuleDelete}><Glyphicon glyph="trash"/></Button>
                         <Glyphicon title='The arrow in a production rule cues that the rule head (top) will be rewritten as the rule body (bottom).' glyph="circle-arrow-down" style={{"fontSize": "25px", "left": "10px", "top": "5px"}}/>

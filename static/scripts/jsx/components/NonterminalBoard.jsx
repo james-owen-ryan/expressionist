@@ -31,15 +31,15 @@ class NonterminalBoard extends React.Component {
     handleNonterminalRuleClickThrough(tag, index) {
         this.props.updateCurrentNonterminal(tag)
         this.props.updateCurrentRule(index)
-        this.props.updateMarkupFeedback([])
-        this.props.updateExpansionFeedback("")
+        this.props.updateGeneratedContentPackageTags([])
+        this.props.updateGeneratedContentPackageText("")
         this.props.updateHistory(tag, index)
     }
 
     handleSetDeep() {
-        if (this.props.name != "") {
+        if (this.props.currentSymbolName != "") {
             var object = {
-                "nonterminal": this.props.name,
+                "nonterminal": this.props.currentSymbolName,
             }
             ajax({
                 url: $SCRIPT_ROOT + '/api/nonterminal/deep',
@@ -55,10 +55,10 @@ class NonterminalBoard extends React.Component {
     }
 
     handleNonterminalRename(nonterminal) {
-        var newsymbol = window.prompt("Enter a new name for this nonterminal symbol.", this.props.name);
-        if (this.props.name !== "" && newsymbol) {
+        var newsymbol = window.prompt("Enter a new name for this nonterminal symbol.", this.props.currentSymbolName);
+        if (this.props.currentSymbolName !== "" && newsymbol) {
             var object = {
-                "old": this.props.name,
+                "old": this.props.currentSymbolName,
                 "new": newsymbol
             }
             ajax({
@@ -78,8 +78,8 @@ class NonterminalBoard extends React.Component {
 
     handleNonterminalDelete() {
         var confirmresponse = window.confirm("Are you sure you'd like to delete this nonterminal symbol? This will also delete any production rules that reference it.");
-        if (this.props.name != "" && confirmresponse == true) {
-            var object = {"nonterminal": this.props.name};
+        if (this.props.currentSymbolName != "" && confirmresponse == true) {
+            var object = {"nonterminal": this.props.currentSymbolName};
             ajax({
                 url: $SCRIPT_ROOT + '/api/nonterminal/delete',
                 type: "POST",
@@ -101,13 +101,13 @@ class NonterminalBoard extends React.Component {
             url: $SCRIPT_ROOT + '/api/nonterminal/expand',
             type: 'POST',
             contentType: "application/json",
-            data: JSON.stringify({"nonterminal": this.props.name}),
+            data: JSON.stringify({"nonterminal": this.props.currentSymbolName}),
             dataType: 'json',
             async: true,
             cache: false,
             success: (data) => {
-                this.props.updateMarkupFeedback(data.markup);
-                this.props.updateExpansionFeedback(data.derivation)
+                this.props.updateGeneratedContentPackageTags(data.markup);
+                this.props.updateGeneratedContentPackageText(data.derivation)
             },
             error: (xhr, status, err) => {
                 console.error(this.props.url, status, err.toString());
@@ -121,7 +121,7 @@ class NonterminalBoard extends React.Component {
         var markup
         var glyph_nt
         if (this.props.nonterminal) {
-            var name = this.props.name
+            var name = this.props.currentSymbolName
             var deep_str = ""
             if (this.props.nonterminal && this.props.nonterminal.deep) {
                 deep_str = "Toggle top-level status"

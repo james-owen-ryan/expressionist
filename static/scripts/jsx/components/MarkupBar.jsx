@@ -20,12 +20,12 @@ class MarkupBar extends React.Component {
         this.handleEnterKeypress = this.handleEnterKeypress.bind(this);
         this.toggleAttachNewTagToCurrentSymbol = this.toggleAttachNewTagToCurrentSymbol.bind(this);
         var presentMarkups = []
-        if (props.currentNonterminal in props.nonterminals){
+        if (props.currentSymbolName in props.nonterminals){
             presentMarkups = props.nonterminals[props.current_nonterminal].markup
         }
         this.state = {
             present: presentMarkups,
-            newMarkupSets: Object.keys(this.props.total).length,
+            newMarkupSets: Object.keys(this.props.tagsets).length,
             showTagDefinitionModal: false,
             newTagName: '',
             nameOfTagsetBeingModified: '',
@@ -38,7 +38,7 @@ class MarkupBar extends React.Component {
     }
 
     handleMarkupSetAdd() {
-        var newMarkupSetName = '/this is a new tagset/' + Object.keys(this.props.total).length
+        var newMarkupSetName = '/this is a new tagset/' + Object.keys(this.props.tagsets).length
         var object = {"markupSet": newMarkupSetName}
         ajax({
             url: $SCRIPT_ROOT + '/api/markup/addtagset',
@@ -86,7 +86,7 @@ class MarkupBar extends React.Component {
                 this.props.updateFromServer();
                 if (this.state.attachNewTagToCurrentSymbol) {
                     var newObject = {
-                        "nonterminal": this.props.currentNonterminal,
+                        "nonterminal": this.props.currentSymbolName,
                         "markupSet": this.state.nameOfTagsetBeingModified,
                         "tag": this.state.newTagName
                     }
@@ -122,7 +122,7 @@ class MarkupBar extends React.Component {
     }
 
     handleMarkupClick(set, tag) {
-        if (this.props.currentNonterminal != "") {
+        if (this.props.currentSymbolName != "") {
             var object = {
 
             }
@@ -161,8 +161,8 @@ class MarkupBar extends React.Component {
 
     componentWillReceiveProps(props){
         var presentMarkups = []
-        if (props.currentNonterminal in props.nonterminals){
-            presentMarkups = props.nonterminals[props.currentNonterminal].markup
+        if (props.currentSymbolName in props.nonterminals){
+            presentMarkups = props.nonterminals[props.currentSymbolName].markup
         }
         this.setState({
             present: presentMarkups
@@ -171,7 +171,7 @@ class MarkupBar extends React.Component {
 
     render() {
         var output = []
-        var total = Object.keys(this.props.total)
+        var total = Object.keys(this.props.tagsets)
         for (var outer = 0; total.length > outer ; outer++) {
             var present_nt = []
             if (this.state.present[total[outer]])
@@ -182,15 +182,15 @@ class MarkupBar extends React.Component {
             {
               present_nt = []
             }
-            output.push(<MarkupSet    currentNonterminal={this.props.currentNonterminal}
+            output.push(<MarkupSet    currentNonterminal={this.props.currentSymbolName}
                                       updateFromServer={this.props.updateFromServer}
-                                      markups={this.props.total}
+                                      markups={this.props.tagsets}
                                       key={total[outer]}
                                       name={total[outer]}
                                       present_nt={present_nt}
-                                      current_set={this.props.total[total[outer]]}
+                                      current_set={this.props.tagsets[total[outer]]}
                                       updateSymbolFilterQuery={this.props.updateSymbolFilterQuery}
-                                      currentNonterminal={this.props.currentNonterminal}
+                                      currentNonterminal={this.props.currentSymbolName}
                                       openAddTagModal={this.openAddTagModal}
                                       currentRule={this.props.currentRule}
             />)
@@ -198,7 +198,7 @@ class MarkupBar extends React.Component {
             if (this.state.newTagName === "") {
                 submitTagButtonHoverText += " (disabled: no tag name)";
             }
-            else if (this.props.total[this.state.nameOfTagsetBeingModified].includes(this.state.newTagName)) {
+            else if (this.props.tagsets[this.state.nameOfTagsetBeingModified].includes(this.state.newTagName)) {
                 submitTagButtonHoverText += " (disabled: tag already exists)";
             }
         }
@@ -217,7 +217,7 @@ class MarkupBar extends React.Component {
                     <div id='existingTagsList' style={{'overflowY': 'scroll', 'marginBottom': '15px', 'maxHeight': '40vh', 'padding': '15px 30px 0px 30px'}}>
                         {this.state.nameOfTagsetBeingModified
                             ?
-                            this.props.total[this.state.nameOfTagsetBeingModified].map((name) => {return (<Button style={{'margin':'0', 'border':'0px', "width": "100%", "textAlign": "left", 'overflowY': 'scroll'}} title="Copy tag name" onClick={this.handleExistingTagClick.bind(this, name)} key={name}>{name}</Button>)})
+                            this.props.tagsets[this.state.nameOfTagsetBeingModified].map((name) => {return (<Button style={{'margin':'0', 'border':'0px', "width": "100%", "textAlign": "left", 'overflowY': 'scroll'}} title="Copy tag name" onClick={this.handleExistingTagClick.bind(this, name)} key={name}>{name}</Button>)})
                             :
                             ""
                         }
@@ -225,13 +225,13 @@ class MarkupBar extends React.Component {
                     <div style={{'textAlign': 'center'}}>
                         <textarea id='newTagNameInput' type='text' title="Enter tag name." value={this.state.newTagName} onChange={this.updateNewTagNameVal} style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '86px', 'marginTop': '10px', 'marginBottom': '15px', 'fontSize': '18px', 'padding': '8px 12px', 'backgroundColor': '#f2f2f2'}} autoFocus="true"/>
                         <br/>
-                        {(this.props.currentNonterminalName && (!this.state.tagBeingRenamed))
+                        {(this.props.currentSymbolName && (!this.state.tagBeingRenamed))
                             ?
                             <label title="This determines whether the newly created tag will be attached to the current symbol upon being created." style={{"fontWeight": "normal", "position": "absolute", "left": "0px", "padding": "20px 0px 21px 31px"}}><input title="This determines whether the newly created tag will be attached to the current symbol upon being created." name="isGoing" type="checkbox" checked={this.state.attachNewTagToCurrentSymbol} onChange={this.toggleAttachNewTagToCurrentSymbol}/> Attach to current symbol</label>
                             :
                             ""
                         }
-                        <Button id="submitTagButton" title={submitTagButtonHoverText} disabled={this.state.newTagName === "" || this.props.total[this.state.nameOfTagsetBeingModified].includes(this.state.newTagName)} bsStyle="primary" bsSize="large" style={{'marginBottom': '25px'}} onClick={this.state.tagBeingRenamed ? this.renameTag : this.addNewTag}>{this.state.tagBeingRenamed ? "Rename tag" : "Create Tag"}</Button>
+                        <Button id="submitTagButton" title={submitTagButtonHoverText} disabled={this.state.newTagName === "" || this.props.tagsets[this.state.nameOfTagsetBeingModified].includes(this.state.newTagName)} bsStyle="primary" bsSize="large" style={{'marginBottom': '25px'}} onClick={this.state.tagBeingRenamed ? this.renameTag : this.addNewTag}>{this.state.tagBeingRenamed ? "Rename tag" : "Create Tag"}</Button>
                     </div>
                 </Modal>
             </div>

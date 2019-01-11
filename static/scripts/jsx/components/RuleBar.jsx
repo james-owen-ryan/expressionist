@@ -27,7 +27,6 @@ class RuleBar extends React.Component {
         this.toggleConnectNewRuleHeadToCurrentSymbol = this.toggleConnectNewRuleHeadToCurrentSymbol.bind(this);
         this.displayConnectBackCheckbox = this.displayConnectBackCheckbox.bind(this);
         this.state = {
-            showModal: false,
             ruleHeadInputVal: '',
             ruleExpansionInputVal: '',
             ruleApplicationRate: 1,
@@ -38,9 +37,9 @@ class RuleBar extends React.Component {
     }
 
     openModal() {
+        this.props.toggleWhetherRuleDefinitionModalIsOpen();
         this.setState({
-            showModal: true,
-            ruleHeadInputVal: this.props.name,
+            ruleHeadInputVal: this.props.currentSymbolName,
             ruleExpansionInputVal: '',
             ruleApplicationRate: 1,
             connectNewRuleHeadToCurrentSymbol: false
@@ -48,11 +47,10 @@ class RuleBar extends React.Component {
     }
 
     closeModal() {
+        this.props.toggleWhetherRuleDefinitionModalIsOpen();
         this.setState({
-            showModal: false,
             connectNewRuleHeadToCurrentSymbol: false
         });
-        this.props.closeRuleDefinitionModal();
     }
 
     updateRuleDefinitionSymbolFilterQuery(e) {
@@ -64,7 +62,7 @@ class RuleBar extends React.Component {
     }
 
     submitRuleDefinitionOnEnter(e) {
-        if (this.state.showModal || this.props.ruleDefinitionModalIsOpen) {
+        if (this.props.ruleDefinitionModalIsOpen) {
             if (e.key === 'Enter' && !(e.ctrlKey || e.metaKey)) {
                 document.getElementById("submitRuleButton").click();
             }
@@ -77,7 +75,7 @@ class RuleBar extends React.Component {
 
     handleRuleClick(index) {
         this.props.updateCurrentRule(index)
-        this.props.updateHistory(this.props.name, index)
+        this.props.updateHistory(this.props.currentSymbolName, index)
     }
 
     registerRuleBodyInputFocus() {
@@ -156,11 +154,11 @@ class RuleBar extends React.Component {
                 contentType: "application/json",
                 data: JSON.stringify(object),
                 success: () => {
-                    this.props.updateCurrentNonterminal(this.props.name);
+                    this.props.updateCurrentNonterminal(this.props.currentSymbolName);
                     this.props.updateCurrentRule(-1);
-                    this.props.updateMarkupFeedback([]);
-                    this.props.updateExpansionFeedback('');
-                    this.props.updateHistory(this.props.name, -1);
+                    this.props.updateGeneratedContentPackageTags([]);
+                    this.props.updateGeneratedContentPackageText('');
+                    this.props.updateHistory(this.props.currentSymbolName, -1);
                     this.props.updateFromServer()
                 },
                 cache: false
@@ -169,7 +167,7 @@ class RuleBar extends React.Component {
                 var object = {
                     "rule body": "[[" + ruleHeadName + "]]",
                     "application rate": 1,
-                    "rule head name": this.props.name
+                    "rule head name": this.props.currentSymbolName
                 }
                 ajax({
                     url: $SCRIPT_ROOT + '/api/rule/add',
@@ -202,7 +200,7 @@ class RuleBar extends React.Component {
                 "rule body": expansion,
                 "application rate": appRate,
                 "rule head name": ruleHeadName,
-                "original rule head name": this.props.name
+                "original rule head name": this.props.currentSymbolName
             }
             ajax({
                 url: $SCRIPT_ROOT + '/api/rule/edit',
@@ -210,11 +208,11 @@ class RuleBar extends React.Component {
                 contentType: "application/json",
                 data: JSON.stringify(object),
                 success: () => {
-                    this.props.updateCurrentNonterminal(this.props.name);
+                    this.props.updateCurrentNonterminal(this.props.currentSymbolName);
                     this.props.updateCurrentRule(-1);
-                    this.props.updateMarkupFeedback([]);
-                    this.props.updateExpansionFeedback('');
-                    this.props.updateHistory(this.props.name, -1);
+                    this.props.updateGeneratedContentPackageTags([]);
+                    this.props.updateGeneratedContentPackageText('');
+                    this.props.updateHistory(this.props.currentSymbolName, -1);
                     this.props.updateFromServer()
                     this.closeModal()
                 },
@@ -224,7 +222,7 @@ class RuleBar extends React.Component {
                 var object = {
                     "rule body": "[[" + this.state.ruleHeadInputVal + "]]",
                     "application rate": 1,
-                    "rule head name": this.props.name
+                    "rule head name": this.props.currentSymbolName
                 }
                 ajax({
                     url: $SCRIPT_ROOT + '/api/rule/add',
@@ -232,11 +230,11 @@ class RuleBar extends React.Component {
                     contentType: "application/json",
                     data: JSON.stringify(object),
                     success: () => {
-                        this.props.updateCurrentNonterminal(this.props.name);
+                        this.props.updateCurrentNonterminal(this.props.currentSymbolName);
                         this.props.updateCurrentRule(-1);
-                        this.props.updateMarkupFeedback([]);
-                        this.props.updateExpansionFeedback('');
-                        this.props.updateHistory(this.props.name, -1);
+                        this.props.updateGeneratedContentPackageTags([]);
+                        this.props.updateGeneratedContentPackageText('');
+                        this.props.updateHistory(this.props.currentSymbolName, -1);
                         this.props.updateFromServer();
                     },
                     cache: false
@@ -284,15 +282,15 @@ class RuleBar extends React.Component {
             // No rule head
             return false
         }
-        if (this.state.ruleHeadInputVal === this.props.name) {
+        if (this.state.ruleHeadInputVal === this.props.currentSymbolName) {
             // Rule head is the current symbol
             return false
         }
-        if (this.props.name === '') {
+        if (this.props.currentSymbolName === '') {
             // No current symbol
             return false
         }
-        if (this.props.ruleAlreadyExists(this.props.name, '[[' + this.state.ruleHeadInputVal + ']]', null)) {
+        if (this.props.ruleAlreadyExists(this.props.currentSymbolName, '[[' + this.state.ruleHeadInputVal + ']]', null)) {
             // A rule of the form 'currentSymbol --> [[newRuleHead]]' already exists
             return false
         }
@@ -306,7 +304,7 @@ class RuleBar extends React.Component {
     componentWillReceiveProps(nextProps) {
         if (nextProps.idOfRuleToEdit !== null) {
             this.setState({
-                ruleHeadInputVal: nextProps.name,
+                ruleHeadInputVal: nextProps.currentSymbolName,
                 ruleExpansionInputVal: nextProps.rules[nextProps.idOfRuleToEdit].expansion.join(''),
                 ruleApplicationRate: nextProps.rules[nextProps.idOfRuleToEdit].app_rate
             });
@@ -317,7 +315,7 @@ class RuleBar extends React.Component {
         var rules = [];
         this.props.rules.forEach(function (rule, i) {
             var shortened = rule.expansion.join('').substring(0, 10);
-            rules.push(<Button onClick={this.handleRuleClick.bind(this, i)} title="View production rule" key={rule.expansion.join('')+this.props.name} style={i === this.props.currentRule ? {"backgroundColor": "#ffe97f"} : {}}>{shortened}</Button>);
+            rules.push(<Button onClick={this.handleRuleClick.bind(this, i)} title="View production rule (hint: quickly navigate to and across a symbol's rules using 'tab' and 'shift-tab')" key={rule.expansion.join('')+this.props.currentSymbolName} style={i === this.props.currentRule ? {"backgroundColor": "#ffe97f"} : {}}>{shortened}</Button>);
         }, this);
         var ruleDefinitionAddButtonIsDisabled = this.props.ruleAlreadyExists(this.state.ruleHeadInputVal, this.state.ruleExpansionInputVal, this.state.ruleApplicationRate);
         if (this.props.idOfRuleToEdit !== null) {
@@ -357,7 +355,7 @@ class RuleBar extends React.Component {
                         </ButtonGroup>
                 </div>
                 <div>
-                    <Modal show={this.state.showModal || this.props.ruleDefinitionModalIsOpen} onHide={this.closeModal}>
+                    <Modal show={this.props.ruleDefinitionModalIsOpen} onHide={this.closeModal}>
                         <Modal.Header closeButton>
                             <Modal.Title>Rule Definition</Modal.Title>
                         </Modal.Header>
@@ -401,7 +399,7 @@ class RuleBar extends React.Component {
                             <br/>
                             {(this.displayConnectBackCheckbox())
                                 ?
-                                <label title={"If checked, the following production rule will also be created: '" + this.props.name + " -> [[" + this.state.ruleHeadInputVal + "]]'. This can be used as a way of attaching tags to a production rule, which requires it to be associated with a dedicated symbol."} style={{"fontWeight": "normal", "position": "absolute", "left": "0px", "padding": "20px 0px 21px 31px"}}><input title={"If checked, the following production rule will also be created: '" + this.props.name + " -> [[" + this.state.ruleHeadInputVal + "]]'. This can be used as a way of attaching tags to a production rule, which requires it to be associated with a dedicated symbol."} name="isGoing" type="checkbox" checked={this.state.connectNewRuleHeadToCurrentSymbol} onChange={this.toggleConnectNewRuleHeadToCurrentSymbol}/> Connect to current symbol</label>
+                                <label title={"If checked, the following production rule will also be created: '" + this.props.currentSymbolName + " -> [[" + this.state.ruleHeadInputVal + "]]'. This can be used as a way of attaching tags to a production rule, which requires it to be associated with a dedicated symbol."} style={{"fontWeight": "normal", "position": "absolute", "left": "0px", "padding": "20px 0px 21px 31px"}}><input title={"If checked, the following production rule will also be created: '" + this.props.currentSymbolName + " -> [[" + this.state.ruleHeadInputVal + "]]'. This can be used as a way of attaching tags to a production rule, which requires it to be associated with a dedicated symbol."} name="isGoing" type="checkbox" checked={this.state.connectNewRuleHeadToCurrentSymbol} onChange={this.toggleConnectNewRuleHeadToCurrentSymbol}/> Connect to current symbol</label>
                                 :
                                 ""
                             }

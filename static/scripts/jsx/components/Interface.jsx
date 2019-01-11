@@ -20,11 +20,20 @@ class Interface extends React.Component {
         this.updateHistory = this.updateHistory.bind(this);
         this.updateCurrentNonterminal = this.updateCurrentNonterminal.bind(this);
         this.updateCurrentRule = this.updateCurrentRule.bind(this);
-        this.updateMarkupFeedback = this.updateMarkupFeedback.bind(this);
-        this.updateExpansionFeedback = this.updateExpansionFeedback.bind(this);
-        this.getexpansion = this.getexpansion.bind(this);
+        this.updateGeneratedContentPackageTags = this.updateGeneratedContentPackageTags.bind(this);
+        this.updateGeneratedContentPackageText = this.updateGeneratedContentPackageText.bind(this);
+        this.getGeneratedContentPackage = this.getGeneratedContentPackage.bind(this);
+        this.openLoadModal = this.openLoadModal.bind(this);
+        this.openSaveModal = this.openSaveModal.bind(this);
+        this.openExportModal = this.openExportModal.bind(this);
+        this.openTestModal = this.openTestModal.bind(this);
+        this.closeLoadModal = this.closeLoadModal.bind(this);
+        this.closeSaveModal = this.closeSaveModal.bind(this);
+        this.closeExportModal = this.closeExportModal.bind(this);
+        this.closeTestModal = this.closeTestModal.bind(this);
         this.openRuleDefinitionModal = this.openRuleDefinitionModal.bind(this);
         this.closeRuleDefinitionModal = this.closeRuleDefinitionModal.bind(this);
+        this.toggleWhetherRuleDefinitionModalIsOpen = this.toggleWhetherRuleDefinitionModalIsOpen.bind(this);
         this.updateSymbolFilterQuery = this.updateSymbolFilterQuery.bind(this);
         this.getCurrentGrammarName = this.getCurrentGrammarName.bind(this);
         this.setCurrentGrammarName = this.setCurrentGrammarName.bind(this);
@@ -48,12 +57,11 @@ class Interface extends React.Component {
             currentGrammarName: 'new',
             bundleName: '',
             nonterminals: [],
-            markups: [],
-            system_vars: [],
-            expansion_feedback: "",
-            markup_feedback: [],
-            current_nonterminal: "",
-            current_rule: -1,
+            tagsets: [],
+            generatedContentPackageText: "",
+            generatedContentPackageTags: [],
+            currentSymbol: "",
+            currentRule: -1,
             ruleDefinitionModalIsOpen: false,
             idOfRuleToEdit: null,
             symbolFilterQuery: "",
@@ -66,34 +74,62 @@ class Interface extends React.Component {
             headerBarSaveButtonIsJuicing: false,
             headerBarExportButtonIsJuicing: false,
             headerBarBuildButtonIsJuicing: false,
+            showLoadModal: false,
+            showSaveModal: false,
+            showExportModal: false,
+            showTestModal: false
         }
     }
 
-    componentDidMount() {
-        window.onpopstate = this.onBackButtonEvent;
-        if( this.props.params.nonterminalid != null)
-        {
-            this.setState({current_nonterminal: this.props.params.nonterminalid})
-            if( this.props.params.ruleid != null)
-            {
-                this.setState({current_rule: this.props.params.ruleid})
-            }
+    openLoadModal() {
+        this.setState({showLoadModal: true});
+    }
+
+    openSaveModal() {
+        this.setState({showSaveModal: true});
+    }
+
+    openExportModal(){
+        this.setState({showExportModal: true});
+    }
+
+    openTestModal() {
+        this.setState({showTestModal: true});
+    }
+
+    closeLoadModal() {
+        this.setState({showLoadModal: false});
+    }
+
+    closeSaveModal() {
+        this.setState({showSaveModal: false});
+    }
+
+    closeExportModal(){
+        this.setState({showExportModal: false});
+    }
+
+    closeTestModal() {
+        this.setState({showTestModal: false});
+    }
+
+    openRuleDefinitionModal(idOfRuleToEdit) {
+        this.setState({ruleDefinitionModalIsOpen: true});
+        this.setState({idOfRuleToEdit: idOfRuleToEdit});
+    }
+
+    closeRuleDefinitionModal() {
+        this.setState({ruleDefinitionModalIsOpen: false});
+        this.setState({idOfRuleToEdit: null});
+    }
+
+    toggleWhetherRuleDefinitionModalIsOpen() {
+        if (this.state.ruleDefinitionModalIsOpen) {
+            this.closeRuleDefinitionModal();
         }
-        ajax({
-            url: $SCRIPT_ROOT + '/api/default',
-            dataType: 'json',
-            cache: false,
-            success: (data) => {
-                this.setState({
-                    nonterminals: data['nonterminals'],
-                    markups: data['markups'],
-                    system_vars: data['system_vars'],
-                })
-            },
-            error: function (xhr, status, err) {
-                console.error(this.props.url, status, err.toString());
-            }.bind(this)
-        });
+        else {
+            this.openRuleDefinitionModal(null);
+        }
     }
 
     onBackButtonEvent(e) {
@@ -101,12 +137,12 @@ class Interface extends React.Component {
         //this.goBack()
         var nonterminal = this.props.params.nonterminalid
         var rule = this.props.params.ruleid
-        if (!(this.state.current_nonterminal == nonterminal && this.state.current_rule == rule)){
-            this.setState({markup_feedback: []})
-            this.setState({expansion_feedback: ""})
+        if (!(this.state.currentSymbol == nonterminal && this.state.currentRule == rule)){
+            this.setState({generatedContentPackageTags: []})
+            this.setState({generatedContentPackageText: ""})
         }
-        this.setState({current_nonterminal: nonterminal})
-        this.setState({current_rule: rule})
+        this.setState({currentSymbol: nonterminal})
+        this.setState({currentRule: rule})
     }
 
     updateFromServer(additionalFunctionToExecuteUponSuccess) {
@@ -116,8 +152,7 @@ class Interface extends React.Component {
             cache: false,
             success: (data) => {
                 this.setState({nonterminals: data['nonterminals']})
-                this.setState({markups: data['markups']})
-                this.setState({system_vars: data['system_vars']})
+                this.setState({tagsets: data['markups']})
                 this.determineIfExportButtonIsDisabled(data['nonterminals'])
                 if (additionalFunctionToExecuteUponSuccess !== undefined) {
                     additionalFunctionToExecuteUponSuccess();
@@ -138,19 +173,19 @@ class Interface extends React.Component {
     }
 
     updateCurrentNonterminal(newTagOrNonterminal) {
-        this.setState({current_nonterminal: newTagOrNonterminal});
+        this.setState({currentSymbol: newTagOrNonterminal});
     }
 
     updateCurrentRule(newCurrentRule) {
-        this.setState({current_rule: newCurrentRule});
+        this.setState({currentRule: newCurrentRule});
     }
 
-    updateMarkupFeedback(newMarkupFeedback) {
-        this.setState({markup_feedback: newMarkupFeedback});
+    updateGeneratedContentPackageTags(newGeneratedContentPackageTags) {
+        this.setState({generatedContentPackageTags: newGeneratedContentPackageTags});
     }
 
-    updateExpansionFeedback(newExpansionFeedback) {
-        this.setState({expansion_feedback: newExpansionFeedback});
+    updateGeneratedContentPackageText(newGeneratedContentPackageText) {
+        this.setState({generatedContentPackageText: newGeneratedContentPackageText});
     }
 
     determineIfExportButtonIsDisabled(nonterminals) {
@@ -206,20 +241,15 @@ class Interface extends React.Component {
         this.setState({buildButtonSpinnerOn: false});
     }
 
-    getexpansion(object) {
-        var symbol = object['symbol']
-        var index = object['index']
-        return {"symbol": symbol, "index": index, "expansion": this.state.nonterminals[symbol].rules[index].expansion.join("")}
-    }
-
-    openRuleDefinitionModal(idOfRuleToEdit) {
-        this.setState({ruleDefinitionModalIsOpen: true});
-        this.setState({idOfRuleToEdit: idOfRuleToEdit});
-    }
-
-    closeRuleDefinitionModal() {
-        this.setState({ruleDefinitionModalIsOpen: false});
-        this.setState({idOfRuleToEdit: null});
+    getGeneratedContentPackage(object) {
+        var symbol = object['symbol'];
+        var index = object['index'];
+        var generatedContentPackage = {
+            "symbol": symbol,
+            "index": index,
+            "expansion": this.state.nonterminals[symbol].rules[index].expansion.join("")
+        }
+        return generatedContentPackage
     }
 
     updateSymbolFilterQuery(query) {
@@ -235,127 +265,154 @@ class Interface extends React.Component {
     }
 
     handlePotentialHotKeyPress(e) {
-        // Check for a hot-key match (ctrl/command+{g, o, s, e, b, y, d, enter})
-        var quickNewHotKeyMatch = false;  // g
-        var quickLoadHotKeyMatch = false;  // o
-        var quickSaveHotKeyMatch = false;  // s
-        var quickExportHotKeyMatch = false;  // e
-        var quickBuildHotKeyMatch = false;  // b
-        var quickTestHotKeyMatch = false;  // y
-        var quickRuleDefineHotKeyMatch = false; // d
-        var quickRuleEditHotKeyMatch = false;  // e
-        var quickTestRewriteMatch = false;  // enter
-        if (e.ctrlKey || e.metaKey) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                quickTestRewriteMatch = true;
-            }
-            else {
-                switch (String.fromCharCode(e.which).toLowerCase()) {
-                case 'g':
-                    e.preventDefault();
-                    quickNewHotKeyMatch = true;
-                    break;
-                case 'o':
-                    e.preventDefault();
-                    quickLoadHotKeyMatch = true;
-                    break;
-                case 's':
-                    e.preventDefault();
-                    quickSaveHotKeyMatch = true;
-                    break;
-                case 'e':
-                    e.preventDefault();
-                    quickExportHotKeyMatch = true;
-                    break;
-                case 'b':
-                    e.preventDefault();
-                    quickBuildHotKeyMatch = true;
-                    break;
-                case 'y':
-                    e.preventDefault();
-                    quickTestHotKeyMatch = true;
-                    break;
-                case 'd':
-                    e.preventDefault();
-                    if (e.shiftKey) {
-                        quickRuleEditHotKeyMatch = true;
-                    }
-                    else {
-                        quickRuleDefineHotKeyMatch = true;
-                    }
-                    break;
-                case 'r':
-                    e.preventDefault();  // Disable page reloading, which breaks the app
+        // Check for rule tabbing
+        var atLeastOneModalIsOpen = (this.state.showSaveModal || this.state.showLoadModal || this.state.showExportModal || this.state.showTestModal || this.state.ruleDefinitionModalIsOpen);
+        if (e.key === 'Tab' && !atLeastOneModalIsOpen) {
+            e.preventDefault();
+            if (this.state.currentSymbol !== "" && this.state.nonterminals[this.state.currentSymbol].rules.length > 0) {
+                var newCurrentRule = this.state.currentRule;
+                if (e.shiftKey) {
+                    // Tab left
+                    newCurrentRule -= 1;
                 }
+                else {
+                    // Tab right
+                    newCurrentRule += 1
+                }
+                if (newCurrentRule < 0) {
+                    // Tabbed left past first rule; wrap back to right end
+                    newCurrentRule = this.state.nonterminals[this.state.currentSymbol].rules.length - 1;
+                }
+                else if (newCurrentRule > this.state.nonterminals[this.state.currentSymbol].rules.length - 1) {
+                    // Tabbed right past last rule; wrap back to left end
+                    newCurrentRule = 0;
+                }
+                this.setState({currentRule: newCurrentRule})
             }
         }
-        // Quick new: simulate clicking of the 'New' button
-        if (quickNewHotKeyMatch) {
-            document.getElementById("headerBarNewButton").click();
-        }
-        // Quick load: simulate clicking of the 'Load' button
-        else if (quickLoadHotKeyMatch && !this.state.loadButtonSpinnerOn) {
-            document.getElementById("headerBarLoadButton").click();
-        }
-        // Quick rule define: simulate clicking of the '+' button for creating a new rule
-        else if (quickRuleDefineHotKeyMatch) {
-            document.getElementById("addRuleButton").click();
-        }
-        // Quick rule edit: simulate clicking of the button for editing a new rule
-        else if (quickRuleEditHotKeyMatch && document.getElementById("editRuleButton")) {
-            document.getElementById("editRuleButton").click();
-        }
-        // Quick rewrite test: simulate clicking of the 'play' button for testing symbol rewriting or rule execution
-        else if (quickTestRewriteMatch && document.getElementById("playButton")) {
-            document.getElementById("playButton").click();
-        }
-        // Quick test: simulate clicking of the 'Test' button
-        else if (quickTestHotKeyMatch && !this.state.testButtonDisabled) {
-            document.getElementById("headerBarTestButton").click();
-        }
-        // Quick save: do a quick save by overwriting the current grammar file
-        else if (quickSaveHotKeyMatch) {
-            // Generate a juicy response (button lights green and fades back to gray)
-            this.setState({headerBarSaveButtonIsJuicing: true});
-            ajax({
-                url: $SCRIPT_ROOT + '/api/grammar/save',
-                type: "POST",
-                contentType: "text/plain",
-                data: this.getCurrentGrammarName(),
-                async: true,
-                cache: false,
-                success: (status) => {}
-            });
-            var that = this;
-            setTimeout(function() {
-                that.setState({headerBarSaveButtonIsJuicing: false});
-            }, 1000);
-        }
-        // Quick export: do a quick export by overwriting the current content-bundle files
-        else if (quickExportHotKeyMatch && !this.state.exportButtonSpinnerOn && !this.state.exportButtonDisabled) {
-            this.turnExportButtonSpinnerOn();
-            ajax({
-                url: $SCRIPT_ROOT + '/api/grammar/export',
-                type: "POST",
-                contentType: "text/plain",
-                data: this.getCurrentGrammarName(),
-                async: true,
-                cache: false,
-                success: (status) => {
-                    this.turnExportButtonSpinnerOff();
-                    this.setState({headerBarExportButtonIsJuicing: true});
-                    this.enableBuildButton();
-                    var that = this;
-                    setTimeout(function() {
-                        that.setState({headerBarExportButtonIsJuicing: false});
-                    }, 1000);
+        else {
+            // Check for a hot-key match (ctrl/command+{g, o, s, e, b, y, d, enter})
+            var quickNewHotKeyMatch = false;  // g
+            var quickLoadHotKeyMatch = false;  // o
+            var quickSaveHotKeyMatch = false;  // s
+            var quickExportHotKeyMatch = false;  // e
+            var quickBuildHotKeyMatch = false;  // b
+            var quickTestHotKeyMatch = false;  // y
+            var quickRuleDefineHotKeyMatch = false; // d
+            var quickRuleEditHotKeyMatch = false;  // e
+            var quickTestRewriteMatch = false;  // enter
+            if (e.ctrlKey || e.metaKey) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    quickTestRewriteMatch = true;
                 }
-            })
-        }
-        // Quick build: build a Productionist
-        else if (quickBuildHotKeyMatch && !this.state.buildButtonSpinnerOn && !this.state.buildButtonDisabled) {
-            this.attemptToBuildProductionist();
+                else {
+                    switch (String.fromCharCode(e.which).toLowerCase()) {
+                    case 'g':
+                        e.preventDefault();
+                        quickNewHotKeyMatch = true;
+                        break;
+                    case 'o':
+                        e.preventDefault();
+                        quickLoadHotKeyMatch = true;
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        quickSaveHotKeyMatch = true;
+                        break;
+                    case 'e':
+                        e.preventDefault();
+                        quickExportHotKeyMatch = true;
+                        break;
+                    case 'b':
+                        e.preventDefault();
+                        quickBuildHotKeyMatch = true;
+                        break;
+                    case 'y':
+                        e.preventDefault();
+                        quickTestHotKeyMatch = true;
+                        break;
+                    case 'd':
+                        e.preventDefault();
+                        if (e.shiftKey) {
+                            quickRuleEditHotKeyMatch = true;
+                        }
+                        else {
+                            quickRuleDefineHotKeyMatch = true;
+                        }
+                        break;
+                    case 'r':
+                        e.preventDefault();  // Disable page reloading, which breaks the app
+                    }
+                }
+            }
+            // Quick new: simulate clicking of the 'New' button
+            if (quickNewHotKeyMatch) {
+                document.getElementById("headerBarNewButton").click();
+            }
+            // Quick load: simulate clicking of the 'Load' button
+            else if (quickLoadHotKeyMatch && !this.state.loadButtonSpinnerOn) {
+                document.getElementById("headerBarLoadButton").click();
+            }
+            // Quick rule define: simulate clicking of the '+' button for creating a new rule
+            else if (quickRuleDefineHotKeyMatch) {
+                document.getElementById("addRuleButton").click();
+            }
+            // Quick rule edit: simulate clicking of the button for editing a new rule
+            else if (quickRuleEditHotKeyMatch && document.getElementById("editRuleButton")) {
+                document.getElementById("editRuleButton").click();
+            }
+            // Quick rewrite test: simulate clicking of the 'play' button for testing symbol rewriting or rule execution
+            else if (quickTestRewriteMatch && document.getElementById("playButton")) {
+                document.getElementById("playButton").click();
+            }
+            // Quick test: simulate clicking of the 'Test' button
+            else if (quickTestHotKeyMatch && !this.state.testButtonDisabled) {
+                document.getElementById("headerBarTestButton").click();
+            }
+            // Quick save: do a quick save by overwriting the current grammar file
+            else if (quickSaveHotKeyMatch) {
+                // Generate a juicy response (button lights green and fades back to gray)
+                this.setState({headerBarSaveButtonIsJuicing: true});
+                ajax({
+                    url: $SCRIPT_ROOT + '/api/grammar/save',
+                    type: "POST",
+                    contentType: "text/plain",
+                    data: this.getCurrentGrammarName(),
+                    async: true,
+                    cache: false,
+                    success: (status) => {}
+                });
+                var that = this;
+                setTimeout(function() {
+                    that.setState({headerBarSaveButtonIsJuicing: false});
+                }, 1000);
+            }
+            // Quick export: do a quick export by overwriting the current content-bundle files
+            else if (quickExportHotKeyMatch && !this.state.exportButtonSpinnerOn && !this.state.exportButtonDisabled) {
+                this.turnExportButtonSpinnerOn();
+                ajax({
+                    url: $SCRIPT_ROOT + '/api/grammar/export',
+                    type: "POST",
+                    contentType: "text/plain",
+                    data: this.getCurrentGrammarName(),
+                    async: true,
+                    cache: false,
+                    success: (status) => {
+                        this.turnExportButtonSpinnerOff();
+                        this.setState({headerBarExportButtonIsJuicing: true});
+                        this.enableBuildButton();
+                        var that = this;
+                        setTimeout(function() {
+                            that.setState({headerBarExportButtonIsJuicing: false});
+                        }, 1000);
+                    }
+                })
+            }
+            // Quick build: build a Productionist
+            else if (quickBuildHotKeyMatch && !this.state.buildButtonSpinnerOn && !this.state.buildButtonDisabled) {
+                this.attemptToBuildProductionist();
+            }
         }
     }
 
@@ -441,7 +498,7 @@ class Interface extends React.Component {
             var rule = this.state.nonterminals[ruleHeadName].rules[i];
             if (ruleBody === rule.expansion.join('')) {
                 if (this.state.idOfRuleToEdit !== null) {
-                    if (applicationRate != rule.app_rate) {
+                    if (applicationRate != rule.applicationRate) {
                         return false;
                     }
                 }
@@ -505,46 +562,70 @@ class Interface extends React.Component {
     }
 
     componentDidMount() {
+//      TODO THIS HAD BEEN OVERRIDDEN FOR A WHILE; EXPLORE IF IT HELPS TO FIX THE BROKEN NAVIGATION CONTROLS
+//        window.onpopstate = this.onBackButtonEvent;
+//        if( this.props.params.nonterminalid != null)
+//        {
+//            this.setState({currentSymbol: this.props.params.nonterminalid})
+//            if( this.props.params.ruleid != null)
+//            {
+//                this.setState({currentRule: this.props.params.ruleid})
+//            }
+//        }
+//        ajax({
+//            url: $SCRIPT_ROOT + '/api/default',
+//            dataType: 'json',
+//            cache: false,
+//            success: (data) => {
+//                this.setState({
+//                    nonterminals: data['nonterminals'],
+//                    tags: data['markups']
+//                })
+//            },
+//            error: function (xhr, status, err) {
+//                console.error(this.props.url, status, err.toString());
+//            }.bind(this)
+//        });
         document.addEventListener("keydown", this.handlePotentialHotKeyPress, false);
     }
 
     render() {
-        var def_rules = []
+        var definedRules = []
         var board
         var referents
-        if (this.state.current_nonterminal in this.state.nonterminals) {
-            var current = this.state.nonterminals[this.state.current_nonterminal]
-            def_rules = this.state.nonterminals[this.state.current_nonterminal].rules
+        if (this.state.currentSymbol in this.state.nonterminals) {
+            var current = this.state.nonterminals[this.state.currentSymbol]
+            definedRules = this.state.nonterminals[this.state.currentSymbol].rules
             // Check which board we need to render
-            if (this.state.current_rule === -1 || current.rules[this.state.current_rule] === null ) {
+            if (this.state.currentRule === -1 || current.rules[this.state.currentRule] === null ) {
                 var referents = []
                 if ("referents" in current)  {
                     var referents = current["referents"];
-                    referents = referents.map(this.getexpansion.bind(this))
+                    referents = referents.map(this.getGeneratedContentPackage.bind(this))
                 }
-                board = <NonterminalBoard   updateMarkupFeedback={this.updateMarkupFeedback}
-                                            updateExpansionFeedback={this.updateExpansionFeedback}
+                board = <NonterminalBoard   updateGeneratedContentPackageTags={this.updateGeneratedContentPackageTags}
+                                            updateGeneratedContentPackageText={this.updateGeneratedContentPackageText}
                                             updateHistory={this.updateHistory}
-                                            currentRule={this.state.current_rule}
+                                            currentRule={this.state.currentRule}
                                             updateFromServer={this.updateFromServer}
                                             updateCurrentNonterminal={this.updateCurrentNonterminal}
                                             updateCurrentRule={this.updateCurrentRule}
                                             referents={referents}
-                                            name={this.state.current_nonterminal}
-                                            nonterminal={this.state.nonterminals[this.state.current_nonterminal]}/>
+                                            currentSymbolName={this.state.currentSymbol}
+                                            nonterminal={this.state.nonterminals[this.state.currentSymbol]}/>
             }
             else {
-                board = <RuleBoard  name={this.state.current_nonterminal}
-                                    currentRule={this.state.current_rule}
+                board = <RuleBoard  currentSymbolName={this.state.currentSymbol}
+                                    currentRule={this.state.currentRule}
                                     nonterminals={this.state.nonterminals}
                                     updateFromServer={this.updateFromServer}
                                     updateCurrentNonterminal={this.updateCurrentNonterminal}
                                     updateCurrentRule={this.updateCurrentRule}
-                                    updateMarkupFeedback={this.updateMarkupFeedback}
-                                    updateExpansionFeedback={this.updateExpansionFeedback}
+                                    updateGeneratedContentPackageTags={this.updateGeneratedContentPackageTags}
+                                    updateGeneratedContentPackageText={this.updateGeneratedContentPackageText}
                                     updateHistory={this.updateHistory}
-                                    expansion={def_rules[this.state.current_rule].expansion}
-                                    app_rate={def_rules[this.state.current_rule].app_rate}
+                                    expansion={definedRules[this.state.currentRule].expansion}
+                                    applicationRate={definedRules[this.state.currentRule].applicationRate}
                                     openRuleDefinitionModal={this.openRuleDefinitionModal}/>
             }
         }
@@ -555,14 +636,25 @@ class Interface extends React.Component {
                     style={{ "height": "70%", "width": "75%", position: "absolute", top: 0, left: 0}}>
                     <HeaderBar  updateCurrentNonterminal={this.updateCurrentNonterminal}
                                 updateCurrentRule={this.updateCurrentRule}
-                                updateMarkupFeedback={this.updateMarkupFeedback}
-                                updateExpansionFeedback={this.updateExpansionFeedback}
+                                updateGeneratedContentPackageTags={this.updateGeneratedContentPackageTags}
+                                updateGeneratedContentPackageText={this.updateGeneratedContentPackageText}
                                 updateHistory={this.updateHistory}
                                 update={this.updateFromServer}
                                 getCurrentGrammarName={this.getCurrentGrammarName}
                                 setCurrentGrammarName={this.setCurrentGrammarName}
                                 bundleName={this.state.bundleName}
-                                systemVars={this.state.system_vars}
+                                openLoadModal={this.openLoadModal}
+                                closeLoadModal={this.closeLoadModal}
+                                openSaveModal={this.openSaveModal}
+                                closeSaveModal={this.closeSaveModal}
+                                openExportModal={this.openExportModal}
+                                closeExportModal={this.closeExportModal}
+                                openTestModal={this.openTestModal}
+                                closeTestModal={this.closeTestModal}
+                                showLoadModal={this.state.showLoadModal}
+                                showSaveModal={this.state.showSaveModal}
+                                showExportModal={this.state.showExportModal}
+                                showTestModal={this.state.showTestModal}
                                 exportButtonDisabled={this.state.exportButtonDisabled}
                                 buildButtonDisabled={this.state.buildButtonDisabled}
                                 testButtonDisabled={this.state.testButtonDisabled}
@@ -586,31 +678,30 @@ class Interface extends React.Component {
                     <div className="muwrap">
                         <div className="show-y-wrapper">
                             <MarkupBar  className="markup-bar"
-                                        currentNonterminal={this.state.current_nonterminal}
                                         updateFromServer={this.updateFromServer}
                                         nonterminals={this.state.nonterminals}
-                                        total={this.state.markups}
+                                        tagsets={this.state.tagsets}
                                         updateSymbolFilterQuery={this.updateSymbolFilterQuery}
-                                        currentNonterminalName={this.state.current_nonterminal}
-                                        currentRule={this.state.current_rule}/>
+                                        currentSymbolName={this.state.currentSymbol}
+                                        currentRule={this.state.currentRule}/>
                         </div>
                     </div>
                     {board}
                     <div className="muwrap" style={{"position": "absolute", "bottom": 0}}>
-                        <RuleBar    rules={def_rules}
+                        <RuleBar    rules={definedRules}
                                     updateFromServer={this.updateFromServer}
                                     nonterminals={this.state.nonterminals}
-                                    name={this.state.current_nonterminal}
+                                    currentSymbolName={this.state.currentSymbol}
                                     updateCurrentNonterminal={this.updateCurrentNonterminal}
                                     updateCurrentRule={this.updateCurrentRule}
-                                    updateMarkupFeedback={this.updateMarkupFeedback}
-                                    updateExpansionFeedback={this.updateExpansionFeedback}
+                                    updateGeneratedContentPackageTags={this.updateGeneratedContentPackageTags}
+                                    updateGeneratedContentPackageText={this.updateGeneratedContentPackageText}
                                     updateHistory={this.updateHistory}
-                                    closeRuleDefinitionModal={this.closeRuleDefinitionModal}
+                                    toggleWhetherRuleDefinitionModalIsOpen={this.toggleWhetherRuleDefinitionModalIsOpen}
                                     ruleDefinitionModalIsOpen={this.state.ruleDefinitionModalIsOpen}
                                     idOfRuleToEdit={this.state.idOfRuleToEdit}
                                     ruleAlreadyExists={this.ruleAlreadyExists}
-                                    currentRule={this.state.current_rule}
+                                    currentRule={this.state.currentRule}
                                     getListOfMatchingSymbolNames={this.getListOfMatchingSymbolNames}/>
                     </div>
                 </div>
@@ -622,16 +713,16 @@ class Interface extends React.Component {
                                         updateCurrentNonterminal={this.updateCurrentNonterminal}
                                         updateHistory={this.updateHistory}
                                         updateCurrentRule={this.updateCurrentRule}
-                                        updateMarkupFeedback={this.updateMarkupFeedback}
-                                        updateExpansionFeedback={this.updateExpansionFeedback}
+                                        updateGeneratedContentPackageTags={this.updateGeneratedContentPackageTags}
+                                        updateGeneratedContentPackageText={this.updateGeneratedContentPackageText}
                                         updateSymbolFilterQuery={this.updateSymbolFilterQuery}
                                         symbolFilterQuery={this.state.symbolFilterQuery}
-                                        currentNonterminalName={this.state.current_nonterminal}
+                                        currentNonterminalName={this.state.currentSymbol}
                                         getListOfMatchingSymbolNames={this.getListOfMatchingSymbolNames}>
                     </NonterminalList>
                 </div>
                 <div style={{"width": "75%", "height": "30%", position: "absolute", bottom: 0, left:0}}>
-                    <FeedbackBar derivation={this.state.expansion_feedback} markup={this.state.markup_feedback}/>
+                    <FeedbackBar text={this.state.generatedContentPackageText} tags={this.state.generatedContentPackageTags}/>
                 </div>
             </div>
         );
