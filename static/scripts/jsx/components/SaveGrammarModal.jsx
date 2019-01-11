@@ -46,7 +46,7 @@ class SaveGrammarModal extends React.Component {
 
     saveGrammarOnEnter(e) {
         if (this.props.show) {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && !(e.ctrlKey || e.metaKey)) {
                 document.getElementById("saveButton").click();
                 e.preventDefault();
             }

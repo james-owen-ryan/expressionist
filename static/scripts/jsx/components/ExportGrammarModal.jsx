@@ -53,7 +53,7 @@ class ExportGrammarModal extends React.Component {
 
     exportBundleOnEnter(e) {
         if (this.props.show) {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && !(e.ctrlKey || e.metaKey)) {
                 document.getElementById("exportButton").click();
                 e.preventDefault();
             }

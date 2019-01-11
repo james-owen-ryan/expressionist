@@ -65,7 +65,7 @@ class RuleBar extends React.Component {
 
     submitRuleDefinitionOnEnter(e) {
         if (this.state.showModal || this.props.ruleDefinitionModalIsOpen) {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && !(e.ctrlKey || e.metaKey)) {
                 document.getElementById("submitRuleButton").click();
             }
         }

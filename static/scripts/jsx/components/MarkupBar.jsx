@@ -148,7 +148,7 @@ class MarkupBar extends React.Component {
     }
 
     handleEnterKeypress(e) {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' && !(e.ctrlKey || e.metaKey)) {
             if (this.state.showTagDefinitionModal) {
                 document.getElementById("submitTagButton").click();
             }
