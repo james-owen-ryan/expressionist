@@ -24,7 +24,7 @@ class RuleBoard extends React.Component {
             cache: false,
             success: (data) => {
                 this.props.updateGeneratedContentPackageText(data.derivation);
-                this.props.updateGeneratedContentPackageText(data.markup);
+                this.props.updateGeneratedContentPackageTags(data.markup);
             },
             error: (xhr, status, err) => {
                 console.error(this.props.url, status, err.toString());
