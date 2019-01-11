@@ -265,7 +265,7 @@ class Interface extends React.Component {
     }
 
     handlePotentialHotKeyPress(e) {
-        // Check for rule tabbing
+        // Check for rule tabbing (note: tabbing on other views is handled in the respective components)
         var atLeastOneModalIsOpen = (this.state.showSaveModal || this.state.showLoadModal || this.state.showExportModal || this.state.showTestModal || this.state.ruleDefinitionModalIsOpen);
         if (e.key === 'Tab' && !atLeastOneModalIsOpen) {
             e.preventDefault();
@@ -363,8 +363,13 @@ class Interface extends React.Component {
                 document.getElementById("editRuleButton").click();
             }
             // Quick rewrite test: simulate clicking of the 'play' button for testing symbol rewriting or rule execution
-            else if (quickTestRewriteMatch && document.getElementById("playButton")) {
-                document.getElementById("playButton").click();
+            else if (quickTestRewriteMatch) {
+                if (this.state.showTestModal) {
+                    document.getElementById("testModalPlayButton").click();
+                }
+                else if (document.getElementById("playButton")) {
+                    document.getElementById("playButton").click();
+                }
             }
             // Quick test: simulate clicking of the 'Test' button
             else if (quickTestHotKeyMatch && !this.state.testButtonDisabled) {

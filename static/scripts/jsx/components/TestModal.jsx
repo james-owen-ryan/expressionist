@@ -30,6 +30,7 @@ class TestModal extends React.Component {
         this.viewGeneratedText = this.viewGeneratedText.bind(this);
         this.viewGeneratedTags = this.viewGeneratedTags.bind(this);
         this.viewGeneratedTreeExpression = this.viewGeneratedTreeExpression.bind(this);
+        this.handlePotentialTabbingHotKeyPress = this.handlePotentialTabbingHotKeyPress.bind(this);
         this.state = {
             grammarFileNames: [],
             tagsets: [],
@@ -185,6 +186,37 @@ class TestModal extends React.Component {
         })
     }
 
+    handlePotentialTabbingHotKeyPress(e) {
+        if (e.key === 'Tab' && this.props.show) {
+            e.preventDefault();
+            if (this.state.showText) {
+                if (e.shiftKey) {
+                    this.viewGeneratedTreeExpression();
+                }
+                else {
+                    this.viewGeneratedTags();
+                }
+            }
+            else if (this.state.showTags) {
+                if (e.shiftKey) {
+                    this.viewGeneratedText();
+                }
+                else {
+                    this.viewGeneratedTreeExpression();
+                }
+            }
+            else if (this.state.showTreeExpression) {
+                if (e.shiftKey) {
+                    this.viewGeneratedTags();
+                }
+                else {
+                    this.viewGeneratedText();
+                }
+
+            }
+        }
+    }
+
     getTagsetsFromBundle(bundleName) {
         var grammar = null;
         ajax({
@@ -216,6 +248,10 @@ class TestModal extends React.Component {
         return tagsets;
     }
 
+    componentDidMount() {
+        document.addEventListener("keydown", this.handlePotentialTabbingHotKeyPress, false);
+    }
+
     componentWillReceiveProps(nextProps) {
         if (nextProps.bundleName !== ''){
             var tagsets = this.getTagsetsFromBundle(nextProps.bundleName);
@@ -236,7 +272,6 @@ class TestModal extends React.Component {
     }
 
     render() {
-        var disabledHoverText = !this.state.generatedContentPackageText ? ' (disabled: must submit content request)' : ' (disabled: current view)';
         return (
             <Modal show={this.props.show} onHide={this.props.onHide} dialogClassName="test-productionist-module-modal" style={{overflowY: "hidden"}}>
                 <Modal.Header closeButton>
@@ -244,10 +279,10 @@ class TestModal extends React.Component {
                 </Modal.Header>
                 <div id="tags">
                     <ButtonGroup className="btn-test" id='tagsList' style={{width: "100%", backgroundColor: "#f2f2f2", marginBottom: '0px'}}>
-                        <Button className="grp_button" onClick={this.sendTaggedContentRequest.bind(this, this.state.tagsets)} title={this.state.contentRequestAlreadySubmitted ? "Resubmit content request" : "Submit content request"} style={{height: '38px'}}><Glyphicon glyph={this.state.contentRequestAlreadySubmitted ? "refresh" : "play"}/></Button>
-                        <Button className="grp_button" onClick={this.viewGeneratedText} title={this.state.showText || !this.state.generatedContentPackageText ? "Change to text view" + disabledHoverText : "Change to text view"} style={this.state.showText && this.state.generatedContentPackageText ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}} disabled={this.state.showText || !this.state.generatedContentPackageText}><Glyphicon glyph="font"/></Button>
-                        <Button className="grp_button" onClick={this.viewGeneratedTags} title={this.state.showTags || !this.state.generatedContentPackageText ? "Change to tags view" + disabledHoverText : "Change to tags view"} style={this.state.showTags ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}} disabled={this.state.showTags || !this.state.generatedContentPackageText}><Glyphicon glyph="tags"/></Button>
-                        <Button className="grp_button" onClick={this.viewGeneratedTreeExpression} title={this.state.showTreeExpression || !this.state.generatedContentPackageText ? "Change to tree view" + disabledHoverText : "Change to tree view"} style={this.state.showTreeExpression ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}} disabled={this.state.showTreeExpression || !this.state.generatedContentPackageText}><Glyphicon glyph="tree-conifer"/></Button>
+                        <Button id="testModalPlayButton" className="grp_button" onClick={this.sendTaggedContentRequest.bind(this, this.state.tagsets)} title={this.state.contentRequestAlreadySubmitted ? "Resubmit content request (hot key: 'command+Enter' or 'ctrl+Enter')" : "Submit content request (hot key: 'command+Enter' or 'ctrl+Enter')"} style={{height: '38px'}}><Glyphicon glyph={this.state.contentRequestAlreadySubmitted ? "refresh" : "play"}/></Button>
+                        <Button className="grp_button" onClick={this.viewGeneratedText} title={!this.state.generatedContentPackageText ? "Change to text view (disabled: must submit content request)'" : "Change to text view (hint: quickly switch between views using 'Tab' and 'shift+Tab')"} style={this.state.showText && this.state.generatedContentPackageText ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}} disabled={!this.state.generatedContentPackageText}><Glyphicon glyph="font"/></Button>
+                        <Button className="grp_button" onClick={this.viewGeneratedTags} title={!this.state.generatedContentPackageText ? "Change to text view (disabled: must submit content request)'" : "Change to tags view (hint: quickly switch between views using 'Tab' and 'shift+Tab')"} style={this.state.showTags ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}} disabled={!this.state.generatedContentPackageText}><Glyphicon glyph="tags"/></Button>
+                        <Button className="grp_button" onClick={this.viewGeneratedTreeExpression} title={!this.state.generatedContentPackageText ? "Change to text view (disabled: must submit content request)'" : "Change to tree view (hint: quickly switch between views using 'Tab' and 'shift+Tab')"} style={this.state.showTreeExpression ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}} disabled={!this.state.generatedContentPackageText}><Glyphicon glyph="tree-conifer"/></Button>
                         {
                             Object.keys(this.state.tagsets).map(function (tagset) {
                                 return (
@@ -281,7 +316,7 @@ class TestModal extends React.Component {
                 <Alert bsStyle="danger" style={{display: this.state.outputError === true ? 'block' : 'none'}}>
                   Content request is unsatisfiable.
                 </Alert>
-                <div style={{whiteSpace: 'pre-wrap', marginBottom: '20px', height: '80vh', }}>
+                <div style={{whiteSpace: 'pre-wrap', height: '70vh', padding: '25px', overflowY: 'scroll'}}>
                     {
                         this.state.showText
                         ?
