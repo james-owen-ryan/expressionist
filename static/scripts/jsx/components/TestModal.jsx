@@ -13,6 +13,9 @@ var Row = require('react-bootstrap').Row
 var Col = require('react-bootstrap').Col
 var Alert = require('react-bootstrap').Alert
 var ajax = require('jquery').ajax
+var ButtonGroup = require('react-bootstrap').ButtonGroup
+var DropdownButton = require('react-bootstrap').DropdownButton
+var MenuItem = require('react-bootstrap').MenuItem
 
 class TestModal extends React.Component {
 
@@ -21,87 +24,72 @@ class TestModal extends React.Component {
         this.toggleTagsetStatus = this.toggleTagsetStatus.bind(this);
         this.updateTagFrequency = this.updateTagFrequency.bind(this);
         this.toggleTagStatus = this.toggleTagStatus.bind(this);
-        this.getTagData = this.getTagData.bind(this);
         this.getTagColorFromStatus = this.getTagColorFromStatus.bind(this);
         this.cycleStatus = this.cycleStatus.bind(this);
         this.sendTaggedContentRequest = this.sendTaggedContentRequest.bind(this);
-        this.toggleTagsetExpandOrCollapse = this.toggleTagsetExpandOrCollapse.bind(this);
+        this.viewGeneratedText = this.viewGeneratedText.bind(this);
+        this.viewGeneratedTags = this.viewGeneratedTags.bind(this);
+        this.viewGeneratedTreeExpression = this.viewGeneratedTreeExpression.bind(this);
         this.state = {
             grammarFileNames: [],
-            markups: {},
-            tags: [],
+            tagsets: [],
+            tagsetStatuses: {},
             bundleName: '',
             bundlesList: [],
-            numOutputs: 0,
-            probablisticOutputText: '',
-            probablisticOutputTags: [],
-            probablisticOutputTreeExpression: '',
-            probablisticOutputBracketedExpression: '',
+            generatedContentPackageText: '',
+            generatedContentPackageTags: [],
+            generatedContentPackageTreeExpression: '',
+            generatedContentPackageBracketedExpression: '',
             outputError: false,
-            tagsetIsExpanded: {}
+            contentRequestAlreadySubmitted: false,
+            showText: true,
+            showTags: false,
+            showTreeExpression: false
         };
     }
 
-    toggleTagsetExpandOrCollapse(tagset) {
-        var tagsetIsExpanded = this.state.tagsetIsExpanded;
-        tagsetIsExpanded[tagset] = !tagsetIsExpanded[tagset];
-        this.setState({tagsetIsExpanded: tagsetIsExpanded})
-    }
-
-    toggleTagsetStatus(tagset) {
-        var that = this;
-        var updated = this.state.tags.map(function (tagObj){
-            if (tagset == tagObj.tagset){
-                return {
-                    name: tagObj.name,
-                    frequency: tagObj.frequency,
-                    status: that.cycleStatus(tagObj.status),
-                    tagset: tagObj.tagset
-                }
-            }
-            return tagObj
-        });
-        this.setState({tags: updated});
-        this.sendTaggedContentRequest(updated);
-    }
-
-    updateTagFrequency(e) {
-        var updated = this.state.tags.map(function(tagObj){
-            if (e.target.id == tagObj.tagset+':'+tagObj.name){
-                return {
-                    name: tagObj.name,
-                    frequency: e.target.value,
-                    status: tagObj.status,
-                    tagset: tagObj.tagset
-                }
-            }
-            return tagObj
-        })
-        this.setState({tags: updated});
-        if (!isNaN(e.target.value) && e.target.value != ''){ 
-            this.sendTaggedContentRequest(updated);
+    toggleTagsetStatus(tagset, event) {
+        event.stopPropagation();  // Prevents the dropdown from closing
+        var currentStatus = this.state.tagsetStatuses[tagset];
+        var newStatus = this.cycleStatus(currentStatus);
+        var updatedTagsetStatuses = this.state.tagsetStatuses;
+        updatedTagsetStatuses[tagset] = newStatus;
+        var updatedTagsets = this.state.tagsets;
+        for (var tag in this.state.tagsets[tagset]) {
+            updatedTagsets[tagset][tag].status = newStatus;
         }
+        this.setState({
+            tagsetStatuses: updatedTagsetStatuses,
+            tagsets: updatedTagsets,
+            contentRequestAlreadySubmitted: false
+        });
+        this.sendTaggedContentRequest(updatedTagsets);
     }
 
-    toggleTagStatus(tagset, tag) {
-        var that = this;
-        var updated = this.state.tags.map(function (tagObj){
-            if (tagObj.name == tag && tagObj.tagset == tagset){
-                return {
-                    name: tagObj.name,
-                    frequency: tagObj.frequency,
-                    status: that.cycleStatus(tagObj.status),
-                    tagset: tagObj.tagset
-                }
-            }
-            return tagObj; 
-        })
-        this.setState({tags: updated});
-        this.sendTaggedContentRequest(updated);
+    toggleTagStatus(tagset, tag, event) {
+        event.stopPropagation();  // Prevents the dropdown from closing
+        var currentStatus = this.state.tagsets[tagset][tag].status;
+        var newStatus = this.cycleStatus(currentStatus);
+        var updatedTagsets = this.state.tagsets;
+        updatedTagsets[tagset][tag].status = newStatus;
+        this.setState({
+            tagsets: updatedTagsets,
+            contentRequestAlreadySubmitted: false
+        });
+        this.sendTaggedContentRequest(updatedTagsets);
     }
 
-    getTagData(tagset, tag, data) {
-        return this.state.tags.find(tagObj => { return tagObj.name == tag && tagObj.tagset == tagset })[data];
+    updateTagFrequency(tagset, tag, status, event) {
+        var newFrequency = event.target.value;
+        var updatedTagsets = this.state.tagsets;
+        updatedTagsets[tagset][tag].frequency = newFrequency;
+        this.setState({
+            tagsets: updatedTagsets,
+            contentRequestAlreadySubmitted: false
+        });
+        if (!isNaN(newFrequency) && newFrequency != ''){
+            this.sendTaggedContentRequest(updatedTagsets);
+        }
     }
 
     getTagColorFromStatus(currentStatus) {
@@ -109,38 +97,40 @@ class TestModal extends React.Component {
             return 'success'
         }
         else if (currentStatus == 'enabled'){
-            return null
+            return 'default'
         }
         // assume currentStatus = 'disabled'
         return 'danger'
     }
 
     cycleStatus(currentStatus) {
-        if (currentStatus == 'required'){
-            return 'enabled'
+        if (currentStatus == 'enabled'){
+            return 'required'
         }
-        else if (currentStatus == 'enabled'){
+        else if (currentStatus == 'required'){
             return 'disabled'
         }
-        // assume currentStatus = 'disabled'
-        return 'required'
+        return 'enabled'
     }
 
-    sendTaggedContentRequest(tags) {
-        // Productionist requires tags to be formatted as `tagset:tag` strings.
-        var forProductionist = tags.map(function (tagObj){
-            return {
-                name: tagObj.tagset + ':' + tagObj.name,
-                frequency: tagObj.frequency,
-                status: tagObj.status
+    sendTaggedContentRequest(tagsets) {
+        // Productionist requires tags to be formatted as `tagset:tag` strings
+        var contentRequest = []
+        for (var tagset in tagsets) {
+            for (var tag in tagsets[tagset]) {
+                contentRequest.push({
+                    name: tagset + ':' + tag,
+                    frequency: tagsets[tagset][tag].frequency,
+                    status: tagsets[tagset][tag].status
+                })
             }
-        })
+        }
         ajax({
             url: $SCRIPT_ROOT + '/api/grammar/tagged_content_request',
             type: "POST",
             contentType: "application/json",
             data: JSON.stringify({
-                tags: forProductionist,
+                tags: contentRequest,
                 bundleName: this.state.bundleName
             }),
             async: true,
@@ -149,19 +139,20 @@ class TestModal extends React.Component {
               if (data != 'The content request cannot be satisfied by the exported content bundle.'){
                 data = JSON.parse(data)
                 var sortedTags = data.tags.sort();
-                for (var i = 0; i < sortedTags.length; i++) {
-                    sortedTags[i]  = "* " + sortedTags[i];
-                }
                 this.setState({
-                  probablisticOutputText: data.text,
-                  probablisticOutputTags: sortedTags,
-                  probablisticOutputTreeExpression: data.treeExpression,
-                  probablisticOutputBracketedExpression: data.bracketedExpression,
+                  generatedContentPackageText: data.text,
+                  generatedContentPackageTags: sortedTags,
+                  generatedContentPackageTreeExpression: data.treeExpression,
+                  generatedContentPackageBracketedExpression: data.bracketedExpression,
                   outputError: false,
-                  numOutputs: this.state.numOutputs+1
+                  contentRequestAlreadySubmitted: true
                 })
-              } else {
-                this.setState({outputError: true})
+              }
+              else {
+                this.setState({
+                    outputError: true,
+                    contentRequestAlreadySubmitted: true
+                })
               }
             },
             error: function(err){
@@ -170,7 +161,31 @@ class TestModal extends React.Component {
         })
     }
 
-    getTagsFromBundle(bundleName) {
+    viewGeneratedText() {
+        this.setState({
+            showText: true,
+            showTags: false,
+            showTreeExpression: false
+        })
+    }
+
+    viewGeneratedTags() {
+        this.setState({
+            showText: false,
+            showTags: true,
+            showTreeExpression: false
+        })
+    }
+
+    viewGeneratedTreeExpression() {
+        this.setState({
+            showText: false,
+            showTags: false,
+            showTreeExpression: true
+        })
+    }
+
+    getTagsetsFromBundle(bundleName) {
         var grammar = null;
         ajax({
             url: $SCRIPT_ROOT + '/api/load_bundle',
@@ -184,61 +199,35 @@ class TestModal extends React.Component {
             }
         })
         grammar = JSON.parse(grammar);
-        var tags = []
-        for (var i = 0; i < Object.keys(grammar.id_to_tag).length; i++){
-            var str = grammar.id_to_tag[i];
-            tags.push({
-                name: str.split(':')[1],
-                frequency: 0,
-                status: 'enabled',
-                tagset: str.split(':')[0]
-            });
-        }
-        return tags;
-    }
-
-    setMarkupsFromBundle(bundleName) {
-        var grammar = null;
-        ajax({
-            url: $SCRIPT_ROOT + '/api/load_bundle',
-            type: "POST",
-            contentType: "application/json",
-            data: bundleName,
-            cache: false,
-            success: (data) => {
-                grammar = JSON.parse(data);
-                var tagsets = {}
-                for (var i = 0; i < Object.keys(grammar.id_to_tag).length; i++){
-                    var str = grammar.id_to_tag[i];
-                    var tagset = str.substr(0, str.indexOf(':'));
-                    var tag = str.substr(str.indexOf(':')+1);
-                    if (tagsets[tagset] == undefined){
-                        tagsets[tagset] = [tag];
-                    }
-                    else{
-                        tagsets[tagset] = tagsets[tagset].concat(tag);
-                    }
-                }
-                this.setState({markups: tagsets})
+        var tagsets = {};
+        for (var i = 0; i < Object.keys(grammar.id_to_tag).length; i++) {
+            var tagsetAndTag = grammar.id_to_tag[i];
+            var tagset = tagsetAndTag.split(':')[0];
+            var tag = tagsetAndTag.split(':')[1];
+            if (!(tagset in tagsets)) {
+                tagsets[tagset] = {};
             }
-        })
+            tagsets[tagset][tag] = {
+                name: tag,
+                frequency: 0,
+                status: 'enabled'
+            }
+        }
+        return tagsets;
     }
 
     componentWillReceiveProps(nextProps) {
         if (nextProps.bundleName !== ''){
-            var tagObjects = this.getTagsFromBundle(nextProps.bundleName);
-            var tagsetIsExpanded = {};
-            for (var i = 0; i < tagObjects.length; i++) {
-                if (!(tagObjects[i].tagset in tagsetIsExpanded)) {
-                    tagsetIsExpanded[tagObjects[i].tagset] = false;
-                }
+            var tagsets = this.getTagsetsFromBundle(nextProps.bundleName);
+            var tagsetStatuses = {};
+            for (var tagset in tagsets) {
+                tagsetStatuses[tagset] = "enabled";
             }
             this.setState({
                 bundleName: nextProps.bundleName,
-                tags: tagObjects,
-                tagsetIsExpanded: tagsetIsExpanded
+                tagsets: tagsets,
+                tagsetStatuses: tagsetStatuses
             });
-            this.setMarkupsFromBundle(nextProps.bundleName);
         }
         else {
             // This happens when the tool starts up, since this modal is actually constructed at that time
@@ -247,73 +236,77 @@ class TestModal extends React.Component {
     }
 
     render() {
+        var disabledHoverText = !this.state.generatedContentPackageText ? ' (disabled: must submit content request)' : ' (disabled: current view)';
         return (
-            <Modal show={this.props.show} onHide={this.props.onHide} dialogClassName="test-productionist-module-modal">
+            <Modal show={this.props.show} onHide={this.props.onHide} dialogClassName="test-productionist-module-modal" style={{overflowY: "hidden"}}>
                 <Modal.Header closeButton>
                     <Modal.Title>Test Productionist module...</Modal.Title>
                 </Modal.Header>
-                <Alert bsStyle="danger" style={setErrorWarningStyle(this.state.outputError)}>
-                  Content request is unsatisfiable.
-                </Alert>
-                <div>
-                    <div style={{display: 'flex', marginBottom: '5px'}}>
-                      <p style={{width: "100%", textAlign: "center"}}>Generated Content Package</p>
-                    </div>
-                    <Grid fluid>
-                      <Row className="show-grid" style={{display: 'flex'}}>
-                        <Col xs={6} className='test-modal-feedback-bar test-modal-feedback-bar-left'>{this.state.probablisticOutputText}</Col>
-                        <Col xs={6} className='test-modal-feedback-bar test-modal-feedback-bar-right'>{this.state.probablisticOutputTags.map( (tagset) => <div>{tagset}</div> )}</Col>
-                      </Row>
-                    </Grid>
-                    <div style={{marginTop: '10px', marginBottom: '10px', width: "100%", textAlign: "center"}}>Tree Expression</div>
-                    <Grid fluid>
-                      <Row className="show-grid">
-                        <Col xs={12} style={{'whiteSpace': 'pre-wrap', 'marginBottom': '20px'}} className='test-modal-feedback-bar'>{this.state.probablisticOutputTreeExpression}</Col>
-                      </Row>
-                    </Grid>
-                </div>
-                <Button onClick={this.sendTaggedContentRequest.bind(this, this.state.tags)} title="Submit content request" style={{padding: '7px 12px', width: "15%", left: "42.5%", height: "50px", fontSize: "25px", position: "relative"}}><Glyphicon glyph="play"/></Button>
                 <div id="tags">
-                    <p style={{marginTop: '10px', marginBottom: '10px', width: "100%", textAlign: "center"}}>Content Request</p>
-                    <ListGroup id='tagsList' style={{marginBottom: '0px'}}>
+                    <ButtonGroup className="btn-test" id='tagsList' style={{width: "100%", backgroundColor: "#f2f2f2", marginBottom: '0px'}}>
+                        <Button className="grp_button" onClick={this.sendTaggedContentRequest.bind(this, this.state.tagsets)} title={this.state.contentRequestAlreadySubmitted ? "Resubmit content request" : "Submit content request"} style={{height: '38px'}}><Glyphicon glyph={this.state.contentRequestAlreadySubmitted ? "refresh" : "play"}/></Button>
+                        <Button className="grp_button" onClick={this.viewGeneratedText} title={this.state.showText || !this.state.generatedContentPackageText ? "Change to text view" + disabledHoverText : "Change to text view"} style={this.state.showText && this.state.generatedContentPackageText ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}} disabled={this.state.showText || !this.state.generatedContentPackageText}><Glyphicon glyph="font"/></Button>
+                        <Button className="grp_button" onClick={this.viewGeneratedTags} title={this.state.showTags || !this.state.generatedContentPackageText ? "Change to tags view" + disabledHoverText : "Change to tags view"} style={this.state.showTags ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}} disabled={this.state.showTags || !this.state.generatedContentPackageText}><Glyphicon glyph="tags"/></Button>
+                        <Button className="grp_button" onClick={this.viewGeneratedTreeExpression} title={this.state.showTreeExpression || !this.state.generatedContentPackageText ? "Change to tree view" + disabledHoverText : "Change to tree view"} style={this.state.showTreeExpression ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}} disabled={this.state.showTreeExpression || !this.state.generatedContentPackageText}><Glyphicon glyph="tree-conifer"/></Button>
                         {
-                            Object.keys(this.state.markups).map(function (tagset){
+                            Object.keys(this.state.tagsets).map(function (tagset) {
                                 return (
-                                    <ListGroupItem bsSize="xsmall" key={tagset} style={{border: '0px'}}>
-                                        <ListGroupItem title="Toggle status in content request for all tags in this tagset" bsSize="xsmall" onClick={this.toggleTagsetStatus.bind(this, tagset)} style={{border: '0px', width: "calc(100% - 38px)"}}>{tagset}</ListGroupItem>
-                                        <Button title={this.state.tagsetIsExpanded[tagset] ? "Collapse tagset" : "Expand tagset"} onClick={this.toggleTagsetExpandOrCollapse.bind(this, tagset)}><Glyphicon glyph={this.state.tagsetIsExpanded[tagset] ? "menu-up" : "menu-down"}/></Button>
-                                        {this.state.tagsetIsExpanded[tagset]
-                                            ?
-                                            this.state.markups[tagset].map(function (tag){
+                                    <DropdownButton className="grp-button" id={tagset} title={tagset} bsStyle={this.getTagColorFromStatus(this.state.tagsetStatuses[tagset])} style={{'height': '38px'}}>
+                                        <MenuItem key={-1} header={true} style={{"backgroundColor": "transparent"}}>
+                                            <Button title={"Toggle status in content request for all tags in this set (to: " + this.cycleStatus(this.state.tagsetStatuses[tagset]) + ")"} onClick={this.toggleTagsetStatus.bind(this, tagset)} bsStyle={this.getTagColorFromStatus(this.state.tagsetStatuses[tagset])}><Glyphicon glyph="adjust"/></Button>
+                                        </MenuItem>
+                                        {
+                                            Object.keys(this.state.tagsets[tagset]).sort().map(function (tag) {
+                                                var status = this.state.tagsets[tagset][tag].status;
                                                 return (
-                                                    <div key={tagset + ":" + tag}>
-                                                        <ListGroupItem style={{border: '0px', padding: "0px"}}>
-                                                            <Button title={"Toggle tag status in content request (currently: " + this.getTagData(tagset, tag, "status") + ")"} bsSize="xsmall" bsStyle={this.getTagColorFromStatus(this.getTagData(tagset, tag, "status"))} onClick={this.toggleTagStatus.bind(this, tagset, tag)} style={{width: "calc(100% - 50px)", padding: "0px 5px 0px 5px", marginBotton: "0px"}}>{tag}</Button>
-                                                            <FormControl title="Modify tag utility in content request" type="number" id={tagset+':'+tag} value={this.getTagData(tagset, tag, "frequency")} onChange={this.updateTagFrequency} style={this.getTagData(tagset, tag, "status") == 'enabled' ? {display: 'inline', width: '50px', height: '30px', float: 'right', border: "0px", "padding": "5px"} : {display: 'none'}} />
-                                                        </ListGroupItem>
-                                                    </div>
+                                                    <MenuItem key={tagset + ":" + tag} style={{backgroundColor: "transparent"}}>
+                                                        <Button title={"Toggle tag status in content request (currently: " + status + ")"} bsStyle={status === "required" ? "success" : status === "disabled" ? "danger" : "default"} style={{padding: "0px 10px 0px 10px", textAlign: "left", height: "32px", width: status === "enabled" ? "calc(100% - 50px)" : "100%", overflowX: 'hidden'}} key={tag} onClick={this.toggleTagStatus.bind(this, tagset, tag)}>{tag}</Button>
+                                                        {
+                                                            status === "enabled"
+                                                            ?
+                                                            <FormControl className="test-productionist-module-modal-utility-form" title="Modify tag utility in content request" type="number" value={this.state.tagsets[tagset][tag].frequency} onClick={e => e.stopPropagation()} onChange={this.updateTagFrequency.bind(this, tagset, tag, status)} style={status === 'enabled' ? {display: 'inline', width: '50px', height: '32px', float: 'right', border: "0px", padding: "5px"} : {display: 'none'}}/>
+                                                            :
+                                                            ""
+                                                        }
+                                                    </MenuItem>
                                                 )
                                             }.bind(this))
-                                            :
-                                            ""
                                         }
-                                    </ListGroupItem>
+                                    </DropdownButton>
                                 )
                             }.bind(this))
                         }
-                    </ListGroup>
+                    </ButtonGroup>
+                </div>
+                <Alert bsStyle="danger" style={{display: this.state.outputError === true ? 'block' : 'none'}}>
+                  Content request is unsatisfiable.
+                </Alert>
+                <div style={{whiteSpace: 'pre-wrap', marginBottom: '20px', height: '80vh', }} className='test-modal-feedback-bar'>
+                    {
+                        this.state.showText
+                        ?
+                        this.state.generatedContentPackageText
+                        :
+                        this.state.showTags
+                        ?
+                        this.state.generatedContentPackageTags.map(tag => (
+                            this.state.generatedContentPackageTags.indexOf(tag) === 0
+                            ?
+                            <span>
+                                * {tag}
+                            </span>
+                            :
+                            <span>
+                                <br/>* {tag}
+                            </span>
+                        ))
+                        :
+                        this.state.generatedContentPackageTreeExpression
+                    }
                 </div>
             </Modal>
         );
     }
-}
-
-function setErrorWarningStyle(outputError){
-  if (outputError == true){
-    return {display: 'block'}
-  }else{
-    return {display: 'none'}
-  }
 }
 
 module.exports = TestModal;

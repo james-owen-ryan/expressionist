@@ -91,4 +91,19 @@
 .test-productionist-module-modal {
     display: block;
     width: 75%;
+    max-height: null;
+    overflow-y: hidden;
+    border: 0;
+}
+
+.test-productionist-module-modal-utility-form {
+    background-color: #f2f2f2;
+}
+
+.test-productionist-module-modal-utility-form:focus {
+    background-color: #ffe97f;
+}
+
+.test-productionist-module-modal-utility-form:hover {
+    background-color: #ffe97f;
 }
