@@ -243,6 +243,7 @@ class Interface extends React.Component {
         var quickBuildHotKeyMatch = false;  // b
         var quickTestHotKeyMatch = false;  // y
         var quickRuleDefineHotKeyMatch = false; // d
+        var quickRuleEditHotKeyMatch = false;  // e
         var quickTestRewriteMatch = false;  // enter
         if (e.ctrlKey || e.metaKey) {
             if (e.key === 'Enter') {
@@ -277,7 +278,12 @@ class Interface extends React.Component {
                     break;
                 case 'd':
                     e.preventDefault();
-                    quickRuleDefineHotKeyMatch = true;
+                    if (e.shiftKey) {
+                        quickRuleEditHotKeyMatch = true;
+                    }
+                    else {
+                        quickRuleDefineHotKeyMatch = true;
+                    }
                     break;
                 case 'r':
                     e.preventDefault();  // Disable page reloading, which breaks the app
@@ -296,8 +302,12 @@ class Interface extends React.Component {
         else if (quickRuleDefineHotKeyMatch) {
             document.getElementById("addRuleButton").click();
         }
+        // Quick rule edit: simulate clicking of the button for editing a new rule
+        else if (quickRuleEditHotKeyMatch && document.getElementById("editRuleButton")) {
+            document.getElementById("editRuleButton").click();
+        }
         // Quick rewrite test: simulate clicking of the 'play' button for testing symbol rewriting or rule execution
-        else if (quickTestRewriteMatch) {
+        else if (quickTestRewriteMatch && document.getElementById("playButton")) {
             document.getElementById("playButton").click();
         }
         // Quick test: simulate clicking of the 'Test' button
