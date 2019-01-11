@@ -100,7 +100,7 @@ class RuleBoard extends React.Component {
                     <h2>
                         <span className="symbol-reference-in-rule-head" title="View rule head" onClick={this.handleRuleClickThrough.bind(this, this.props.name)}>{this.props.name}</span>
                         <br></br>
-                        <Button bsStyle="default" title="Test rule execution" onClick={this.handleExpandRule}><Glyphicon glyph="play"/></Button>
+                        <Button id="playButton" bsStyle="default" title="Test rule execution (hot key: 'command+Enter' or 'ctrl+Enter')" onClick={this.handleExpandRule}><Glyphicon glyph="play"/></Button>
                         <Button bsStyle="default" title="Edit rule" onClick={this.prepareForRuleDefinitionEdit}><Glyphicon glyph="pencil"/></Button>
                         <Button bsStyle="danger" title="Delete rule" onClick={this.onRuleDelete}><Glyphicon glyph="trash"/></Button>
                         <Glyphicon title='The arrow in a production rule cues that the rule head (top) may be rewritten as the rule body (bottom).' glyph="circle-arrow-down" style={{"fontSize": "25px", "left": "10px", "top": "5px"}}/>

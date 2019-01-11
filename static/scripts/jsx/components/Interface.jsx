@@ -235,7 +235,7 @@ class Interface extends React.Component {
     }
 
     handlePotentialHotKeyPress(e) {
-        // Check for a hot-key match (ctrl/command+{g,o,s,e,b,/,d})
+        // Check for a hot-key match (ctrl/command+{g, o, s, e, b, y, d, enter})
         var quickNewHotKeyMatch = false;  // g
         var quickLoadHotKeyMatch = false;  // o
         var quickSaveHotKeyMatch = false;  // s
@@ -243,34 +243,45 @@ class Interface extends React.Component {
         var quickBuildHotKeyMatch = false;  // b
         var quickTestHotKeyMatch = false;  // y
         var quickRuleDefineHotKeyMatch = false; // d
+        var quickTestRewriteMatch = false;  // enter
         if (e.ctrlKey || e.metaKey) {
-            switch (String.fromCharCode(e.which).toLowerCase()) {
-            case 'g':
+            if (e.key === 'Enter') {
                 e.preventDefault();
-                quickNewHotKeyMatch = true;
-            case 'o':
-                e.preventDefault();
-                quickLoadHotKeyMatch = true;
-            case 's':
-                e.preventDefault();
-                quickSaveHotKeyMatch = true;
-                break;
-            case 'e':
-                e.preventDefault();
-                quickExportHotKeyMatch = true;
-                break;
-            case 'b':
-                e.preventDefault();
-                quickBuildHotKeyMatch = true;
-                break;
-            case 'y':
-                e.preventDefault();
-                quickTestHotKeyMatch = true;
-                break;
-            case 'd':
-                e.preventDefault();
-                quickRuleDefineHotKeyMatch = true;
-                break;
+                quickTestRewriteMatch = true;
+            }
+            else {
+                switch (String.fromCharCode(e.which).toLowerCase()) {
+                case 'g':
+                    e.preventDefault();
+                    quickNewHotKeyMatch = true;
+                    break;
+                case 'o':
+                    e.preventDefault();
+                    quickLoadHotKeyMatch = true;
+                    break;
+                case 's':
+                    e.preventDefault();
+                    quickSaveHotKeyMatch = true;
+                    break;
+                case 'e':
+                    e.preventDefault();
+                    quickExportHotKeyMatch = true;
+                    break;
+                case 'b':
+                    e.preventDefault();
+                    quickBuildHotKeyMatch = true;
+                    break;
+                case 'y':
+                    e.preventDefault();
+                    quickTestHotKeyMatch = true;
+                    break;
+                case 'd':
+                    e.preventDefault();
+                    quickRuleDefineHotKeyMatch = true;
+                    break;
+                case 'r':
+                    e.preventDefault();  // Disable page reloading, which breaks the app
+                }
             }
         }
         // Quick new: simulate clicking of the 'New' button
@@ -284,6 +295,10 @@ class Interface extends React.Component {
         // Quick rule define: simulate clicking of the '+' button for creating a new rule
         else if (quickRuleDefineHotKeyMatch) {
             document.getElementById("addRuleButton").click();
+        }
+        // Quick rewrite test: simulate clicking of the 'play' button for testing symbol rewriting or rule execution
+        else if (quickTestRewriteMatch) {
+            document.getElementById("playButton").click();
         }
         // Quick test: simulate clicking of the 'Test' button
         else if (quickTestHotKeyMatch && !this.state.testButtonDisabled) {

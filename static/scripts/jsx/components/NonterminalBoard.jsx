@@ -142,7 +142,7 @@ class NonterminalBoard extends React.Component {
                     <h1>
                     <span title="Current symbol" className="symbol-board-header" style={{"backgroundColor": this.props.nonterminal.rules.length > 0 ? "#57F7E0" : "#FF9891"}}>{name}</span><br />
                     <Button bsStyle={this.props.nonterminal.deep ? "success" : "default" } onClick={this.handleSetDeep} title={deep_str}>{glyph_nt}</Button>
-                    <Button onClick={this.handleExpand} title="Test symbol rewriting"><Glyphicon glyph="play"/></Button>
+                    <Button id="playButton" onClick={this.handleExpand} title="Test symbol rewriting (hot key: 'command+Enter' or 'ctrl+Enter')"><Glyphicon glyph="play"/></Button>
                     <Button onClick={this.handleNonterminalRename} title="Rename symbol"><Glyphicon glyph="pencil"/></Button>
                     <Button onClick={this.handleNonterminalDelete} title="Delete symbol"><Glyphicon glyph="trash"/></Button>
                     </h1>
