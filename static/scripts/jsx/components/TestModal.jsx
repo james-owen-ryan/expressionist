@@ -281,7 +281,7 @@ class TestModal extends React.Component {
                 <Alert bsStyle="danger" style={{display: this.state.outputError === true ? 'block' : 'none'}}>
                   Content request is unsatisfiable.
                 </Alert>
-                <div style={{whiteSpace: 'pre-wrap', marginBottom: '20px', height: '80vh', }} className='test-modal-feedback-bar'>
+                <div style={{whiteSpace: 'pre-wrap', marginBottom: '20px', height: '80vh', }}>
                     {
                         this.state.showText
                         ?

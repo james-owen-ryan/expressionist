@@ -39,13 +39,6 @@
     overflow-x: scroll;
 }
 
-.test-modal-feedback-bar {
-    background-color: #fff;
-    border: 4px solid #f2f2f2;
-    overflow: auto;
-    padding: 10px;
-}
-
 .test-modal-feedback-bar-left {
     border-right: 2px solid #f2f2f2;
 }
