@@ -25,6 +25,7 @@ class RuleBar extends React.Component {
         this.formatList = this.formatList.bind(this);
         this.updateRuleDefinitionSymbolFilterQuery = this.updateRuleDefinitionSymbolFilterQuery.bind(this);
         this.toggleConnectNewRuleHeadToCurrentSymbol = this.toggleConnectNewRuleHeadToCurrentSymbol.bind(this);
+        this.displayConnectBackCheckbox = this.displayConnectBackCheckbox.bind(this);
         this.state = {
             showModal: false,
             ruleHeadInputVal: '',
@@ -278,6 +279,26 @@ class RuleBar extends React.Component {
         });
     }
 
+    displayConnectBackCheckbox() {
+        if (this.state.ruleHeadInputVal === '') {
+            // No rule head
+            return false
+        }
+        if (this.state.ruleHeadInputVal === this.props.name) {
+            // Rule head is the current symbol
+            return false
+        }
+        if (this.props.name === '') {
+            // No current symbol
+            return false
+        }
+        if (this.props.ruleAlreadyExists(this.props.name, '[[' + this.state.ruleHeadInputVal + ']]', null)) {
+            // A rule of the form 'currentSymbol --> [[newRuleHead]]' already exists
+            return false
+        }
+        return true
+    }
+
     componentDidMount(){
         document.addEventListener("keydown", this.submitRuleDefinitionOnEnter, false);
     }
@@ -312,6 +333,10 @@ class RuleBar extends React.Component {
         if (ruleDefinitionAddButtonIsDisabled) {
             ruleDefinitionModalButtonHoverText += " (disabled: rule already exists)"
         }
+        else if (this.state.ruleHeadInputVal === '') {
+            ruleDefinitionAddButtonIsDisabled = true;
+            ruleDefinitionModalButtonHoverText += " (disabled: rule head is missing)"
+        }
         else if (this.state.ruleExpansionInputVal === '') {
             ruleDefinitionAddButtonIsDisabled = true;
             ruleDefinitionModalButtonHoverText += " (disabled: rule body is empty)"
@@ -319,10 +344,6 @@ class RuleBar extends React.Component {
         else if (this.state.ruleApplicationRate === '') {
             ruleDefinitionAddButtonIsDisabled = true;
             ruleDefinitionModalButtonHoverText += " (disabled: application rate is missing)"
-        }
-        else if (this.state.ruleHeadInputVal === '') {
-            ruleDefinitionAddButtonIsDisabled = true;
-            ruleDefinitionModalButtonHoverText += " (disabled: rule head is missing)"
         }
         // If the rule is being edited to have a new rule head that is itself a new nonterminal symbol, display a checkbox that affords wrapping
         // the rule as a new symbol (corresponding to the new rule head head); this is a common authoring move that one carries out when she
@@ -364,7 +385,7 @@ class RuleBar extends React.Component {
                                     return (
                                         <button className={'list-group-item list-group-item-xs nonterminal list-group-item-'.concat(color)}
                                         style={{'margin':'0', 'border':'0px'}}
-                                        title={this.state.ruleBodyInputIsActive ? "Insert symbol reference (hint: when editing rule head, clicking here changes it to the selected symbol)" : "Change rule head (hint: when editing rule body, clicking here inserts the selected symbol)"}
+                                        title={this.state.ruleBodyInputIsActive ? "Insert symbol reference into rule body (hint: when editing rule head, clicking here changes the head to the selected symbol)" : "Change rule head to symbol (hint: when editing rule body, clicking here inserts the selected symbol into the body)"}
                                         onClick={this.handleSymbolReferenceClick.bind(this, name)} key={name}>{this.props.nonterminals[name].deep ? <Glyphicon glyph="star"/> : ""}{this.props.nonterminals[name].deep ? " " : ""}{name}
                                         </button>
                                     )
@@ -372,14 +393,13 @@ class RuleBar extends React.Component {
                             }
                         </div>
                         <div style={{'textAlign': 'center'}}>
-                            <p title="This is the symbol that will be rewritten by executing this rule." style={{'fontWeight': '300', 'fontSize': '16px'}}>Rule head</p>
-                            <textarea id='ruleHeadInput' type='text' title="This is the symbol that will be rewritten by executing this rule." value={this.state.ruleHeadInputVal} onChange={this.updateRuleHeadInputVal} onFocus={this.deregisterRuleBodyInputFocus} style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '43px', 'marginTop': '10px', 'marginBottom': '15px', 'fontSize': '18px', 'padding': '8px 12px', backgroundColor: '#f2f2f2'}}/>
-                            <p title="This is what the rule head will be rewritten as (rule body) when this rule is executed." style={{'fontWeight': '300', 'fontSize': '16px'}}>Rule body</p>
-                            <textarea id='ruleExpansionInput' type='text' title="This is what the symbol (rule head) will be rewritten as (rule body) when this rule is executed." value={this.state.ruleExpansionInputVal} onChange={this.updateRuleExpansionInputVal} onFocus={this.registerRuleBodyInputFocus} style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '100px', 'marginTop': '10px', 'marginBottom': '15px', 'fontSize': '18px', 'padding': '0 12px', backgroundColor: '#f2f2f2'}} autoFocus="true"/>
-                            <p title="This number specifies how often this rule will be randomly selected relative to any sibling rules (a higher number increases the chance)." style={{'fontWeight': '300', 'fontSize': '16px'}}>Application rate</p>
-                            <input title="This number specifies how often this rule will be randomly selected relative to any sibling rules (a higher number increases the chance)." id='appRateModal' type='text' value={this.state.ruleApplicationRate} onChange={this.updateApplicationRate} onFocus={this.deregisterRuleBodyInputFocus} style={{'width': '50px', 'border': '0px solid #d7d7d7', 'height': '43px', 'marginBottom': '25px', 'fontSize': '18px', 'padding': '0 12px', 'textAlign': 'center'}}/>
+                            <textarea id='ruleHeadInput' type='text' title="This is the rule head: the symbol that is rewritten when this rule is executed." value={this.state.ruleHeadInputVal} onChange={this.updateRuleHeadInputVal} onFocus={this.deregisterRuleBodyInputFocus} style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '43px', 'marginTop': '10px', 'marginBottom': '15px', 'fontSize': '18px', 'padding': '8px 12px', backgroundColor: '#f2f2f2'}} autoFocus={this.state.ruleHeadInputVal === ""}/>
+                            <p title='The arrow in a production rule cues that the rule head (top) will be rewritten as the rule body (bottom).'><Glyphicon glyph="circle-arrow-down" style={{"fontSize": "25px", "top": "5px"}}/></p>
+                            <textarea id='ruleExpansionInput' type='text' title="This is the rule body: what the rule head will be rewritten as when this rule is executed." value={this.state.ruleExpansionInputVal} onChange={this.updateRuleExpansionInputVal} onFocus={this.registerRuleBodyInputFocus} style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '100px', 'marginTop': '10px', 'marginBottom': '15px', 'fontSize': '18px', 'padding': '0 12px', backgroundColor: '#f2f2f2'}} autoFocus={this.state.ruleHeadInputVal !== ""}/>
                             <br/>
-                            {(this.state.ruleHeadInputVal !== '' && this.state.ruleHeadInputVal !== this.props.name)
+                            <input title="This is the application rate: a number that specifies how frequently this rule will be used relative to any sibling rules (a higher number increases the frequency)." id='appRateModal' type='text' value={this.state.ruleApplicationRate} onChange={this.updateApplicationRate} onFocus={this.deregisterRuleBodyInputFocus} style={{'width': '50px', 'border': '0px solid #d7d7d7', 'height': '43px', 'marginBottom': '25px', 'fontSize': '18px', 'padding': '0 12px', 'textAlign': 'center'}}/>
+                            <br/>
+                            {(this.displayConnectBackCheckbox())
                                 ?
                                 <label title={"If checked, the following production rule will also be created: '" + this.props.name + " -> [[" + this.state.ruleHeadInputVal + "]]'. This can be used as a way of attaching tags to a production rule, which requires it to be associated with a dedicated symbol."} style={{"fontWeight": "normal", "position": "absolute", "left": "0px", "padding": "20px 0px 21px 31px"}}><input title={"If checked, the following production rule will also be created: '" + this.props.name + " -> [[" + this.state.ruleHeadInputVal + "]]'. This can be used as a way of attaching tags to a production rule, which requires it to be associated with a dedicated symbol."} name="isGoing" type="checkbox" checked={this.state.connectNewRuleHeadToCurrentSymbol} onChange={this.toggleConnectNewRuleHeadToCurrentSymbol}/> Connect to current symbol</label>
                                 :
