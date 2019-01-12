@@ -769,6 +769,9 @@ class Interface extends React.Component {
                         generatedContentPackageTags: []
                     });
                     unsavedChanges = true;
+                    // Reset navigation history (they don't entangle coherently)
+                    navigationHistory = [];
+                    currentIndexInNavigationHistory = -1;
                 },
                 cache: false
             })
@@ -797,6 +800,9 @@ class Interface extends React.Component {
                         generatedContentPackageTags: []
                     });
                     unsavedChanges = true;
+                    // Reset navigation history (they don't entangle coherently)
+                    navigationHistory = [];
+                    currentIndexInNavigationHistory = -1;
                 },
                 cache: false
             })
