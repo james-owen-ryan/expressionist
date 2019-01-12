@@ -40,7 +40,7 @@ class Nonterminal extends React.Component {
             success: () => {
                 this.props.updateCurrentRule(-1)
                 this.props.updateFromServer()
-                this.props.updateCurrentNonterminal(this.state.newNameVal)
+                this.props.updateCurrentSymbolName(this.state.newNameVal)
                 this.props.updateHistory(this.state.newNameVal, this.props.currentRule)
             },
             cache: false

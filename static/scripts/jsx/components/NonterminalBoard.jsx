@@ -18,7 +18,7 @@ class NonterminalBoard extends React.Component {
         this.handleExpand = this.handleExpand.bind(this);
         this.startSymbolNameEditing = this.startSymbolNameEditing.bind(this);
         this.stopSymbolNameEditing = this.stopSymbolNameEditing.bind(this);
-        this.updateCurrentSymbolNameGivenEdit = this.bind.updateCurrentSymbolNameGivenEdit();
+        this.updateCurrentSymbolNameGivenEdit = this.updateCurrentSymbolNameGivenEdit.bind(this);
         this.state = {
             editingSymbolName: false,
             symbolNameInputVal: ''
@@ -36,7 +36,7 @@ class NonterminalBoard extends React.Component {
     }
 
     handleNonterminalRuleClickThrough(tag, index) {
-        this.props.updateCurrentNonterminal(tag)
+        this.props.updateCurrentSymbolName(tag)
         this.props.updateCurrentRule(index)
         this.props.updateGeneratedContentPackageTags([])
         this.props.updateGeneratedContentPackageText("")
@@ -75,7 +75,7 @@ class NonterminalBoard extends React.Component {
                 data: JSON.stringify(object),
                 success: () => {
                     this.props.updateFromServer();
-                    this.props.updateCurrentNonterminal(newsymbol);
+                    this.props.updateCurrentSymbolName(newsymbol);
                     this.props.updateHistory(newsymbol, this.props.currentRule);
                 },
                 cache: false
@@ -93,7 +93,7 @@ class NonterminalBoard extends React.Component {
                 contentType: "application/json",
                 data: JSON.stringify(object),
                 success: () => {
-                    this.props.updateCurrentNonterminal("");
+                    this.props.updateCurrentSymbolName("");
                     this.props.updateCurrentRule(-1);
                     this.props.updateFromServer();
                     this.props.updateHistory("", -1);

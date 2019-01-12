@@ -146,7 +146,7 @@ class NonterminalList extends React.Component {
                                                 new={newNT}
                                                 other_names={this.props.nonterminals}
                                                 updateFromServer={this.props.updateFromServer}
-                                                updateCurrentNonterminal={this.props.updateCurrentNonterminal}
+                                                updateCurrentSymbolName={this.props.updateCurrentSymbolName}
                                                 updateCurrentRule={this.props.updateCurrentRule}
                                                 updateHistory={this.props.updateHistory}
                                                 currentRule={this.props.currentRule}
