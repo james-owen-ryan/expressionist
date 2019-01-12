@@ -34,6 +34,10 @@ class Interface extends React.Component {
         this.goBack = this.goBack.bind(this);
         this.goForward = this.goForward.bind(this);
         this.getGeneratedContentPackage = this.getGeneratedContentPackage.bind(this);
+        this.newGrammar = this.newGrammar.bind(this);
+        this.loadGrammar = this.loadGrammar.bind(this);
+        this.saveGrammar = this.saveGrammar.bind(this);
+        this.exportGrammar = this.exportGrammar.bind(this);
         this.openLoadModal = this.openLoadModal.bind(this);
         this.openSaveModal = this.openSaveModal.bind(this);
         this.openExportModal = this.openExportModal.bind(this);
@@ -83,14 +87,96 @@ class Interface extends React.Component {
             loadButtonSpinnerOn: false,
             exportButtonSpinnerOn: false,
             buildButtonSpinnerOn: false,
-            headerBarSaveButtonIsJuicing: false,
-            headerBarExportButtonIsJuicing: false,
-            headerBarBuildButtonIsJuicing: false,
+            loadButtonIsJuicing: false,
+            saveButtonIsJuicing: false,
+            exportButtonIsJuicing: false,
+            buildButtonIsJuicing: false,
             showLoadModal: false,
             showSaveModal: false,
             showExportModal: false,
             showTestModal: false
         }
+    }
+
+    newGrammar() {
+        var prompt = window.confirm("Are you sure you'd like to start a new grammar? All unsaved changes will be lost.");
+        if (prompt == false){
+            return false;
+        }
+        ajax({
+            url: $SCRIPT_ROOT + '/api/grammar/new',
+            type: 'GET',
+            cache: false
+        });
+        this.updateCurrentSymbolName('');
+        this.updateGeneratedContentPackageTags([]);
+        this.updateGeneratedContentPackageTags('');
+        this.updateFromServer();
+        this.disableTestButton();
+        this.disableBuildButton();
+        this.setCurrentGrammarName("");
+    }
+
+    loadGrammar(filename) {
+        this.closeLoadModal();
+        this.turnLoadButtonSpinnerOn();
+        ajax({
+            url: $SCRIPT_ROOT + '/api/grammar/from_file',
+            type: "POST",
+            contentType: "json",
+            data: filename,
+            success: () => {
+                this.updateCurrentSymbolName('');
+                this.updateGeneratedContentPackageTags([]);
+                this.updateGeneratedContentPackageTags('');
+                this.updateFromServer(this.turnLoadButtonSpinnerOff);
+                this.disableTestButton();
+                this.disableBuildButton();
+                this.setCurrentGrammarName(filename);
+            },
+            cache: false
+        })
+    }
+
+    saveGrammar() {
+        ajax({
+            url: $SCRIPT_ROOT + '/api/grammar/save',
+            type: "POST",
+            contentType: "text/plain",
+            data: this.getCurrentGrammarName(),
+            async: true,
+            cache: false,
+            success: (status) => {
+                // Generate a juicy response (button lights green and TURNS back to gray)
+                this.setState({saveButtonIsJuicing: true});
+            }
+        })
+        var that = this;
+        setTimeout(function() {
+            that.setState({saveButtonIsJuicing: false});
+        }, 1000);
+    }
+
+    exportGrammar() {
+        this.turnExportButtonSpinnerOn();
+        ajax({
+            url: $SCRIPT_ROOT + '/api/grammar/export',
+            type: "POST",
+            contentType: "text/plain",
+            data: this.getCurrentGrammarName(),
+            async: true,
+            cache: false,
+            success: (status) => {
+                this.turnExportButtonSpinnerOff();
+                this.enableBuildButton();
+                // Generate a juicy response (button lights green and turns back to gray)
+                this.setState({exportButtonIsJuicing: true});
+                var that = this;
+                setTimeout(function() {
+                    that.setState({exportButtonIsJuicing: false});
+                }, 1000);
+            }
+        })
     }
 
     openLoadModal() {
@@ -178,7 +264,14 @@ class Interface extends React.Component {
     }
 
     turnLoadButtonSpinnerOff() {
-        this.setState({loadButtonSpinnerOn: false});
+        this.setState({
+            loadButtonSpinnerOn: false,
+            loadButtonIsJuicing: true
+        });
+        var that = this;
+        setTimeout(function() {
+            that.setState({loadButtonIsJuicing: false});
+        }, 1000);
     }
 
     turnExportButtonSpinnerOn() {
@@ -362,8 +455,8 @@ class Interface extends React.Component {
             }
             // Quick save: do a quick save by overwriting the current grammar file
             else if (quickSaveHotKeyMatch) {
-                // Generate a juicy response (button lights green and fades back to gray)
-                this.setState({headerBarSaveButtonIsJuicing: true});
+                // Generate a juicy response (button lights green and TURNS back to gray)
+                this.setState({saveButtonIsJuicing: true});
                 ajax({
                     url: $SCRIPT_ROOT + '/api/grammar/save',
                     type: "POST",
@@ -375,7 +468,7 @@ class Interface extends React.Component {
                 });
                 var that = this;
                 setTimeout(function() {
-                    that.setState({headerBarSaveButtonIsJuicing: false});
+                    that.setState({saveButtonIsJuicing: false});
                 }, 1000);
             }
             // Quick export: do a quick export by overwriting the current content-bundle files
@@ -390,11 +483,11 @@ class Interface extends React.Component {
                     cache: false,
                     success: (status) => {
                         this.turnExportButtonSpinnerOff();
-                        this.setState({headerBarExportButtonIsJuicing: true});
+                        this.setState({exportButtonIsJuicing: true});
                         this.enableBuildButton();
                         var that = this;
                         setTimeout(function() {
-                            that.setState({headerBarExportButtonIsJuicing: false});
+                            that.setState({exportButtonIsJuicing: false});
                         }, 1000);
                     }
                 })
@@ -553,11 +646,11 @@ class Interface extends React.Component {
             cache: false,
             success: (data) => {
                 this.turnBuildButtonSpinnerOff();
-                this.setState({bundleName: contentBundleName, headerBarBuildButtonIsJuicing: true});
+                this.setState({bundleName: contentBundleName, buildButtonIsJuicing: true});
                 this.enableTestButton();
                 var that = this;
                 setTimeout(function() {
-                    that.setState({headerBarBuildButtonIsJuicing: false});
+                    that.setState({buildButtonIsJuicing: false});
                 }, 1000);
             }
         })
@@ -760,10 +853,13 @@ class Interface extends React.Component {
                                 updateCurrentRule={this.updateCurrentRule}
                                 updateGeneratedContentPackageTags={this.updateGeneratedContentPackageTags}
                                 updateGeneratedContentPackageText={this.updateGeneratedContentPackageText}
-                                update={this.updateFromServer}
                                 getCurrentGrammarName={this.getCurrentGrammarName}
                                 setCurrentGrammarName={this.setCurrentGrammarName}
                                 bundleName={this.state.bundleName}
+                                newGrammar={this.newGrammar}
+                                loadGrammar={this.loadGrammar}
+                                saveGrammar={this.saveGrammar}
+                                exportGrammar={this.exportGrammar}
                                 openLoadModal={this.openLoadModal}
                                 closeLoadModal={this.closeLoadModal}
                                 openSaveModal={this.openSaveModal}
@@ -792,9 +888,10 @@ class Interface extends React.Component {
                                 turnExportButtonSpinnerOn={this.turnExportButtonSpinnerOn}
                                 turnBuildButtonSpinnerOff={this.turnBuildButtonSpinnerOff}
                                 turnBuildButtonSpinnerOn={this.turnBuildButtonSpinnerOn}
-                                headerBarSaveButtonIsJuicing={this.state.headerBarSaveButtonIsJuicing}
-                                headerBarExportButtonIsJuicing={this.state.headerBarExportButtonIsJuicing}
-                                headerBarBuildButtonIsJuicing={this.state.headerBarBuildButtonIsJuicing}
+                                loadButtonIsJuicing={this.state.loadButtonIsJuicing}
+                                saveButtonIsJuicing={this.state.saveButtonIsJuicing}
+                                exportButtonIsJuicing={this.state.exportButtonIsJuicing}
+                                buildButtonIsJuicing={this.state.buildButtonIsJuicing}
                                 attemptToBuildProductionist={this.attemptToBuildProductionist}/>
                     <div className="muwrap">
                         <div className="show-y-wrapper">

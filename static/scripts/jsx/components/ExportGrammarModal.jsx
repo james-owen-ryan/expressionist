@@ -16,15 +16,12 @@ class ExportGrammarModal extends React.Component {
         this.handleChange = this.handleChange.bind(this);
         this.updateGrammarName = this.updateGrammarName.bind(this);
         this.setExportButtonStyle = this.setExportButtonStyle.bind(this);
-        this.exportGrammar = this.exportGrammar.bind(this);
         this.checkExportGrammarName = this.checkExportGrammarName.bind(this);
         this.checkDisableExportButton = this.checkDisableExportButton.bind(this);
         this.exportBundleOnEnter = this.exportBundleOnEnter.bind(this);
-        this.juiceExportButton = this.juiceExportButton.bind(this);
         this.state = {
             grammarFileNames: [],
             height: '400px',
-            exportModalButtonText: 'Export',
             disableExportButton: false,
             validationState: 'success',
             getCurrentGrammarName: this.props.getCurrentGrammarName,
@@ -65,9 +62,13 @@ class ExportGrammarModal extends React.Component {
     }
 
     setExportButtonStyle(){
-        if (this.checkExportGrammarName() == 'error'){
+        if (this.props.exportButtonIsJuicing) {
+            return 'success'
+        }
+        else if (this.checkExportGrammarName() == 'error'){
             return 'danger'
-        }else{
+        }
+        else {
             return this.checkExportGrammarName();
         }
     }
@@ -87,53 +88,6 @@ class ExportGrammarModal extends React.Component {
             return 'error'
         }
         return null
-    }
-
-    juiceExportButton() {
-        // This function gradually fades the save button from our palette green (rgb(87, 247, 224))
-        // to our palette gray (rgb(242, 242, 242))
-        var currentButtonRgbValues = document.getElementById("exportButton").style.backgroundColor;
-        var extractedRgbComponents = currentButtonRgbValues.match(/\d+/g);
-        var r = extractedRgbComponents[0];
-        var g = extractedRgbComponents[1];
-        var b = extractedRgbComponents[2];
-        if (r < 242){
-            r++;
-        }
-        if (g > 242){
-            g--;
-        }
-        if (b < 242){
-            b++;
-        }
-        document.getElementById("exportButton").style.backgroundColor = "rgb("+r+","+g+","+b+")";
-    }
-
-    exportGrammar() {
-        this.props.turnExportButtonSpinnerOn();
-        this.setState({'exportModalButtonText': 'Exporting...'});
-        ajax({
-            url: $SCRIPT_ROOT + '/api/grammar/export',
-            type: "POST",
-            contentType: "text/plain",
-            data: this.state.getCurrentGrammarName(),
-            async: true,
-            cache: false,
-            success: (status) => {
-                this.props.turnExportButtonSpinnerOff();
-                this.props.enableBuildButton();
-                this.setState({'exportModalButtonText': 'Exported!'})
-                // Generate a juicy response (button lights green and fades back to gray)
-                document.getElementById('exportButton').style.backgroundColor = 'rgb(87, 247, 224)';
-                var juicingIntervalFunction = setInterval(this.juiceExportButton, 1);
-                var that = this;
-                setTimeout(function() {
-                    clearInterval(juicingIntervalFunction);
-                    that.setState({'exportModalButtonText': 'Export'})
-                    document.getElementById('exportButton').style.backgroundColor = 'rgb(242, 242, 242)';
-                }, 1250);
-            }
-        })
     }
 
     componentDidMount(){
@@ -156,7 +110,7 @@ class ExportGrammarModal extends React.Component {
                         </FormGroup>
                     </form>
                     <FileList onFileClick={this.updateGrammarName} highlightedFile={this.state.getCurrentGrammarName()} height='200px' directory='exports'></FileList>
-                    <Button id="exportButton" title={this.props.exportButtonSpinnerOn ? "Exporting content bundle (to /exports)..." : "Export content bundle (to /exports)"} onClick={this.exportGrammar} type="submit" style={{marginTop: '15px'}} bsStyle={this.setExportButtonStyle()} spinColor="#000" loading={this.props.exportButtonSpinnerOn} disabled={this.checkDisableExportButton()}>{this.state.exportModalButtonText}</Button>
+                    <Button id="exportButton" title={this.props.exportButtonSpinnerOn ? "Exporting content bundle (to /exports)..." : "Export content bundle (to /exports)"} onClick={this.props.exportGrammar} type="submit" style={{marginTop: '15px'}} bsStyle={this.setExportButtonStyle()} spinColor="#000" loading={this.props.exportButtonSpinnerOn} disabled={this.checkDisableExportButton()}>{this.props.exportButtonSpinnerOn ? 'Exporting...' : this.props.exportButtonIsJuicing ? 'Exported!' : 'Export'}</Button>
                 </div>
             </Modal>
 

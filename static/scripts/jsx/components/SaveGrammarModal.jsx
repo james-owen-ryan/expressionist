@@ -17,15 +17,10 @@ class SaveGrammarModal extends React.Component {
         this.updateGrammarName = this.updateGrammarName.bind(this);
         this.disableSaveButton = this.disableSaveButton.bind(this);
         this.setSaveButtonStyle = this.setSaveButtonStyle.bind(this);
-        this.saveGrammar = this.saveGrammar.bind(this);
         this.saveGrammarOnEnter = this.saveGrammarOnEnter.bind(this);
-        this.juiceSaveButton = this.juiceSaveButton.bind(this);
         this.state = {
             grammarFileNames: [],
             height: '400px',
-            saveGrammarBtnText: 'Save',
-            getCurrentGrammarName: this.props.getCurrentGrammarName,
-            setCurrentGrammarName: this.props.setCurrentGrammarName
         };
     }
 
@@ -40,7 +35,7 @@ class SaveGrammarModal extends React.Component {
 
     handleChange(e){
         if (e.key !== 'Enter') {
-            this.state.setCurrentGrammarName(e.target.value);
+            this.props.setCurrentGrammarName(e.target.value);
         }
     }
 
@@ -54,7 +49,7 @@ class SaveGrammarModal extends React.Component {
     };
 
     updateGrammarName(filename){
-        this.state.setCurrentGrammarName(filename);
+        this.props.setCurrentGrammarName(filename);
     }
 
     disableSaveButton(){
@@ -65,7 +60,10 @@ class SaveGrammarModal extends React.Component {
     }
 
     setSaveButtonStyle(){
-        if (this.checkSaveGrammarName() == 'error'){
+        if (this.props.saveButtonIsJuicing) {
+            return 'success'
+        }
+        else if (this.checkSaveGrammarName() == 'error'){
             return 'danger'
         }
         else if (this.checkSaveGrammarName() === null){
@@ -77,54 +75,12 @@ class SaveGrammarModal extends React.Component {
     }
 
     checkSaveGrammarName() {
-        if (this.state.grammarFileNames.indexOf(this.state.getCurrentGrammarName()) > -1){
+        if (this.state.grammarFileNames.indexOf(this.props.getCurrentGrammarName()) > -1){
             return 'warning'
-        } else if (this.state.getCurrentGrammarName() == '') {
+        } else if (this.props.getCurrentGrammarName() == '') {
             return 'error'
         }
         return null
-    }
-
-    saveGrammar() {
-        // Generate a juicy response (button lights green and fades back to gray)
-        document.getElementById('saveButton').style.backgroundColor = 'rgb(87, 247, 224)';
-        this.setState({'saveGrammarBtnText': 'Saved!'});
-        var juicingIntervalFunction = setInterval(this.juiceSaveButton, 1);
-        ajax({
-            url: $SCRIPT_ROOT + '/api/grammar/save',
-            type: "POST",
-            contentType: "text/plain",
-            data: this.state.getCurrentGrammarName(),
-            async: true,
-            cache: false,
-            success: (status) => {}
-        })
-        var that = this;
-        setTimeout(function() {
-            clearInterval(juicingIntervalFunction);
-            that.setState({'saveGrammarBtnText': 'Save'})
-            document.getElementById('saveButton').style.backgroundColor = 'rgb(242, 242, 242)';
-        }, 1250);
-    }
-
-    juiceSaveButton() {
-        // This function gradually fades the save button from our palette green (rgb(87, 247, 224))
-        // to our palette gray (rgb(242, 242, 242))
-        var currentButtonRgbValues = document.getElementById("saveButton").style.backgroundColor;
-        var extractedRgbComponents = currentButtonRgbValues.match(/\d+/g);
-        var r = extractedRgbComponents[0];
-        var g = extractedRgbComponents[1];
-        var b = extractedRgbComponents[2];
-        if (r < 242){
-            r++;
-        }
-        if (g > 242){
-            g--;
-        }
-        if (b < 242){
-            b++;
-        }
-        document.getElementById("saveButton").style.backgroundColor = "rgb("+r+","+g+","+b+")";
     }
 
     componentWillMount(){
@@ -145,13 +101,13 @@ class SaveGrammarModal extends React.Component {
                     <form>
                         <FormGroup controlId="saveGrammarForm" validationState={this.checkSaveGrammarName()}>
                             <ControlLabel>Grammar name</ControlLabel>
-                            <FormControl type="text" value={this.state.getCurrentGrammarName()} placeholder="Enter a filename." onChange={this.handleChange} autoFocus="true"/>
+                            <FormControl type="text" value={this.props.getCurrentGrammarName()} placeholder="Enter a filename." onChange={this.handleChange} autoFocus="true"/>
                             <FormControl.Feedback />
                             <HelpBlock><i>Grammars are saved to /grammars. Saving will overwrite files with the same name.</i></HelpBlock>
                         </FormGroup>
                     </form>
-                    <FileList onFileClick={this.updateGrammarName} highlightedFile={this.state.getCurrentGrammarName() + '.json'} height='200px' directory='grammars'></FileList>
-                    <Button title="Save grammar file (to /grammars)" id="saveButton" onClick={this.saveGrammar} style={{marginTop: '15px'}} bsStyle={this.setSaveButtonStyle()} disabled={this.disableSaveButton()}>{this.state.saveGrammarBtnText}</Button>
+                    <FileList onFileClick={this.updateGrammarName} highlightedFile={this.props.getCurrentGrammarName() + '.json'} height='200px' directory='grammars'></FileList>
+                    <Button title="Save grammar file (to /grammars)" id="saveButton" onClick={this.props.saveGrammar} style={{marginTop: '15px'}} bsStyle={this.setSaveButtonStyle()} disabled={this.disableSaveButton()}>{this.props.saveButtonIsJuicing ? 'Saved!' : 'Save'}</Button>
                 </div>
             </Modal>
 
