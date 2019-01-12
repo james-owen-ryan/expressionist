@@ -61,6 +61,7 @@ def load_bundle():
 
 @app.route('/api/grammar/load', methods=['POST'])
 def load_grammar():
+    """Load a grammar into memory given a JSON string sent via POST (allows the app to reflect undo and redo changes)."""
     app.flask_grammar = grammar.from_json(str(request.data))
     return app.flask_grammar.to_json()
 

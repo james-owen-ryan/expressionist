@@ -16,7 +16,7 @@ class NonterminalList extends React.Component {
         this.addNonterminal = this.addNonterminal.bind(this);
         this.clearSymbolFilterQuery = this.clearSymbolFilterQuery.bind(this);
         this.state = {
-            newNTNumber: 0
+            thisIsANewSymbolNumber: 0
         }
     }
 
@@ -87,15 +87,15 @@ class NonterminalList extends React.Component {
     addNonterminal() {
         // Reset the filter query, so that the author can see the symbol-definition element
         this.props.updateSymbolFilterQuery('');
-        var newNTName = '$symbol' + this.state.newNTNumber;
+        var thisIsANewSymbolName = '$symbol' + this.state.thisIsANewSymbolNumber;
         ajax({
             url: $SCRIPT_ROOT + '/api/nonterminal/add',
             type: "POST",
             contentType: "application/json",
-            data: JSON.stringify({'nonterminal': newNTName}),
+            data: JSON.stringify({'nonterminal': thisIsANewSymbolName}),
             success: () => {
                 this.props.updateFromServer();
-                this.setState({newNTNumber: this.state.newNTNumber + 1})
+                this.setState({thisIsANewSymbolNumber: this.state.thisIsANewSymbolNumber + 1})
             },
             cache: false
         })
@@ -132,9 +132,9 @@ class NonterminalList extends React.Component {
                     {   nonterminals.map((name) => {
                             var complete = this.props.nonterminals[name].complete;
                             var deep = this.props.nonterminals[name].deep;
-                            var newNT = false
-                            if (name.indexOf('$symbol') != -1){
-                                newNT = true
+                            var thisIsANewSymbol = false
+                            if (name.indexOf('$symbol') !== -1){
+                                thisIsANewSymbol = true
                             }
                             return (
                                 <Nonterminal    name={name}
@@ -142,7 +142,7 @@ class NonterminalList extends React.Component {
                                                 deep={deep}
                                                 onClick={this.clickNonterminalUpdate.bind(this, name)} 
                                                 key={name}
-                                                new={newNT}
+                                                thisIsANewSymbol={thisIsANewSymbol}
                                                 symbolNameAlreadyExists={this.props.symbolNameAlreadyExists}
                                                 updateFromServer={this.props.updateFromServer}
                                                 updateCurrentSymbolName={this.props.updateCurrentSymbolName}

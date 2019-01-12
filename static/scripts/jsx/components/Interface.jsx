@@ -14,7 +14,7 @@ var Button = require('react-bootstrap').Button
 
 var navigationHistory = [];  // Array of [symbolName, ruleId] entries
 var currentIndexInNavigationHistory = -1;
-var grammarHistory = [];  // Array of previous grammar states (stored as JSON objects)
+var grammarHistory = [];  // Array of [grammarState (JSON), currentSymbolName, currentRuleId] entries
 var currentIndexInGrammarHistory = -1;
 var unsavedChanges = false;
 
@@ -98,14 +98,6 @@ class Interface extends React.Component {
             showExportModal: false,
             showTestModal: false
         }
-    }
-
-    resetGrammarHistoryAndNavigationHistory() {
-        navigationHistory = [];
-        currentIndexInNavigationHistory = -1;
-        grammarHistory = [];
-        currentIndexInGrammarHistory = -1;
-        unsavedChanges = false;
     }
 
     newGrammar() {
@@ -714,10 +706,18 @@ class Interface extends React.Component {
         this.setState({generatedContentPackageText: newGeneratedContentPackageText});
     }
 
+    resetGrammarHistoryAndNavigationHistory() {
+        navigationHistory = [];
+        currentIndexInNavigationHistory = -1;
+        grammarHistory = [];
+        currentIndexInGrammarHistory = -1;
+        unsavedChanges = false;
+    }
+
     updateGrammarHistory(grammarState) {
         if (grammarHistory.length > 0) {
             // Make sure this grammar state differs from the one in the current index
-            var stateAtTheCurrentIndex = grammarHistory[currentIndexInGrammarHistory];
+            var stateAtTheCurrentIndex = grammarHistory[currentIndexInGrammarHistory][0];
             var object = {
                 "grammarState1": stateAtTheCurrentIndex,
                 "grammarState2": grammarState
@@ -731,7 +731,8 @@ class Interface extends React.Component {
                     var grammarsAreEquivalent = data['verdict'];
                     if (!grammarsAreEquivalent) {
                         grammarHistory = grammarHistory.slice(0, currentIndexInGrammarHistory+1);
-                        grammarHistory.push(grammarState);
+                        var newEntry = [grammarState, this.state.currentSymbol, this.state.currentRule];
+                        grammarHistory.push(newEntry);
                         currentIndexInGrammarHistory += 1;
                         unsavedChanges = true;
                     }
@@ -740,7 +741,8 @@ class Interface extends React.Component {
             })
         }
         else {
-            grammarHistory = [grammarState];
+            var firstEntry = [grammarState, this.state.currentSymbol, this.state.currentRule];
+            grammarHistory = [firstEntry];
             currentIndexInGrammarHistory = 0;
         }
     }
@@ -748,26 +750,56 @@ class Interface extends React.Component {
     undo() {
         if (currentIndexInGrammarHistory > 0) {
             var newGrammarHistoryIndex = currentIndexInGrammarHistory - 1;
-            var previousEntryInGrammarHistory = grammarHistory[newGrammarHistoryIndex];
+            var previousGrammarState = grammarHistory[newGrammarHistoryIndex][0];
+            var previousGrammarStateSymbolName = grammarHistory[newGrammarHistoryIndex][1];
+            var previousGrammarStateRuleId = grammarHistory[newGrammarHistoryIndex][2];
             currentIndexInGrammarHistory = newGrammarHistoryIndex;
-            this.setState({
-                nonterminals: previousEntryInGrammarHistory['nonterminals'],
-                tagsets: previousEntryInGrammarHistory['markups']
-            });
-            unsavedChanges = true;
+            ajax({
+                url: $SCRIPT_ROOT + '/api/grammar/load',
+                type: "POST",
+                contentType: "json",
+                data: JSON.stringify(previousGrammarState),
+                success: () => {
+                    this.setState({
+                        nonterminals: previousGrammarState['nonterminals'],
+                        tagsets: previousGrammarState['markups'],
+                        currentSymbol: previousGrammarStateSymbolName,
+                        currentRule: previousGrammarStateRuleId,
+                        generatedContentPackageText: "",
+                        generatedContentPackageTags: []
+                    });
+                    unsavedChanges = true;
+                },
+                cache: false
+            })
         }
     }
 
     redo() {
         if (currentIndexInGrammarHistory < grammarHistory.length - 1) {
             var newGrammarHistoryIndex = currentIndexInGrammarHistory + 1;
-            var nextEntryInGrammarHistory = grammarHistory[newGrammarHistoryIndex];
+            var nextGrammarState = grammarHistory[newGrammarHistoryIndex][0];
+            var nextGrammarStateSymbolName = grammarHistory[newGrammarHistoryIndex][1];
+            var nextGrammarStateRuleId = grammarHistory[newGrammarHistoryIndex][2];
             currentIndexInGrammarHistory = newGrammarHistoryIndex;
-            this.setState({
-                nonterminals: nextEntryInGrammarHistory['nonterminals'],
-                tagsets: nextEntryInGrammarHistory['markups']
-            });
-            unsavedChanges = true;
+            ajax({
+                url: $SCRIPT_ROOT + '/api/grammar/load',
+                type: "POST",
+                contentType: "json",
+                data: JSON.stringify(nextGrammarState),
+                success: () => {
+                    this.setState({
+                        nonterminals: nextGrammarState['nonterminals'],
+                        tagsets: nextGrammarState['markups'],
+                        currentSymbol: nextGrammarStateSymbolName,
+                        currentRule: nextGrammarStateRuleId,
+                        generatedContentPackageText: "",
+                        generatedContentPackageTags: []
+                    });
+                    unsavedChanges = true;
+                },
+                cache: false
+            })
         }
     }
 

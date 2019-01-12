@@ -38,16 +38,16 @@ class Nonterminal extends React.Component {
             contentType: "application/json",
             data: JSON.stringify(object),
             success: () => {
-                this.props.updateCurrentRule(-1)
-                this.props.updateFromServer()
-                this.props.updateCurrentSymbolName(this.state.newNameVal)
+                this.props.updateCurrentRule(-1);
+                this.props.updateFromServer();
+                this.props.updateCurrentSymbolName(this.state.newNameVal);
             },
             cache: false
         })
     }
 
     submitSymbolNameOnEnterKeypress(e) {
-        if (this.props.new && !this.state.renameRequestAlreadySent && !this.getDisableNewNameHoverText()) {
+        if (this.props.thisIsANewSymbol && !this.state.renameRequestAlreadySent && !this.getDisableNewNameHoverText()) {
             if (document.activeElement.id === "newSymbolNameInputElement") {
                 if (e.key === 'Enter') {
                     this.handleNonterminalRename();
@@ -81,13 +81,13 @@ class Nonterminal extends React.Component {
     componentDidMount(){
         // Remove any earlier event listener that was added from earlier nonterminals being mounted
         // for the first time
-        document.removeEventListener("keyup", this.submitSymbolNameOnEnterKeypress, false);
+        document.removeEventListener("keydown", this.submitSymbolNameOnEnterKeypress, false);
         // Add the new event listener
-        document.addEventListener("keyup", this.submitSymbolNameOnEnterKeypress, false);
+        document.addEventListener("keydown", this.submitSymbolNameOnEnterKeypress, false);
     }
 
     render() {
-        if (this.props.new == true){
+        if (this.props.thisIsANewSymbol === true){
             return (
                 <ListGroupItem title={this.props.name} bsSize="xsmall" style={{'padding': '0', 'height': '44px', 'marginBottom': '0px'}}>
                             <input id="newSymbolNameInputElement" type='text' onChange={this.handleNewNameValueChange} value={this.state.newNameVal} style={{'width': 'calc(100% - 80px)', 'height': '35px', 'padding': '8px', 'backgroundColor': 'white'}} placeholder='Enter symbol name.' autoFocus="true"/>
