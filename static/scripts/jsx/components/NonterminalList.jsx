@@ -144,7 +144,7 @@ class NonterminalList extends React.Component {
                                                 onClick={this.clickNonterminalUpdate.bind(this, name)} 
                                                 key={name}
                                                 new={newNT}
-                                                other_names={this.props.nonterminals}
+                                                symbolNameAlreadyExists={this.props.symbolNameAlreadyExists}
                                                 updateFromServer={this.props.updateFromServer}
                                                 updateCurrentSymbolName={this.props.updateCurrentSymbolName}
                                                 updateCurrentRule={this.props.updateCurrentRule}

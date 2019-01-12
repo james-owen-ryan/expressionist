@@ -729,7 +729,8 @@ class Interface extends React.Component {
                                         updateSymbolFilterQuery={this.updateSymbolFilterQuery}
                                         symbolFilterQuery={this.state.symbolFilterQuery}
                                         currentNonterminalName={this.state.currentSymbol}
-                                        getListOfMatchingSymbolNames={this.getListOfMatchingSymbolNames}>
+                                        getListOfMatchingSymbolNames={this.getListOfMatchingSymbolNames}
+                                        symbolNameAlreadyExists={this.symbolNameAlreadyExists}>
                     </NonterminalList>
                 </div>
                 <div style={{"width": "75%", "height": "30%", position: "absolute", bottom: 0, left:0}}>

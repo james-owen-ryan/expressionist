@@ -12,7 +12,7 @@ class Nonterminal extends React.Component {
     constructor(props) {
         super(props);
         this.handleNonterminalDelete = this.handleNonterminalDelete.bind(this);
-        this.disableNewNameValue = this.disableNewNameValue.bind(this);
+        this.getDisableNewNameHoverText = this.getDisableNewNameHoverText.bind(this);
         this.handleNewNameValueChange = this.handleNewNameValueChange.bind(this);
         this.handleNonterminalRename = this.handleNonterminalRename.bind(this);
         this.submitSymbolNameOnEnterKeypress = this.submitSymbolNameOnEnterKeypress.bind(this);
@@ -48,7 +48,7 @@ class Nonterminal extends React.Component {
     }
 
     submitSymbolNameOnEnterKeypress(e) {
-        if (this.props.new && !this.state.renameRequestAlreadySent && !this.disableNewNameValue()) {
+        if (this.props.new && !this.state.renameRequestAlreadySent && !this.getDisableNewNameHoverText()) {
             if (document.activeElement.id === "newSymbolNameInputElement") {
                 if (e.key === 'Enter') {
                     this.handleNonterminalRename();
@@ -57,11 +57,14 @@ class Nonterminal extends React.Component {
         }
     };
 
-    disableNewNameValue(){
-        if (this.state.newNameVal == '' || this.props.other_names[this.state.newNameVal] != undefined){
-            return true
+    getDisableNewNameHoverText(){
+        if (this.state.newNameVal == '') {
+            return " (disabled: requires at least one character)"
         }
-        return false
+        if (this.props.symbolNameAlreadyExists(this.state.newNameVal)) {
+            return " (disabled: symbol name already exists)"
+        }
+        return ""
     }
 
     handleNonterminalDelete(){
@@ -90,7 +93,7 @@ class Nonterminal extends React.Component {
                 <ListGroupItem title={this.props.name} bsSize="xsmall" style={{'padding': '0', 'height': '44px', 'marginBottom': '0px'}}>
                             <input id="newSymbolNameInputElement" type='text' onChange={this.handleNewNameValueChange} value={this.state.newNameVal} style={{'width': 'calc(100% - 80px)', 'height': '35px', 'padding': '8px', 'backgroundColor': 'white'}} placeholder='Enter symbol name.' autoFocus="true"/>
                             <div style={{'marginRight': '10px', 'display': 'inline', 'width': '80px'}}>
-                                <Button id="newSymbolNameInputElementButton" onClick={this.handleNonterminalRename} title={this.disableNewNameValue() ? "Add symbol (disabled: requires at least one character)" : "Add symbol"} bsStyle="default" style={{'marginBottom': '3px', 'padding': '8px 13px', 'height': '35.5px'}} disabled={this.disableNewNameValue()}><Glyphicon glyph="ok"/></Button>
+                                <Button id="newSymbolNameInputElementButton" onClick={this.handleNonterminalRename} title={"Add symbol" + this.getDisableNewNameHoverText()} bsStyle="default" style={{'marginBottom': '3px', 'padding': '8px 13px', 'height': '35.5px'}} disabled={this.getDisableNewNameHoverText() ? true : false}><Glyphicon glyph="ok"/></Button>
                                 <Button onClick={this.handleNonterminalDelete} title="Cancel" style={{'marginBottom': '3px', 'padding': '8px 13px', 'height': '35.5px'}} bsStyle="default"><Glyphicon glyph="remove"/></Button>
                             </div>
                 </ListGroupItem>
