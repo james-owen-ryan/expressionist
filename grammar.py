@@ -244,20 +244,17 @@ class PCFG(object):
                 else:
                     self.exhaustively_and_nonprobabilistically_export(nonterminal=nonterminal, filename=filename)
 
-    def to_json(self, to_file = None):
-        # total represents our final dictionary we will conver to JSON
+    def to_json(self, to_file=None):
+        # total represents our final dictionary we will convert to JSON
         total = {}
         # use defaultdict as it allows us to assume they are sets
         markups = collections.defaultdict(set)
         # nonterminals are their own dictionaries
         nonterminals = collections.defaultdict()
-
         if to_file is None:
             to_file = False
         else:
             to_file = True
-
-        #print(self.markup_class)
         for key, value in self.nonterminals.iteritems():
             temp = collections.defaultdict()
             if len(value.rules) != 0:

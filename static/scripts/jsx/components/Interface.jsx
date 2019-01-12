@@ -14,6 +14,8 @@ var Button = require('react-bootstrap').Button
 
 var navigationHistory = [];  // Array of [symbolName, ruleId] entries
 var currentIndexInNavigationHistory = -1;
+var grammarHistory = [];  // Array of previous grammar states (stored as JSON objects)
+var currentIndexInGrammarHistory = -1;
 
 
 class Interface extends React.Component {
@@ -25,7 +27,10 @@ class Interface extends React.Component {
         this.updateCurrentRule = this.updateCurrentRule.bind(this);
         this.updateGeneratedContentPackageTags = this.updateGeneratedContentPackageTags.bind(this);
         this.updateGeneratedContentPackageText = this.updateGeneratedContentPackageText.bind(this);
-        this.updateHistory = this.updateHistory.bind(this);
+        this.updateGrammarHistory = this.updateGrammarHistory.bind(this);
+        this.undo = this.undo.bind(this);
+        this.redo = this.redo.bind(this);
+        this.updateNavigationHistory = this.updateNavigationHistory.bind(this);
         this.goBack = this.goBack.bind(this);
         this.goForward = this.goForward.bind(this);
         this.getGeneratedContentPackage = this.getGeneratedContentPackage.bind(this);
@@ -139,41 +144,6 @@ class Interface extends React.Component {
         }
     }
 
-    updateFromServer(additionalFunctionToExecuteUponSuccess) {
-        ajax({
-            url: $SCRIPT_ROOT + '/api/default',
-            dataType: 'json',
-            cache: false,
-            success: (data) => {
-                this.setState({nonterminals: data['nonterminals']})
-                this.setState({tagsets: data['markups']})
-                this.determineIfExportButtonIsDisabled(data['nonterminals'])
-                if (additionalFunctionToExecuteUponSuccess !== undefined) {
-                    additionalFunctionToExecuteUponSuccess();
-                }
-            },
-            error: (xhr, status, err) => {
-                console.error(this.props.url, status, err.toString())
-            }
-        });
-    }
-
-    updateCurrentSymbolName(newSymbolName) {
-        this.setState({currentSymbol: newSymbolName});
-    }
-
-    updateCurrentRule(newCurrentRule) {
-        this.setState({currentRule: newCurrentRule});
-    }
-
-    updateGeneratedContentPackageTags(newGeneratedContentPackageTags) {
-        this.setState({generatedContentPackageTags: newGeneratedContentPackageTags});
-    }
-
-    updateGeneratedContentPackageText(newGeneratedContentPackageText) {
-        this.setState({generatedContentPackageText: newGeneratedContentPackageText});
-    }
-
     determineIfExportButtonIsDisabled(nonterminals) {
         // Disable the 'Export' button only if there are no top-level, complete symbols
         // in the grammar
@@ -277,7 +247,7 @@ class Interface extends React.Component {
             }
         }
         else {
-            // Check for a hot-key match (ctrl/command+{g, o, s, e, b, y, d, enter, left arrow, right arrow})
+            // Check for a hot-key match (ctrl/command + ...)
             var quickNewHotKeyMatch = false;  // g
             var quickLoadHotKeyMatch = false;  // o
             var quickSaveHotKeyMatch = false;  // s
@@ -285,10 +255,12 @@ class Interface extends React.Component {
             var quickBuildHotKeyMatch = false;  // b
             var quickTestHotKeyMatch = false;  // y
             var quickRuleDefineHotKeyMatch = false; // d
-            var quickRuleEditHotKeyMatch = false;  // e
+            var quickRuleEditHotKeyMatch = false;  // shift+d
             var quickTestRewriteHotKeyMatch = false;  // enter
             var goBackHotKeyMatch = false; // left arrow
             var goForwardHotKeyMatch = false; // right arrow
+            var undoHotKeyMatch = false;  // z
+            var redoHotKeyMatch = false;  // shift+z
             if (e.ctrlKey || e.metaKey) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -335,6 +307,15 @@ class Interface extends React.Component {
                         }
                         else {
                             quickRuleDefineHotKeyMatch = true;
+                        }
+                        break;
+                    case 'z':
+                        e.preventDefault();
+                        if (e.shiftKey) {
+                            redoHotKeyMatch = true;
+                        }
+                        else {
+                            undoHotKeyMatch = true;
                         }
                         break;
                     case 'r':
@@ -421,6 +402,14 @@ class Interface extends React.Component {
             // Quick build: build a Productionist
             else if (quickBuildHotKeyMatch && !this.state.buildButtonSpinnerOn && !this.state.buildButtonDisabled) {
                 this.attemptToBuildProductionist();
+            }
+            // Undo
+            else if (undoHotKeyMatch) {
+                this.undo();
+            }
+            // Redo
+            else if (redoHotKeyMatch) {
+                this.redo();
             }
         }
     }
@@ -574,7 +563,99 @@ class Interface extends React.Component {
         })
     }
 
-    updateHistory(symbolName, ruleId) {
+    updateFromServer(additionalFunctionToExecuteUponSuccess) {
+        ajax({
+            url: $SCRIPT_ROOT + '/api/default',
+            dataType: 'json',
+            cache: false,
+            success: (data) => {
+                this.setState({
+                    nonterminals: data['nonterminals'],
+                    tagsets: data['markups']
+                });
+                this.updateGrammarHistory(data);
+                this.determineIfExportButtonIsDisabled(data['nonterminals']);
+                if (additionalFunctionToExecuteUponSuccess !== undefined) {
+                    additionalFunctionToExecuteUponSuccess();
+                }
+            },
+            error: (xhr, status, err) => {
+                console.error(this.props.url, status, err.toString())
+            }
+        });
+    }
+
+    updateCurrentSymbolName(newSymbolName) {
+        this.setState({currentSymbol: newSymbolName});
+    }
+
+    updateCurrentRule(newCurrentRule) {
+        this.setState({currentRule: newCurrentRule});
+    }
+
+    updateGeneratedContentPackageTags(newGeneratedContentPackageTags) {
+        this.setState({generatedContentPackageTags: newGeneratedContentPackageTags});
+    }
+
+    updateGeneratedContentPackageText(newGeneratedContentPackageText) {
+        this.setState({generatedContentPackageText: newGeneratedContentPackageText});
+    }
+
+    updateGrammarHistory(grammarState) {
+        if (grammarHistory.length > 0) {
+            // Make sure this grammar state differs from the one in the current index
+            var stateAtTheCurrentIndex = grammarHistory[currentIndexInGrammarHistory];
+            var object = {
+                "grammarState1": stateAtTheCurrentIndex,
+                "grammarState2": grammarState
+            }
+            ajax({
+                url: $SCRIPT_ROOT + '/api/grammar/check_equivalence',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(object),
+                success: (data) => {
+                    var grammarsAreEquivalent = data['verdict'];
+                    if (!grammarsAreEquivalent) {
+                        grammarHistory = grammarHistory.slice(0, currentIndexInGrammarHistory+1);
+                        grammarHistory.push(grammarState);
+                        currentIndexInGrammarHistory += 1;
+                    }
+                },
+                cache: false
+            })
+        }
+        else {
+            grammarHistory = [grammarState];
+            currentIndexInGrammarHistory = 0;
+        }
+    }
+
+    undo() {
+        if (currentIndexInGrammarHistory > 0) {
+            var newGrammarHistoryIndex = currentIndexInGrammarHistory - 1;
+            var previousEntryInGrammarHistory = grammarHistory[newGrammarHistoryIndex];
+            currentIndexInGrammarHistory = newGrammarHistoryIndex;
+            this.setState({
+                nonterminals: previousEntryInGrammarHistory['nonterminals'],
+                tagsets: previousEntryInGrammarHistory['markups']
+            });
+        }
+    }
+
+    redo() {
+        if (currentIndexInGrammarHistory < grammarHistory.length - 1) {
+            var newGrammarHistoryIndex = currentIndexInGrammarHistory + 1;
+            var nextEntryInGrammarHistory = grammarHistory[newGrammarHistoryIndex];
+            currentIndexInGrammarHistory = newGrammarHistoryIndex;
+            this.setState({
+                nonterminals: nextEntryInGrammarHistory['nonterminals'],
+                tagsets: nextEntryInGrammarHistory['markups']
+            });
+        }
+    }
+
+    updateNavigationHistory(symbolName, ruleId) {
         if (symbolName !== "") {
             var cleanRuleId = ruleId !== undefined ? ruleId : -1;
             var newEntry = [symbolName, cleanRuleId];
@@ -582,8 +663,8 @@ class Interface extends React.Component {
                 // Make sure this isn't already the entry at the current index
                 var entryAtTheCurrentIndex = navigationHistory[currentIndexInNavigationHistory];
                 if ((newEntry[0] !== entryAtTheCurrentIndex[0]) || (newEntry[1] !== entryAtTheCurrentIndex[1])) {
-                    navigationHistory = navigationHistory.slice(0, currentIndexInNavigationHistory+1)
-                    navigationHistory.push(newEntry)
+                    navigationHistory = navigationHistory.slice(0, currentIndexInNavigationHistory+1);
+                    navigationHistory.push(newEntry);
                     currentIndexInNavigationHistory += 1;
                 }
             }
@@ -631,7 +712,7 @@ class Interface extends React.Component {
     }
 
     render() {
-        this.updateHistory(this.state.currentSymbol, this.state.currentRule);
+        this.updateNavigationHistory(this.state.currentSymbol, this.state.currentRule);
         var definedRules = []
         var board
         var referents

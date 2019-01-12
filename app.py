@@ -20,12 +20,22 @@ debug = False
 
 @app.route('/api/default', methods=['GET'])
 def default():
+
     return app.flask_grammar.to_json()
 
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+@app.route('/api/grammar/check_equivalence', methods=['POST'])
+def check_if_grammar_states_are_the_same():
+    data = request.get_json()
+    grammar_state_1 = data['grammarState1']
+    grammar_state_2 = data['grammarState2']
+    payload = {'verdict': grammar_state_1 == grammar_state_2}
+    return jsonify(payload)
 
 
 @app.route('/api/grammar/load_dir', methods=['GET'])
@@ -51,7 +61,6 @@ def load_bundle():
 
 @app.route('/api/grammar/load', methods=['POST'])
 def load_grammar():
-    print request
     app.flask_grammar = grammar.from_json(str(request.data))
     return app.flask_grammar.to_json()
 
@@ -265,7 +274,6 @@ def remove_tag():
 @app.route('/api/markup/deletetagset', methods=['POST'])
 def delete_tagset():
     name = request.get_json()['tagsetName']
-    print 'Deleting tagset: '+name
     app.flask_grammar.delete_tagset(name)
     return app.flask_grammar.to_json()
 
