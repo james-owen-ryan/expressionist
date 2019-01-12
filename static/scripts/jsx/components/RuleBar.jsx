@@ -154,7 +154,6 @@ class RuleBar extends React.Component {
                 data: JSON.stringify(object),
                 success: () => {
                     this.props.updateCurrentSymbolName(this.props.currentSymbolName);
-                    this.props.updateCurrentRule(-1);
                     this.props.updateGeneratedContentPackageTags([]);
                     this.props.updateGeneratedContentPackageText('');
                     this.props.updateFromServer()
