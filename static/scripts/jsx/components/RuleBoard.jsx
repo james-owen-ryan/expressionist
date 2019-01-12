@@ -37,7 +37,6 @@ class RuleBoard extends React.Component {
         this.props.updateCurrentRule(-1);
         this.props.updateGeneratedContentPackageText([]);
         this.props.updateGeneratedContentPackageText('');
-        this.props.updateHistory(tag, -1);
     }
 
     onRuleDelete() {
@@ -53,7 +52,6 @@ class RuleBoard extends React.Component {
             success: () => {
                 this.props.updateCurrentRule(this.props.currentRule-1)
                 this.props.updateFromServer()
-                this.props.updateHistory(this.props.currentSymbolName, -1)
             },
             cache: false
         })

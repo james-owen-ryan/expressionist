@@ -29,7 +29,6 @@ class HeaderBar extends React.Component {
                 this.props.updateCurrentSymbolName('');
                 this.props.updateGeneratedContentPackageTags([]);
                 this.props.updateGeneratedContentPackageTags('');
-                this.props.updateHistory("'", -1);
                 this.props.update(this.props.turnLoadButtonSpinnerOff);
                 this.props.disableTestButton();
                 this.props.disableBuildButton();
@@ -52,7 +51,6 @@ class HeaderBar extends React.Component {
         this.props.updateCurrentSymbolName('');
         this.props.updateGeneratedContentPackageTags([]);
         this.props.updateGeneratedContentPackageTags('');
-        this.props.updateHistory("'", -1);
         this.props.update();
         this.props.disableTestButton();
         this.props.disableBuildButton();

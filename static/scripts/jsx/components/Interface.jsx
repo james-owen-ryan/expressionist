@@ -10,18 +10,24 @@ var FeedbackBar = require('./FeedbackBar.jsx')
 var HeaderBar = require('./HeaderBar.jsx')
 var Modal = require('react-bootstrap').Modal
 var Button = require('react-bootstrap').Button
-import { Router, browserHistory } from 'react-router'
+
+
+var navigationHistory = [];  // Array of [symbolName, ruleId] entries
+var currentIndexInNavigationHistory = -1;
+
 
 class Interface extends React.Component {
 
     constructor(props) {
         super(props);
         this.updateFromServer = this.updateFromServer.bind(this);
-        this.updateHistory = this.updateHistory.bind(this);
         this.updateCurrentSymbolName = this.updateCurrentSymbolName.bind(this);
         this.updateCurrentRule = this.updateCurrentRule.bind(this);
         this.updateGeneratedContentPackageTags = this.updateGeneratedContentPackageTags.bind(this);
         this.updateGeneratedContentPackageText = this.updateGeneratedContentPackageText.bind(this);
+        this.updateHistory = this.updateHistory.bind(this);
+        this.goBack = this.goBack.bind(this);
+        this.goForward = this.goForward.bind(this);
         this.getGeneratedContentPackage = this.getGeneratedContentPackage.bind(this);
         this.openLoadModal = this.openLoadModal.bind(this);
         this.openSaveModal = this.openSaveModal.bind(this);
@@ -133,19 +139,6 @@ class Interface extends React.Component {
         }
     }
 
-    onBackButtonEvent(e) {
-        e.preventDefault();
-        //this.goBack()
-        var nonterminal = this.props.params.nonterminalid
-        var rule = this.props.params.ruleid
-        if (!(this.state.currentSymbol == nonterminal && this.state.currentRule == rule)){
-            this.setState({generatedContentPackageTags: []})
-            this.setState({generatedContentPackageText: ""})
-        }
-        this.setState({currentSymbol: nonterminal})
-        this.setState({currentRule: rule})
-    }
-
     updateFromServer(additionalFunctionToExecuteUponSuccess) {
         ajax({
             url: $SCRIPT_ROOT + '/api/default',
@@ -163,14 +156,6 @@ class Interface extends React.Component {
                 console.error(this.props.url, status, err.toString())
             }
         });
-    }
-
-    updateHistory(nonterminal, rule) {
-        if( nonterminal != '') {
-            browserHistory.push('/'+nonterminal+'/'+String(rule))
-        } else {
-            browserHistory.push('/')
-        }
     }
 
     updateCurrentSymbolName(newSymbolName) {
@@ -292,7 +277,7 @@ class Interface extends React.Component {
             }
         }
         else {
-            // Check for a hot-key match (ctrl/command+{g, o, s, e, b, y, d, enter})
+            // Check for a hot-key match (ctrl/command+{g, o, s, e, b, y, d, enter, left arrow, right arrow})
             var quickNewHotKeyMatch = false;  // g
             var quickLoadHotKeyMatch = false;  // o
             var quickSaveHotKeyMatch = false;  // s
@@ -301,11 +286,21 @@ class Interface extends React.Component {
             var quickTestHotKeyMatch = false;  // y
             var quickRuleDefineHotKeyMatch = false; // d
             var quickRuleEditHotKeyMatch = false;  // e
-            var quickTestRewriteMatch = false;  // enter
+            var quickTestRewriteHotKeyMatch = false;  // enter
+            var goBackHotKeyMatch = false; // left arrow
+            var goForwardHotKeyMatch = false; // right arrow
             if (e.ctrlKey || e.metaKey) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    quickTestRewriteMatch = true;
+                    quickTestRewriteHotKeyMatch = true;
+                }
+                else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    goBackHotKeyMatch = true;
+                }
+                else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    goForwardHotKeyMatch = true;
                 }
                 else {
                     switch (String.fromCharCode(e.which).toLowerCase()) {
@@ -347,6 +342,14 @@ class Interface extends React.Component {
                     }
                 }
             }
+            // Go back: return to the previous symbol or rule
+            if (goBackHotKeyMatch) {
+                this.goBack();
+            }
+            // Go forward: return to the next symbol or rule (after having gone back already)
+            if (goForwardHotKeyMatch) {
+                this.goForward();
+            }
             // Quick new: simulate clicking of the 'New' button
             if (quickNewHotKeyMatch) {
                 document.getElementById("headerBarNewButton").click();
@@ -364,7 +367,7 @@ class Interface extends React.Component {
                 document.getElementById("editRuleButton").click();
             }
             // Quick rewrite test: simulate clicking of the 'play' button for testing symbol rewriting or rule execution
-            else if (quickTestRewriteMatch) {
+            else if (quickTestRewriteHotKeyMatch) {
                 if (this.state.showTestModal) {
                     document.getElementById("testModalPlayButton").click();
                 }
@@ -571,35 +574,63 @@ class Interface extends React.Component {
         })
     }
 
+    updateHistory(symbolName, ruleId) {
+        if (symbolName !== "") {
+            var cleanRuleId = ruleId !== undefined ? ruleId : -1;
+            var newEntry = [symbolName, cleanRuleId];
+            if (navigationHistory.length > 0) {
+                // Make sure this isn't already the entry at the current index
+                var entryAtTheCurrentIndex = navigationHistory[currentIndexInNavigationHistory];
+                if ((newEntry[0] !== entryAtTheCurrentIndex[0]) || (newEntry[1] !== entryAtTheCurrentIndex[1])) {
+                    navigationHistory = navigationHistory.slice(0, currentIndexInNavigationHistory+1)
+                    navigationHistory.push(newEntry)
+                    currentIndexInNavigationHistory += 1;
+                }
+            }
+            else {
+                navigationHistory = [newEntry];
+                currentIndexInNavigationHistory = 0;
+            }
+        }
+    }
+
+    goBack() {
+        if (currentIndexInNavigationHistory > 0) {
+            var newNavigationIndex = currentIndexInNavigationHistory - 1;
+            var previousEntryInNavigationHistory = navigationHistory[newNavigationIndex];
+            currentIndexInNavigationHistory = newNavigationIndex;
+            this.setState({
+                currentSymbol: previousEntryInNavigationHistory[0],
+                currentRule: previousEntryInNavigationHistory[1],
+                generatedContentPackageText: "",
+                generatedContentPackageTags: []
+            })
+        }
+    }
+
+    goForward() {
+        if (currentIndexInNavigationHistory < navigationHistory.length - 1) {
+            var newNavigationIndex = currentIndexInNavigationHistory + 1;
+            var nextEntryInNavigationHistory = navigationHistory[newNavigationIndex];
+            currentIndexInNavigationHistory = newNavigationIndex;
+            this.setState({
+                currentSymbol: nextEntryInNavigationHistory[0],
+                currentRule: nextEntryInNavigationHistory[1],
+                generatedContentPackageText: "",
+                generatedContentPackageTags: []
+            })
+        }
+    }
+
     componentDidMount() {
-//      TODO THIS HAD BEEN OVERRIDDEN FOR A WHILE; EXPLORE IF IT HELPS TO FIX THE BROKEN NAVIGATION CONTROLS
-//        window.onpopstate = this.onBackButtonEvent;
-//        if( this.props.params.nonterminalid != null)
-//        {
-//            this.setState({currentSymbol: this.props.params.nonterminalid})
-//            if( this.props.params.ruleid != null)
-//            {
-//                this.setState({currentRule: this.props.params.ruleid})
-//            }
-//        }
-//        ajax({
-//            url: $SCRIPT_ROOT + '/api/default',
-//            dataType: 'json',
-//            cache: false,
-//            success: (data) => {
-//                this.setState({
-//                    nonterminals: data['nonterminals'],
-//                    tags: data['markups']
-//                })
-//            },
-//            error: function (xhr, status, err) {
-//                console.error(this.props.url, status, err.toString());
-//            }.bind(this)
-//        });
+        window.addEventListener('popstate', function (event) {
+            event.preventDefault();
+        });
         document.addEventListener("keydown", this.handlePotentialHotKeyPress, false);
     }
 
     render() {
+        this.updateHistory(this.state.currentSymbol, this.state.currentRule);
         var definedRules = []
         var board
         var referents
@@ -615,7 +646,6 @@ class Interface extends React.Component {
                 }
                 board = <NonterminalBoard   updateGeneratedContentPackageTags={this.updateGeneratedContentPackageTags}
                                             updateGeneratedContentPackageText={this.updateGeneratedContentPackageText}
-                                            updateHistory={this.updateHistory}
                                             currentRule={this.state.currentRule}
                                             updateFromServer={this.updateFromServer}
                                             updateCurrentSymbolName={this.updateCurrentSymbolName}
@@ -634,7 +664,6 @@ class Interface extends React.Component {
                                     updateCurrentRule={this.updateCurrentRule}
                                     updateGeneratedContentPackageTags={this.updateGeneratedContentPackageTags}
                                     updateGeneratedContentPackageText={this.updateGeneratedContentPackageText}
-                                    updateHistory={this.updateHistory}
                                     expansion={definedRules[this.state.currentRule].expansion}
                                     applicationRate={definedRules[this.state.currentRule].applicationRate}
                                     openRuleDefinitionModal={this.openRuleDefinitionModal}/>
@@ -649,7 +678,6 @@ class Interface extends React.Component {
                                 updateCurrentRule={this.updateCurrentRule}
                                 updateGeneratedContentPackageTags={this.updateGeneratedContentPackageTags}
                                 updateGeneratedContentPackageText={this.updateGeneratedContentPackageText}
-                                updateHistory={this.updateHistory}
                                 update={this.updateFromServer}
                                 getCurrentGrammarName={this.getCurrentGrammarName}
                                 setCurrentGrammarName={this.setCurrentGrammarName}
@@ -707,7 +735,6 @@ class Interface extends React.Component {
                                     updateCurrentRule={this.updateCurrentRule}
                                     updateGeneratedContentPackageTags={this.updateGeneratedContentPackageTags}
                                     updateGeneratedContentPackageText={this.updateGeneratedContentPackageText}
-                                    updateHistory={this.updateHistory}
                                     toggleWhetherRuleDefinitionModalIsOpen={this.toggleWhetherRuleDefinitionModalIsOpen}
                                     ruleDefinitionModalIsOpen={this.state.ruleDefinitionModalIsOpen}
                                     idOfRuleToEdit={this.state.idOfRuleToEdit}
@@ -722,7 +749,6 @@ class Interface extends React.Component {
                     <NonterminalList    nonterminals={this.state.nonterminals}
                                         updateFromServer={this.updateFromServer}
                                         updateCurrentSymbolName={this.updateCurrentSymbolName}
-                                        updateHistory={this.updateHistory}
                                         updateCurrentRule={this.updateCurrentRule}
                                         updateGeneratedContentPackageTags={this.updateGeneratedContentPackageTags}
                                         updateGeneratedContentPackageText={this.updateGeneratedContentPackageText}

@@ -41,7 +41,6 @@ class NonterminalBoard extends React.Component {
         this.props.updateCurrentRule(index)
         this.props.updateGeneratedContentPackageTags([])
         this.props.updateGeneratedContentPackageText("")
-        this.props.updateHistory(tag, index)
     }
 
     handleSetDeep() {
@@ -75,7 +74,6 @@ class NonterminalBoard extends React.Component {
                     this.props.updateCurrentSymbolName("");
                     this.props.updateCurrentRule(-1);
                     this.props.updateFromServer();
-                    this.props.updateHistory("", -1);
                 },
                 cache: false
             })
@@ -148,7 +146,6 @@ class NonterminalBoard extends React.Component {
                 this.setState({editingSymbolName: false});
                 this.props.updateFromServer();
                 this.props.updateCurrentSymbolName(this.state.symbolNameInputVal);
-                this.props.updateHistory(this.state.symbolNameInputVal, this.props.currentRule);
             },
             cache: false
         })

@@ -23,6 +23,11 @@ def default():
     return app.flask_grammar.to_json()
 
 
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+
 @app.route('/api/grammar/load_dir', methods=['GET'])
 def load_dir():
     return jsonify(results=os.listdir(os.path.abspath(os.path.join(os.path.dirname(__file__), 'grammars/'))))
@@ -263,12 +268,6 @@ def delete_tagset():
     print 'Deleting tagset: '+name
     app.flask_grammar.delete_tagset(name)
     return app.flask_grammar.to_json()
-
-
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def index(path):
-    return render_template('index.html')
 
 
 @app.route('/api/grammar/export', methods=['GET', 'POST'])

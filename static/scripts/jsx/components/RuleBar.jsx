@@ -74,8 +74,7 @@ class RuleBar extends React.Component {
     }
 
     handleRuleClick(index) {
-        this.props.updateCurrentRule(index)
-        this.props.updateHistory(this.props.currentSymbolName, index)
+        this.props.updateCurrentRule(index);
     }
 
     registerRuleBodyInputFocus() {
@@ -158,7 +157,6 @@ class RuleBar extends React.Component {
                     this.props.updateCurrentRule(-1);
                     this.props.updateGeneratedContentPackageTags([]);
                     this.props.updateGeneratedContentPackageText('');
-                    this.props.updateHistory(this.props.currentSymbolName, -1);
                     this.props.updateFromServer()
                 },
                 cache: false
@@ -212,7 +210,6 @@ class RuleBar extends React.Component {
                     this.props.updateCurrentRule(-1);
                     this.props.updateGeneratedContentPackageTags([]);
                     this.props.updateGeneratedContentPackageText('');
-                    this.props.updateHistory(this.props.currentSymbolName, -1);
                     this.props.updateFromServer()
                     this.closeModal()
                 },
@@ -234,7 +231,6 @@ class RuleBar extends React.Component {
                         this.props.updateCurrentRule(-1);
                         this.props.updateGeneratedContentPackageTags([]);
                         this.props.updateGeneratedContentPackageText('');
-                        this.props.updateHistory(this.props.currentSymbolName, -1);
                         this.props.updateFromServer();
                     },
                     cache: false
