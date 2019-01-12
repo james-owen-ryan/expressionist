@@ -49,6 +49,7 @@ class Interface extends React.Component {
         this.turnExportButtonSpinnerOn = this.turnExportButtonSpinnerOn.bind(this);
         this.turnBuildButtonSpinnerOff = this.turnBuildButtonSpinnerOff.bind(this);
         this.turnBuildButtonSpinnerOn = this.turnBuildButtonSpinnerOn.bind(this);
+        this.symbolNameAlreadyExists = this.symbolNameAlreadyExists.bind(this);
         this.ruleAlreadyExists = this.ruleAlreadyExists.bind(this);
         this.getListOfMatchingSymbolNames = this.getListOfMatchingSymbolNames.bind(this);
         this.attemptToBuildProductionist = this.attemptToBuildProductionist.bind(this);
@@ -513,6 +514,10 @@ class Interface extends React.Component {
         return false
     }
 
+    symbolNameAlreadyExists(symbolName) {
+        return (symbolName in this.state.nonterminals)
+    }
+
     attemptToBuildProductionist() {
         // First, make sure that there is an exported content bundle that shares the same name
         // with the current grammar (specifically, check for the corresponding .grammar and
@@ -617,7 +622,8 @@ class Interface extends React.Component {
                                             updateCurrentRule={this.updateCurrentRule}
                                             referents={referents}
                                             currentSymbolName={this.state.currentSymbol}
-                                            nonterminal={this.state.nonterminals[this.state.currentSymbol]}/>
+                                            nonterminal={this.state.nonterminals[this.state.currentSymbol]}
+                                            symbolNameAlreadyExists={this.symbolNameAlreadyExists}/>
             }
             else {
                 board = <RuleBoard  currentSymbolName={this.state.currentSymbol}

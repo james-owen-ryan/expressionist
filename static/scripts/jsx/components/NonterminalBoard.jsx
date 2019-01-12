@@ -13,12 +13,13 @@ class NonterminalBoard extends React.Component {
         this.handleClickerThing = this.handleClickerThing.bind(this);
         this.handleNonterminalRuleClickThrough = this.handleNonterminalRuleClickThrough.bind(this);
         this.handleSetDeep = this.handleSetDeep.bind(this);
-        this.handleNonterminalRename = this.handleNonterminalRename.bind(this);
         this.handleNonterminalDelete = this.handleNonterminalDelete.bind(this);
         this.handleExpand = this.handleExpand.bind(this);
         this.startSymbolNameEditing = this.startSymbolNameEditing.bind(this);
         this.stopSymbolNameEditing = this.stopSymbolNameEditing.bind(this);
-        this.updateCurrentSymbolNameGivenEdit = this.updateCurrentSymbolNameGivenEdit.bind(this);
+        this.updateSymbolNameInputVal = this.updateSymbolNameInputVal.bind(this);
+        this.stopEditingRuleNameOnEnter = this.stopEditingRuleNameOnEnter.bind(this);
+        this.renameCurrentSymbol = this.renameCurrentSymbol.bind(this);
         this.state = {
             editingSymbolName: false,
             symbolNameInputVal: ''
@@ -55,28 +56,6 @@ class NonterminalBoard extends React.Component {
                 data: JSON.stringify(object),
                 success: () => {
                     this.props.updateFromServer();
-                },
-                cache: false
-            })
-        }
-    }
-
-    handleNonterminalRename(nonterminal) {
-        var newsymbol = window.prompt("Enter a new name for this nonterminal symbol.", this.props.currentSymbolName);
-        if (this.props.currentSymbolName !== "" && newsymbol) {
-            var object = {
-                "old": this.props.currentSymbolName,
-                "new": newsymbol
-            }
-            ajax({
-                url: $SCRIPT_ROOT + '/api/nonterminal/rename',
-                type: "POST",
-                contentType: "application/json",
-                data: JSON.stringify(object),
-                success: () => {
-                    this.props.updateFromServer();
-                    this.props.updateCurrentSymbolName(newsymbol);
-                    this.props.updateHistory(newsymbol, this.props.currentRule);
                 },
                 cache: false
             })
@@ -123,15 +102,60 @@ class NonterminalBoard extends React.Component {
     }
 
     startSymbolNameEditing() {
-        this.setState({editingSymbolName: true})
+        this.setState({editingSymbolName: true});
+    }
+
+    updateSymbolNameInputVal(e) {
+        this.setState({symbolNameInputVal: e.target.value});
+    }
+
+    stopEditingRuleNameOnEnter(e) {
+        if (e.key === 'Enter' && this.state.editingSymbolName) {
+            e.preventDefault();
+            this.stopSymbolNameEditing();
+        }
     }
 
     stopSymbolNameEditing() {
-        this.setState({editingSymbolName: false})
+        var validRename = true;
+        if (this.state.symbolNameInputVal === "") {
+            validRename = false;
+        }
+        else if (this.props.symbolNameAlreadyExists(this.state.symbolNameInputVal)) {
+            validRename = false;
+        }
+        if (validRename) {
+            this.renameCurrentSymbol();
+        }
+        else if (this.state.symbolNameInputVal === this.props.currentSymbolName) {
+            // It's fine to stick with the same name after all, but there's no need to actually
+            // send the rename request, so just turn editing off
+            this.setState({editingSymbolName: false});
+        }
     }
 
-    updateCurrentSymbolNameGivenEdit() {
-        this.props.updateCurrentSymbolName(this.state.symbolNameInputVal);
+    renameCurrentSymbol() {
+        var object = {
+            "old": this.props.currentSymbolName,
+            "new": this.state.symbolNameInputVal
+        }
+        ajax({
+            url: $SCRIPT_ROOT + '/api/nonterminal/rename',
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(object),
+            success: () => {
+                this.setState({editingSymbolName: false});
+                this.props.updateFromServer();
+                this.props.updateCurrentSymbolName(this.state.symbolNameInputVal);
+                this.props.updateHistory(this.state.symbolNameInputVal, this.props.currentRule);
+            },
+            cache: false
+        })
+    }
+
+    componentDidMount() {
+        document.addEventListener("keydown", this.stopEditingRuleNameOnEnter, false);
     }
 
     componentWillReceiveProps(nextProps) {
@@ -162,11 +186,17 @@ class NonterminalBoard extends React.Component {
             <div style={{"width": "100%", "position": "absolute", "top": "30%"}}>
                 <div style={{"width": "70%", "margin": "0 auto", "float": "center"}}>
                     <h1>
-                    <span title="Current symbol" className="symbol-board-header" style={{"backgroundColor": this.props.nonterminal.rules.length > 0 ? "#57F7E0" : "#FF9891"}} onClick={this.startSymbolNameEditing}>{this.props.currentSymbolName}</span>
+                    {
+                        this.state.editingSymbolName
+                        ?
+                        <textarea type='text' title="Press Enter or click outside this area to submit your changes." value={this.state.symbolNameInputVal} onChange={this.updateSymbolNameInputVal} onBlur={this.stopSymbolNameEditing} style={{width: '90%', border: '0px solid #d7d7d7', height: '43px', marginTop: '10px', marginBottom: '15px', fontSize: '18px', padding: '8px 12px', backgroundColor: '#f2f2f2'}} autoFocus="true"/>
+                        :
+                        <span title="Current symbol (click to edit name)" className="symbol-board-header" style={{"backgroundColor": this.props.nonterminal.rules.length > 0 ? "#57F7E0" : "#FF9891"}} onClick={this.startSymbolNameEditing}>{this.props.currentSymbolName}</span>
+                    }
                     <br />
                     <Button bsStyle={this.props.nonterminal.deep ? "success" : "default" } onClick={this.handleSetDeep} title={deep_str}>{glyph_nt}</Button>
                     <Button id="playButton" onClick={this.handleExpand} title="Test symbol rewriting (hot key: 'command+Enter' or 'ctrl+Enter')"><Glyphicon glyph="play"/></Button>
-                    <Button onClick={this.handleNonterminalRename} title="Rename symbol"><Glyphicon glyph="pencil"/></Button>
+                    <Button onClick={this.startSymbolNameEditing} title="Rename symbol"><Glyphicon glyph="pencil"/></Button>
                     <Button onClick={this.handleNonterminalDelete} title="Delete symbol"><Glyphicon glyph="trash"/></Button>
                     </h1>
                 </div>
