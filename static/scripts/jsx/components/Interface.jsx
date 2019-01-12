@@ -623,6 +623,7 @@ class Interface extends React.Component {
     }
 
     componentDidMount() {
+        this.updateFromServer();  // This will reload the grammar in the case of a page refresh
         window.addEventListener('popstate', function (event) {
             event.preventDefault();
         });
