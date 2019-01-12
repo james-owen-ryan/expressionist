@@ -16,6 +16,7 @@ var navigationHistory = [];  // Array of [symbolName, ruleId] entries
 var currentIndexInNavigationHistory = -1;
 var grammarHistory = [];  // Array of previous grammar states (stored as JSON objects)
 var currentIndexInGrammarHistory = -1;
+var unsavedChanges = false;
 
 
 class Interface extends React.Component {
@@ -99,9 +100,11 @@ class Interface extends React.Component {
     }
 
     newGrammar() {
-        var prompt = window.confirm("Are you sure you'd like to start a new grammar? All unsaved changes will be lost.");
-        if (prompt == false){
-            return false;
+        if (unsavedChanges) {
+            var prompt = window.confirm("Are you sure you'd like to start a new grammar? You have unsaved changes that will be lost.");
+            if (prompt == false){
+                return false;
+            }
         }
         ajax({
             url: $SCRIPT_ROOT + '/api/grammar/new',
@@ -118,6 +121,12 @@ class Interface extends React.Component {
     }
 
     loadGrammar(filename) {
+        if (unsavedChanges) {
+            var prompt = window.confirm("Are you sure you'd like to load a different grammar? You have unsaved changes that will be lost.");
+            if (prompt == false){
+                return false;
+            }
+        }
         this.closeLoadModal();
         this.turnLoadButtonSpinnerOn();
         ajax({
@@ -149,6 +158,7 @@ class Interface extends React.Component {
             success: (status) => {
                 // Generate a juicy response (button lights green and TURNS back to gray)
                 this.setState({saveButtonIsJuicing: true});
+                unsavedChanges = false;
             }
         })
         var that = this;
@@ -713,6 +723,7 @@ class Interface extends React.Component {
                         grammarHistory = grammarHistory.slice(0, currentIndexInGrammarHistory+1);
                         grammarHistory.push(grammarState);
                         currentIndexInGrammarHistory += 1;
+                        unsavedChanges = true;
                     }
                 },
                 cache: false
@@ -733,6 +744,7 @@ class Interface extends React.Component {
                 nonterminals: previousEntryInGrammarHistory['nonterminals'],
                 tagsets: previousEntryInGrammarHistory['markups']
             });
+            unsavedChanges = true;
         }
     }
 
@@ -745,6 +757,7 @@ class Interface extends React.Component {
                 nonterminals: nextEntryInGrammarHistory['nonterminals'],
                 tagsets: nextEntryInGrammarHistory['markups']
             });
+            unsavedChanges = true;
         }
     }
 
