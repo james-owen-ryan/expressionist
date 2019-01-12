@@ -26,7 +26,7 @@ class HeaderBar extends React.Component {
             contentType: "json",
             data: filename,
             success: () => {
-                this.props.updateCurrentNonterminal('');
+                this.props.updateCurrentSymbolName('');
                 this.props.updateGeneratedContentPackageTags([]);
                 this.props.updateGeneratedContentPackageTags('');
                 this.props.updateHistory("'", -1);
@@ -49,7 +49,7 @@ class HeaderBar extends React.Component {
             type: 'GET',
             cache: false
         });
-        this.props.updateCurrentNonterminal('');
+        this.props.updateCurrentSymbolName('');
         this.props.updateGeneratedContentPackageTags([]);
         this.props.updateGeneratedContentPackageTags('');
         this.props.updateHistory("'", -1);

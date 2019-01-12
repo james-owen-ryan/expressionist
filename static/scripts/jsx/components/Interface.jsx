@@ -18,7 +18,7 @@ class Interface extends React.Component {
         super(props);
         this.updateFromServer = this.updateFromServer.bind(this);
         this.updateHistory = this.updateHistory.bind(this);
-        this.updateCurrentNonterminal = this.updateCurrentNonterminal.bind(this);
+        this.updateCurrentSymbolName = this.updateCurrentSymbolName.bind(this);
         this.updateCurrentRule = this.updateCurrentRule.bind(this);
         this.updateGeneratedContentPackageTags = this.updateGeneratedContentPackageTags.bind(this);
         this.updateGeneratedContentPackageText = this.updateGeneratedContentPackageText.bind(this);
@@ -172,8 +172,8 @@ class Interface extends React.Component {
         }
     }
 
-    updateCurrentNonterminal(newTagOrNonterminal) {
-        this.setState({currentSymbol: newTagOrNonterminal});
+    updateCurrentSymbolName(newSymbolName) {
+        this.setState({currentSymbol: newSymbolName});
     }
 
     updateCurrentRule(newCurrentRule) {
@@ -613,7 +613,7 @@ class Interface extends React.Component {
                                             updateHistory={this.updateHistory}
                                             currentRule={this.state.currentRule}
                                             updateFromServer={this.updateFromServer}
-                                            updateCurrentNonterminal={this.updateCurrentNonterminal}
+                                            updateCurrentSymbolName={this.updateCurrentSymbolName}
                                             updateCurrentRule={this.updateCurrentRule}
                                             referents={referents}
                                             currentSymbolName={this.state.currentSymbol}
@@ -624,7 +624,7 @@ class Interface extends React.Component {
                                     currentRule={this.state.currentRule}
                                     nonterminals={this.state.nonterminals}
                                     updateFromServer={this.updateFromServer}
-                                    updateCurrentNonterminal={this.updateCurrentNonterminal}
+                                    updateCurrentSymbolName={this.updateCurrentSymbolName}
                                     updateCurrentRule={this.updateCurrentRule}
                                     updateGeneratedContentPackageTags={this.updateGeneratedContentPackageTags}
                                     updateGeneratedContentPackageText={this.updateGeneratedContentPackageText}
@@ -639,7 +639,7 @@ class Interface extends React.Component {
             <div style={{position: "fixed", top: 0, right: 0, "height": "100%", "width": "100%"}}>
                 <div
                     style={{ "height": "70%", "width": "75%", position: "absolute", top: 0, left: 0}}>
-                    <HeaderBar  updateCurrentNonterminal={this.updateCurrentNonterminal}
+                    <HeaderBar  updateCurrentSymbolName={this.updateCurrentSymbolName}
                                 updateCurrentRule={this.updateCurrentRule}
                                 updateGeneratedContentPackageTags={this.updateGeneratedContentPackageTags}
                                 updateGeneratedContentPackageText={this.updateGeneratedContentPackageText}
@@ -697,7 +697,7 @@ class Interface extends React.Component {
                                     updateFromServer={this.updateFromServer}
                                     nonterminals={this.state.nonterminals}
                                     currentSymbolName={this.state.currentSymbol}
-                                    updateCurrentNonterminal={this.updateCurrentNonterminal}
+                                    updateCurrentSymbolName={this.updateCurrentSymbolName}
                                     updateCurrentRule={this.updateCurrentRule}
                                     updateGeneratedContentPackageTags={this.updateGeneratedContentPackageTags}
                                     updateGeneratedContentPackageText={this.updateGeneratedContentPackageText}
@@ -715,7 +715,7 @@ class Interface extends React.Component {
                     style={{"overflow": "auto", "width": "25%", "height":"100%", position: "absolute", top: 0, right: 0, "border": "10px solid #f2f2f2", "borderTop": "4px solid rgb(242, 242, 242)"}}>
                     <NonterminalList    nonterminals={this.state.nonterminals}
                                         updateFromServer={this.updateFromServer}
-                                        updateCurrentNonterminal={this.updateCurrentNonterminal}
+                                        updateCurrentSymbolName={this.updateCurrentSymbolName}
                                         updateHistory={this.updateHistory}
                                         updateCurrentRule={this.updateCurrentRule}
                                         updateGeneratedContentPackageTags={this.updateGeneratedContentPackageTags}

@@ -33,7 +33,7 @@ class RuleBoard extends React.Component {
     }
 
     handleRuleClickThrough(tag){
-        this.props.updateCurrentNonterminal(tag);
+        this.props.updateCurrentSymbolName(tag);
         this.props.updateCurrentRule(-1);
         this.props.updateGeneratedContentPackageText([]);
         this.props.updateGeneratedContentPackageText('');

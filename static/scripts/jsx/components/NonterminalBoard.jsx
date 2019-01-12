@@ -16,6 +16,13 @@ class NonterminalBoard extends React.Component {
         this.handleNonterminalRename = this.handleNonterminalRename.bind(this);
         this.handleNonterminalDelete = this.handleNonterminalDelete.bind(this);
         this.handleExpand = this.handleExpand.bind(this);
+        this.startSymbolNameEditing = this.startSymbolNameEditing.bind(this);
+        this.stopSymbolNameEditing = this.stopSymbolNameEditing.bind(this);
+        this.updateCurrentSymbolNameGivenEdit = this.bind.updateCurrentSymbolNameGivenEdit();
+        this.state = {
+            editingSymbolName: false,
+            symbolNameInputVal: ''
+        }
     }
 
     handleClickerThing(object){
@@ -115,13 +122,28 @@ class NonterminalBoard extends React.Component {
         });
     }
 
+    startSymbolNameEditing() {
+        this.setState({editingSymbolName: true})
+    }
+
+    stopSymbolNameEditing() {
+        this.setState({editingSymbolName: false})
+    }
+
+    updateCurrentSymbolNameGivenEdit() {
+        this.props.updateCurrentSymbolName(this.state.symbolNameInputVal);
+    }
+
+    componentWillReceiveProps(nextProps) {
+        this.setState({symbolNameInputVal: nextProps.currentSymbolName});
+    }
+
     render() {
         var expand
         var rules
         var markup
         var glyph_nt
         if (this.props.nonterminal) {
-            var name = this.props.currentSymbolName
             var deep_str = ""
             if (this.props.nonterminal && this.props.nonterminal.deep) {
                 deep_str = "Toggle top-level status"
@@ -140,7 +162,8 @@ class NonterminalBoard extends React.Component {
             <div style={{"width": "100%", "position": "absolute", "top": "30%"}}>
                 <div style={{"width": "70%", "margin": "0 auto", "float": "center"}}>
                     <h1>
-                    <span title="Current symbol" className="symbol-board-header" style={{"backgroundColor": this.props.nonterminal.rules.length > 0 ? "#57F7E0" : "#FF9891"}}>{name}</span><br />
+                    <span title="Current symbol" className="symbol-board-header" style={{"backgroundColor": this.props.nonterminal.rules.length > 0 ? "#57F7E0" : "#FF9891"}} onClick={this.startSymbolNameEditing}>{this.props.currentSymbolName}</span>
+                    <br />
                     <Button bsStyle={this.props.nonterminal.deep ? "success" : "default" } onClick={this.handleSetDeep} title={deep_str}>{glyph_nt}</Button>
                     <Button id="playButton" onClick={this.handleExpand} title="Test symbol rewriting (hot key: 'command+Enter' or 'ctrl+Enter')"><Glyphicon glyph="play"/></Button>
                     <Button onClick={this.handleNonterminalRename} title="Rename symbol"><Glyphicon glyph="pencil"/></Button>

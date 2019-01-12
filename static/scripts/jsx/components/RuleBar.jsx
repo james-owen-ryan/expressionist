@@ -154,7 +154,7 @@ class RuleBar extends React.Component {
                 contentType: "application/json",
                 data: JSON.stringify(object),
                 success: () => {
-                    this.props.updateCurrentNonterminal(this.props.currentSymbolName);
+                    this.props.updateCurrentSymbolName(this.props.currentSymbolName);
                     this.props.updateCurrentRule(-1);
                     this.props.updateGeneratedContentPackageTags([]);
                     this.props.updateGeneratedContentPackageText('');
@@ -208,7 +208,7 @@ class RuleBar extends React.Component {
                 contentType: "application/json",
                 data: JSON.stringify(object),
                 success: () => {
-                    this.props.updateCurrentNonterminal(this.props.currentSymbolName);
+                    this.props.updateCurrentSymbolName(this.props.currentSymbolName);
                     this.props.updateCurrentRule(-1);
                     this.props.updateGeneratedContentPackageTags([]);
                     this.props.updateGeneratedContentPackageText('');
@@ -230,7 +230,7 @@ class RuleBar extends React.Component {
                     contentType: "application/json",
                     data: JSON.stringify(object),
                     success: () => {
-                        this.props.updateCurrentNonterminal(this.props.currentSymbolName);
+                        this.props.updateCurrentSymbolName(this.props.currentSymbolName);
                         this.props.updateCurrentRule(-1);
                         this.props.updateGeneratedContentPackageTags([]);
                         this.props.updateGeneratedContentPackageText('');

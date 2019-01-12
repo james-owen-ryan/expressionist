@@ -22,7 +22,7 @@ class NonterminalList extends React.Component {
 
     clickNonterminalUpdate(position) {
         if (this.props.nonterminals[position]) {
-            this.props.updateCurrentNonterminal(position);
+            this.props.updateCurrentSymbolName(position);
             this.props.updateCurrentRule(-1);
             this.props.updateGeneratedContentPackageTags([]);
             this.props.updateGeneratedContentPackageText("");
