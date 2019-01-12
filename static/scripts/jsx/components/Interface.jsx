@@ -29,6 +29,7 @@ class Interface extends React.Component {
         this.updateGeneratedContentPackageTags = this.updateGeneratedContentPackageTags.bind(this);
         this.updateGeneratedContentPackageText = this.updateGeneratedContentPackageText.bind(this);
         this.updateGrammarHistory = this.updateGrammarHistory.bind(this);
+        this.resetGrammarHistoryAndNavigationHistory = this.resetGrammarHistoryAndNavigationHistory.bind(this);
         this.undo = this.undo.bind(this);
         this.redo = this.redo.bind(this);
         this.updateNavigationHistory = this.updateNavigationHistory.bind(this);
@@ -99,6 +100,14 @@ class Interface extends React.Component {
         }
     }
 
+    resetGrammarHistoryAndNavigationHistory() {
+        navigationHistory = [];
+        currentIndexInNavigationHistory = -1;
+        grammarHistory = [];
+        currentIndexInGrammarHistory = -1;
+        unsavedChanges = false;
+    }
+
     newGrammar() {
         if (unsavedChanges) {
             var prompt = window.confirm("Are you sure you'd like to start a new grammar? You have unsaved changes that will be lost.");
@@ -118,6 +127,7 @@ class Interface extends React.Component {
         this.disableTestButton();
         this.disableBuildButton();
         this.setCurrentGrammarName("");
+        this.resetGrammarHistoryAndNavigationHistory();
     }
 
     loadGrammar(filename) {
