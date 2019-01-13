@@ -30,6 +30,7 @@ class RuleBar extends React.Component {
         this.updateRuleDefinitionSymbolFilterQuery = this.updateRuleDefinitionSymbolFilterQuery.bind(this);
         this.toggleConnectNewRuleHeadToCurrentSymbol = this.toggleConnectNewRuleHeadToCurrentSymbol.bind(this);
         this.displayConnectBackCheckbox = this.displayConnectBackCheckbox.bind(this);
+        this.callbackToSwitchViewToNewlyDefinedView = this.callbackToSwitchViewToNewlyDefinedView.bind(this);
         this.state = {
             ruleHeadInputVal: '',
             ruleExpansionInputVal: '',
@@ -122,6 +123,10 @@ class RuleBar extends React.Component {
         }
     }
 
+    callbackToSwitchViewToNewlyDefinedView() {
+        this.props.updateCurrentRule(this.props.rules.length-1);
+    }
+
     addRule() {
         // Send the new rule definition to the server
         var ruleHeadName = this.state.ruleHeadInputVal;
@@ -148,12 +153,13 @@ class RuleBar extends React.Component {
                 contentType: "application/json",
                 data: JSON.stringify(object),
                 success: () => {
-                    this.props.updateFromServer();
-                    this.props.updateCurrentSymbolName(this.props.currentSymbolName);
                     if (ruleHeadName === this.props.currentSymbolName) {
                         // If the author has just created a new rule for the current symbol, navigate the
                         // view to that new rule
-                        this.props.updateCurrentRule(this.props.rules.length);
+                        this.props.updateFromServer(this.callbackToSwitchViewToNewlyDefinedView);
+                    }
+                    else {
+                        this.props.updateFromServer();
                     }
                     this.props.updateGeneratedContentPackageTags([]);
                     this.props.updateGeneratedContentPackageText('');

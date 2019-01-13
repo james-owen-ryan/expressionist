@@ -94,6 +94,7 @@ class Interface extends React.Component {
             saveButtonIsJuicing: false,
             exportButtonIsJuicing: false,
             buildButtonIsJuicing: false,
+            playButtonIsJuicing: false,
             showLoadModal: false,
             showSaveModal: false,
             showExportModal: false,
@@ -492,12 +493,17 @@ class Interface extends React.Component {
             }
             // Quick rewrite test: simulate clicking of the 'play' button for testing symbol rewriting or rule execution
             else if (quickTestRewriteHotKeyMatch) {
+                this.setState({playButtonIsJuicing: true});
                 if (this.state.showTestModal) {
                     document.getElementById("testModalPlayButton").click();
                 }
                 else if (document.getElementById("playButton")) {
                     document.getElementById("playButton").click();
                 }
+                var that = this;
+                setTimeout(function() {
+                    that.setState({playButtonIsJuicing: false});
+                }, 50);
             }
             // Quick test: simulate clicking of the 'Test' button
             else if (quickTestHotKeyMatch && !this.state.testButtonDisabled) {
@@ -959,7 +965,8 @@ class Interface extends React.Component {
                                             referents={referents}
                                             currentSymbolName={this.state.currentSymbol}
                                             nonterminal={this.state.nonterminals[this.state.currentSymbol]}
-                                            symbolNameAlreadyExists={this.symbolNameAlreadyExists}/>
+                                            symbolNameAlreadyExists={this.symbolNameAlreadyExists}
+                                            playButtonIsJuicing={this.state.playButtonIsJuicing}/>
             }
             else {
                 board = <RuleBoard  currentSymbolName={this.state.currentSymbol}
@@ -973,7 +980,8 @@ class Interface extends React.Component {
                                     expansion={definedRules[this.state.currentRule].expansion}
                                     applicationRate={definedRules[this.state.currentRule].app_rate}
                                     openRuleDefinitionModal={this.openRuleDefinitionModal}
-                                    ruleAlreadyExists={this.ruleAlreadyExists}/>
+                                    ruleAlreadyExists={this.ruleAlreadyExists}
+                                    playButtonIsJuicing={this.state.playButtonIsJuicing}/>
             }
         }
 
@@ -1026,6 +1034,7 @@ class Interface extends React.Component {
                                 saveButtonIsJuicing={this.state.saveButtonIsJuicing}
                                 exportButtonIsJuicing={this.state.exportButtonIsJuicing}
                                 buildButtonIsJuicing={this.state.buildButtonIsJuicing}
+                                playButtonIsJuicing={this.state.playButtonIsJuicing}
                                 attemptToBuildProductionist={this.attemptToBuildProductionist}
                                 goBack={this.goBack}
                                 goForward={this.goForward}

@@ -179,7 +179,7 @@ class RuleBoard extends React.Component {
                     <h2>
                         <span className="symbol-reference-in-rule-head" title="View rule head" onClick={this.handleRuleClickThrough.bind(this, this.props.currentSymbolName)}>{this.props.currentSymbolName}</span>
                         <br></br>
-                        <Button id="playButton" bsStyle="default" title={AUTHOR_IS_USING_A_MAC ? "Test rule execution (⌘↩)" : "Test rule execution (Ctrl+Enter)"} onClick={this.handleExecuteRule}><Glyphicon glyph="play"/></Button>
+                        <Button id="playButton" bsStyle="default" title={AUTHOR_IS_USING_A_MAC ? "Test rule execution (⌘↩)" : "Test rule execution (Ctrl+Enter)"} onClick={this.handleExecuteRule} bsStyle={this.props.playButtonIsJuicing ? 'success' : 'default'}><Glyphicon glyph="play"/></Button>
                         <Button id="editRuleButton" bsStyle="default" title={AUTHOR_IS_USING_A_MAC ? "Edit rule (⇧⌘D)" : "Test rule execution (Ctrl+Shift+D)"} onClick={this.prepareForRuleDefinitionEditModal}><Glyphicon glyph="pencil"/></Button>
                         <Button bsStyle="danger" title="Delete rule" onClick={this.onRuleDelete}><Glyphicon glyph="trash"/></Button>
                         <Glyphicon title='The arrow in a production rule cues that the rule head (top) will be rewritten as the rule body (bottom).' glyph="circle-arrow-down" style={{"fontSize": "25px", "left": "10px", "top": "5px"}}/>
