@@ -953,7 +953,11 @@ class Interface extends React.Component {
                                 saveButtonIsJuicing={this.state.saveButtonIsJuicing}
                                 exportButtonIsJuicing={this.state.exportButtonIsJuicing}
                                 buildButtonIsJuicing={this.state.buildButtonIsJuicing}
-                                attemptToBuildProductionist={this.attemptToBuildProductionist}/>
+                                attemptToBuildProductionist={this.attemptToBuildProductionist}
+                                goBack={this.goBack}
+                                goForward={this.goForward}
+                                undo={this.undo}
+                                redo={this.redo}/>
                     <div className="muwrap">
                         <div className="show-y-wrapper">
                             <MarkupBar  className="markup-bar"

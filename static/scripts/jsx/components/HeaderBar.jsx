@@ -8,6 +8,8 @@ var TestModal = require('./TestModal.jsx')
 var SaveGrammarModal = require('./SaveGrammarModal.jsx')
 var ExportGrammarModal = require('./ExportGrammarModal.jsx')
 var FileList = require('./FileList.jsx')
+var DropdownButton = require('react-bootstrap').DropdownButton
+var Glyphicon = require('react-bootstrap').Glyphicon
 
 class HeaderBar extends React.Component {
 
@@ -20,6 +22,14 @@ class HeaderBar extends React.Component {
             <div>
                 <ButtonToolbar>
                     <ButtonGroup>
+                        <DropdownButton className="grp-button" title=<Glyphicon glyph="list-alt"/> bsStyle='default' style={{'height': '32px'}}>
+                            <div>
+                                <Button key="goBackMenuItem" title="Go back (hot key: 'command+LeftArrow' or 'ctrl+LeftArrow')" style={{width: '150px', textAlign: 'left'}} onClick={this.props.goBack}>Back</Button>
+                                <Button key="goForwardMenuItem" title="Go forward (hot key: 'command+RightArrow' or 'ctrl+RightArrow')" style={{width: '150px', textAlign: 'left'}} onClick={this.props.goForward}>Forward</Button>
+                                <Button key="undoMenuItem" title="Undo (hot key: 'command+z' or 'ctrl+z')" style={{width: '150px', textAlign: 'left'}} onClick={this.props.undo}>Undo</Button>
+                                <Button key="redoMenuItem" title="Redo (hot key: 'command+shift+z' or 'ctrl+shift+z')" style={{width: '150px', textAlign: 'left'}} onClick={this.props.redo}>Redo</Button>
+                            </div>
+                        </DropdownButton>
                         <Button id="headerBarNewButton" title="Start new grammar (hot key: 'command+g' or 'ctrl+g')" onClick={this.props.newGrammar} bsStyle='primary'>New</Button>
                         <Button id="headerBarLoadButton" title={this.props.loadButtonSpinnerOn ? "Loading grammar..." : "Load grammar (hot key: 'command+o' or 'ctrl+o')"} onClick={this.props.openLoadModal} bsStyle={this.props.loadButtonIsJuicing ? 'success' : 'primary'} spinColor="#000" loading={this.props.loadButtonSpinnerOn}>{this.props.loadButtonSpinnerOn ? "Loading..." : this.props.loadButtonIsJuicing ? "Loaded!" : "Load"}</Button>
                         <Button title="Save grammar (hot key: 'command+s' or 'ctrl+s')" onClick={this.props.openSaveModal} bsStyle={this.props.saveButtonIsJuicing ? 'success' : 'primary'}>{this.props.saveButtonIsJuicing ? "Saved!" : "Save"}</Button>
