@@ -22,6 +22,7 @@ class RuleBoard extends React.Component {
         this.stopQuickRuleBodyEditing = this.stopQuickRuleBodyEditing.bind(this);
         this.updateRuleBody = this.updateRuleBody.bind(this);
         this.callbackToTurnOffQuickRuleEditing = this.callbackToTurnOffQuickRuleEditing.bind(this);
+        this.moveCursorToPosition = this.moveCursorToPosition.bind(this);
         this.state = {
             editingRuleBody: false,
             ruleBodyInputVal: ''
@@ -100,6 +101,39 @@ class RuleBoard extends React.Component {
 
     updateRuleBodyInputVal(e) {
         this.setState({ruleBodyInputVal: e.target.value});
+    }
+
+    updateRuleBodyInputVal(e) {
+        if (e.target.value.indexOf('\n') === -1) {
+            var inputValue = e.target.value;
+            var positionToMoveCursorTo = null;
+            // Facilitate symbol referencing in the style of IDE autocompletion
+            if (document.getElementById("ruleBodyQuickEditInput").selectionStart === document.getElementById("ruleBodyQuickEditInput").selectionEnd) {
+                var cursorPosition = document.getElementById("ruleBodyQuickEditInput").selectionStart;
+                if (inputValue.slice(cursorPosition-1, cursorPosition+2) === '[]]') {
+                    if (inputValue[cursorPosition-2] !== '[') {
+                        inputValue = inputValue.slice(0, cursorPosition-1).concat(inputValue.slice(cursorPosition+2));
+                        positionToMoveCursorTo = cursorPosition - 1;
+                    }
+                }
+                else if (inputValue.slice(cursorPosition-2, cursorPosition) === '[[') {
+                    inputValue = inputValue.slice(0, cursorPosition).concat(']]').concat(inputValue.slice(cursorPosition));
+                    positionToMoveCursorTo = cursorPosition;
+                }
+            }
+            if (positionToMoveCursorTo) {
+                this.setState({ruleBodyInputVal: inputValue}, this.moveCursorToPosition.bind(this, positionToMoveCursorTo));
+            }
+            else {
+                this.setState({ruleBodyInputVal: inputValue});
+            }
+        }
+    }
+
+    moveCursorToPosition(position) {
+        document.getElementById("ruleBodyQuickEditInput").focus();
+        document.getElementById("ruleBodyQuickEditInput").selectionStart = position;
+        document.getElementById("ruleBodyQuickEditInput").selectionEnd = position;
     }
 
     stopQuickRuleBodyEditingOnEnter(e) {
@@ -188,7 +222,7 @@ class RuleBoard extends React.Component {
                 {
                     this.state.editingRuleBody
                     ?
-                    <textarea type='text' title="Press Enter or click outside this area to submit your changes." value={this.state.ruleBodyInputVal} onChange={this.updateRuleBodyInputVal} onBlur={this.stopQuickRuleBodyEditing} style={{position: "relative", left: "15%", width: '70%', border: '0px', height: '30vh', fontSize: '18px', padding: '8px 12px', backgroundColor: '#f2f2f2'}} autoFocus="true"/>
+                    <textarea id="ruleBodyQuickEditInput" type='text' title="Press Enter or click outside this area to submit your changes." value={this.state.ruleBodyInputVal} onChange={this.updateRuleBodyInputVal} onBlur={this.stopQuickRuleBodyEditing} style={{position: "relative", left: "15%", width: '70%', border: '0px', height: '30vh', fontSize: '18px', padding: '8px 12px', backgroundColor: '#f2f2f2'}} autoFocus="true"/>
                     :
                     <div style={{"width": "70%", "margin": "0 auto", "height": "35vh", "overflowY": "auto"}}>
                     <h3 title="Rule body">{stylizedRuleBody}</h3>

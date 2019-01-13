@@ -31,6 +31,7 @@ class RuleBar extends React.Component {
         this.toggleConnectNewRuleHeadToCurrentSymbol = this.toggleConnectNewRuleHeadToCurrentSymbol.bind(this);
         this.displayConnectBackCheckbox = this.displayConnectBackCheckbox.bind(this);
         this.callbackToSwitchViewToNewlyDefinedView = this.callbackToSwitchViewToNewlyDefinedView.bind(this);
+        this.moveCursorToPosition = this.moveCursorToPosition.bind(this);
         this.state = {
             ruleHeadInputVal: '',
             ruleExpansionInputVal: '',
@@ -51,6 +52,54 @@ class RuleBar extends React.Component {
 
     updateRuleDefinitionSymbolFilterQuery(e) {
         this.setState({ruleDefinitionSymbolFilterQuery: e.target.value})
+    }
+
+    updateRuleHeadInputVal(e) {
+        if (e.target.value.indexOf('\n') === -1) {
+            this.setState({ruleHeadInputVal: e.target.value})
+        }
+    }
+
+    updateRuleExpansionInputVal(e) {
+        if (e.target.value.indexOf('\n') === -1) {
+            var inputValue = e.target.value;
+            var positionToMoveCursorTo = null;
+            // Facilitate symbol referencing in the style of IDE autocompletion
+            if (document.getElementById("ruleExpansionInput").selectionStart === document.getElementById("ruleExpansionInput").selectionEnd) {
+                var cursorPosition = document.getElementById("ruleExpansionInput").selectionStart;
+                if (inputValue.slice(cursorPosition-1, cursorPosition+2) === '[]]') {
+                    if (inputValue[cursorPosition-2] !== '[') {
+                        inputValue = inputValue.slice(0, cursorPosition-1).concat(inputValue.slice(cursorPosition+2));
+                        positionToMoveCursorTo = cursorPosition - 1;
+                    }
+                }
+                else if (inputValue.slice(cursorPosition-2, cursorPosition) === '[[') {
+                    inputValue = inputValue.slice(0, cursorPosition).concat(']]').concat(inputValue.slice(cursorPosition));
+                    positionToMoveCursorTo = cursorPosition;
+                }
+            }
+            if (positionToMoveCursorTo) {
+                this.setState({ruleExpansionInputVal: inputValue}, this.moveCursorToPosition.bind(this, positionToMoveCursorTo));
+            }
+            else {
+                this.setState({ruleExpansionInputVal: inputValue});
+            }
+        }
+    }
+
+    moveCursorToPosition(position) {
+        document.getElementById("ruleExpansionInput").focus();
+        document.getElementById("ruleExpansionInput").selectionStart = position;
+        document.getElementById("ruleExpansionInput").selectionEnd = position;
+    }
+
+    updateApplicationRate(e) {
+        if (!isNaN(e.target.value)){
+            this.setState({ruleApplicationRate: e.target.value})
+        }
+        else {
+            this.setState({ruleApplicationRate: 1})
+        }
     }
 
     toggleConnectNewRuleHeadToCurrentSymbol() {
@@ -99,27 +148,6 @@ class RuleBar extends React.Component {
             this.setState({ruleHeadInputVal: nonterminalName});
             document.getElementById("ruleHeadInput").focus();
             document.getElementById("ruleHeadInput").setSelectionRange(0, nonterminalName.length);
-        }
-    }
-
-    updateRuleHeadInputVal(e) {
-        if (e.target.value.indexOf('\n') === -1) {
-            this.setState({ruleHeadInputVal: e.target.value})
-        }
-    }
-
-    updateRuleExpansionInputVal(e) {
-        if (e.target.value.indexOf('\n') === -1) {
-            this.setState({ruleExpansionInputVal: e.target.value})
-        }
-    }
-
-    updateApplicationRate(e) {
-        if (!isNaN(e.target.value)){
-            this.setState({ruleApplicationRate: e.target.value}) 
-        }
-        else {
-            this.setState({ruleApplicationRate: 1})
         }
     }
 
