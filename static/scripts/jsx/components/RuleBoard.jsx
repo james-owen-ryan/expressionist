@@ -17,6 +17,7 @@ class RuleBoard extends React.Component {
         this.stopQuickRuleBodyEditingOnEnter = this.stopQuickRuleBodyEditingOnEnter.bind(this);
         this.stopQuickRuleBodyEditing = this.stopQuickRuleBodyEditing.bind(this);
         this.updateRuleBody = this.updateRuleBody.bind(this);
+        this.callbackToTurnOffQuickRuleEditing = this.callbackToTurnOffQuickRuleEditing.bind(this);
         this.state = {
             editingRuleBody: false,
             ruleBodyInputVal: ''
@@ -117,6 +118,10 @@ class RuleBoard extends React.Component {
         }
     }
 
+    callbackToTurnOffQuickRuleEditing() {
+        this.setState({editingRuleBody: false});
+    }
+
     updateRuleBody() {
         var ruleId = this.props.currentRule;
         var ruleHeadName = this.props.currentSymbolName;
@@ -135,8 +140,7 @@ class RuleBoard extends React.Component {
             contentType: "application/json",
             data: JSON.stringify(object),
             success: () => {
-                this.props.updateFromServer();
-                this.setState({editingRuleBody: false});
+                this.props.updateFromServer(this.callbackToTurnOffQuickRuleEditing);
             },
             cache: false
         })
