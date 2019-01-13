@@ -74,8 +74,19 @@ class RuleBar extends React.Component {
                     }
                 }
                 else if (inputValue.slice(cursorPosition-2, cursorPosition) === '[[') {
-                    inputValue = inputValue.slice(0, cursorPosition).concat(']]').concat(inputValue.slice(cursorPosition));
-                    positionToMoveCursorTo = cursorPosition;
+                    // Make sure the author isn't in the process of deleting a symbol reference (i.e., first check if
+                    // they just deleted a right square bracket)
+                    if (this.state.ruleExpansionInputVal[cursorPosition] !== ']') {
+                        // Also make sure aren't just adding in an accidentally deleted bracket from an ongoing
+                        // symbol reference that they are still in the process of forming
+                        if (!(
+                                inputValue.slice(cursorPosition).indexOf(']') !== -1 &&
+                                (inputValue.slice(cursorPosition).indexOf('[' === -1) || inputValue.slice(cursorPosition).indexOf(']') < inputValue.slice(cursorPosition).indexOf('['))
+                            )) {
+                            inputValue = inputValue.slice(0, cursorPosition).concat(']]').concat(inputValue.slice(cursorPosition));
+                            positionToMoveCursorTo = cursorPosition;
+                        }
+                    }
                 }
             }
             if (positionToMoveCursorTo) {
