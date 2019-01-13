@@ -193,7 +193,7 @@ class NonterminalBoard extends React.Component {
                     <br />
                     <Button bsStyle={this.props.nonterminal.deep ? "success" : "default" } onClick={this.handleSetDeep} title={deep_str}>{glyph_nt}</Button>
                     <Button id="playButton" onClick={this.handleExpand} title="Test symbol rewriting (hot key: 'command+Enter' or 'ctrl+Enter')"><Glyphicon glyph="play"/></Button>
-                    <Button onClick={this.startSymbolNameEditing} title="Rename symbol"><Glyphicon glyph="pencil"/></Button>
+                    <Button onClick={this.startSymbolNameEditing} title="Rename symbol (hint: click on symbol name for same effect)"><Glyphicon glyph="pencil"/></Button>
                     <Button onClick={this.handleNonterminalDelete} title="Delete symbol"><Glyphicon glyph="trash"/></Button>
                     </h1>
                 </div>
