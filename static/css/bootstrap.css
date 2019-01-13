@@ -3727,7 +3727,7 @@ tbody.collapse.in {
 .btn-group .btn + .btn-group,
 .btn-group .btn-group + .btn,
 .btn-group .btn-group + .btn-group {
-  margin-left: -1px;
+  margin-left: 0px;
 }
 .btn-toolbar {
   margin-left: -5px;
@@ -4006,7 +4006,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
   position: relative;
 }
 .input-group-btn > .btn + .btn {
-  margin-left: -1px;
+  margin-left: 0px;
 }
 .input-group-btn > .btn:hover,
 .input-group-btn > .btn:focus,
@@ -4020,7 +4020,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 .input-group-btn:last-child > .btn,
 .input-group-btn:last-child > .btn-group {
   z-index: 2;
-  margin-left: -1px;
+  margin-left: 0px;
 }
 .nav {
   padding-left: 0;
@@ -4774,7 +4774,7 @@ fieldset[disabled] .navbar-inverse .btn-link:focus {
   position: relative;
   float: left;
   padding: 6px 12px;
-  margin-left: -1px;
+  margin-left: 0px;
   line-height: 1.42857143;
   color: #337ab7;
   text-decoration: none;
@@ -6008,7 +6008,7 @@ button.close {
   margin-left: 5px;
 }
 .modal-footer .btn-group .btn + .btn {
-  margin-left: -1px;
+  margin-left: 0px;
 }
 .modal-footer .btn-block + .btn-block {
   margin-left: 0;
