@@ -125,9 +125,10 @@ class NonterminalBoard extends React.Component {
         if (validRename) {
             this.renameCurrentSymbol();
         }
-        else if (this.state.symbolNameInputVal === this.props.currentSymbolName) {
+        else if (this.state.symbolNameInputVal === this.props.currentSymbolName || (this.state.symbolNameInputVal === "")) {
             // It's fine to stick with the same name after all, but there's no need to actually
-            // send the rename request, so just turn editing off
+            // send the rename request, so just turn editing off; note that we treat clicking away
+            // from an empty box as an action that causes the current name to be kept
             this.setState({editingSymbolName: false});
         }
     }
@@ -193,7 +194,7 @@ class NonterminalBoard extends React.Component {
                     <br />
                     <Button bsStyle={this.props.nonterminal.deep ? "success" : "default" } onClick={this.handleSetDeep} title={deep_str}>{glyph_nt}</Button>
                     <Button id="playButton" onClick={this.handleExpand} title="Test symbol rewriting (hot key: 'command+Enter' or 'ctrl+Enter')"><Glyphicon glyph="play"/></Button>
-                    <Button onClick={this.startSymbolNameEditing} title="Rename symbol (hint: click on symbol name for same effect)"><Glyphicon glyph="pencil"/></Button>
+                    <Button onClick={this.startSymbolNameEditing} title="Rename symbol"><Glyphicon glyph="pencil"/></Button>
                     <Button onClick={this.handleNonterminalDelete} title="Delete symbol"><Glyphicon glyph="trash"/></Button>
                     </h1>
                 </div>
