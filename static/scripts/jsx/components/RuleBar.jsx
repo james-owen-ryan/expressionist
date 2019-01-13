@@ -42,19 +42,10 @@ class RuleBar extends React.Component {
 
     openModal() {
         this.props.toggleWhetherRuleDefinitionModalIsOpen();
-        this.setState({
-            ruleHeadInputVal: this.props.currentSymbolName,
-            ruleExpansionInputVal: '',
-            ruleApplicationRate: 1,
-            connectNewRuleHeadToCurrentSymbol: false
-        });
     }
 
     closeModal() {
         this.props.toggleWhetherRuleDefinitionModalIsOpen();
-        this.setState({
-            connectNewRuleHeadToCurrentSymbol: false
-        });
     }
 
     updateRuleDefinitionSymbolFilterQuery(e) {
@@ -66,7 +57,7 @@ class RuleBar extends React.Component {
     }
 
     submitRuleDefinitionOnEnter(e) {
-        if (this.props.ruleDefinitionModalIsOpen) {
+        if (this.props.showRuleDefinitionModal) {
             if (e.key === 'Enter' && !(e.ctrlKey || e.metaKey)) {
                 document.getElementById("submitRuleButton").click();
             }
@@ -157,10 +148,15 @@ class RuleBar extends React.Component {
                 contentType: "application/json",
                 data: JSON.stringify(object),
                 success: () => {
+                    this.props.updateFromServer();
                     this.props.updateCurrentSymbolName(this.props.currentSymbolName);
+                    if (ruleHeadName === this.props.currentSymbolName) {
+                        // If the author has just created a new rule for the current symbol, navigate the
+                        // view to that new rule
+                        this.props.updateCurrentRule(this.props.rules.length);
+                    }
                     this.props.updateGeneratedContentPackageTags([]);
                     this.props.updateGeneratedContentPackageText('');
-                    this.props.updateFromServer()
                 },
                 cache: false
             })
@@ -209,8 +205,6 @@ class RuleBar extends React.Component {
                 contentType: "application/json",
                 data: JSON.stringify(object),
                 success: () => {
-                    this.props.updateCurrentSymbolName(this.props.currentSymbolName);
-                    this.props.updateCurrentRule(-1);
                     this.props.updateGeneratedContentPackageTags([]);
                     this.props.updateGeneratedContentPackageText('');
                     this.props.updateFromServer()
@@ -230,8 +224,6 @@ class RuleBar extends React.Component {
                     contentType: "application/json",
                     data: JSON.stringify(object),
                     success: () => {
-                        this.props.updateCurrentSymbolName(this.props.currentSymbolName);
-                        this.props.updateCurrentRule(-1);
                         this.props.updateGeneratedContentPackageTags([]);
                         this.props.updateGeneratedContentPackageText('');
                         this.props.updateFromServer();
@@ -305,7 +297,16 @@ class RuleBar extends React.Component {
             this.setState({
                 ruleHeadInputVal: nextProps.currentSymbolName,
                 ruleExpansionInputVal: nextProps.rules[nextProps.idOfRuleToEdit].expansion.join(''),
-                ruleApplicationRate: nextProps.rules[nextProps.idOfRuleToEdit].app_rate
+                ruleApplicationRate: nextProps.rules[nextProps.idOfRuleToEdit].app_rate,
+                connectNewRuleHeadToCurrentSymbol: false
+            });
+        }
+        else {
+            this.setState({
+                ruleHeadInputVal: nextProps.currentSymbolName,
+                ruleExpansionInputVal: '',
+                ruleApplicationRate: 1,
+                connectNewRuleHeadToCurrentSymbol: false
             });
         }
     }
@@ -354,7 +355,7 @@ class RuleBar extends React.Component {
                         </ButtonGroup>
                 </div>
                 <div>
-                    <Modal show={this.props.ruleDefinitionModalIsOpen} onHide={this.closeModal}>
+                    <Modal show={this.props.showRuleDefinitionModal} onHide={this.closeModal}>
                         <Modal.Header closeButton>
                             <Modal.Title>Rule Definition</Modal.Title>
                         </Modal.Header>

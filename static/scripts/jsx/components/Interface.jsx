@@ -80,7 +80,6 @@ class Interface extends React.Component {
             generatedContentPackageTags: [],
             currentSymbol: "",
             currentRule: -1,
-            ruleDefinitionModalIsOpen: false,
             idOfRuleToEdit: null,
             symbolFilterQuery: "",
             exportButtonDisabled: true,
@@ -97,7 +96,8 @@ class Interface extends React.Component {
             showLoadModal: false,
             showSaveModal: false,
             showExportModal: false,
-            showTestModal: false
+            showTestModal: false,
+            showRuleDefinitionModal: false
         }
     }
 
@@ -242,17 +242,17 @@ class Interface extends React.Component {
     }
 
     openRuleDefinitionModal(idOfRuleToEdit) {
-        this.setState({ruleDefinitionModalIsOpen: true});
+        this.setState({showRuleDefinitionModal: true});
         this.setState({idOfRuleToEdit: idOfRuleToEdit});
     }
 
     closeRuleDefinitionModal() {
-        this.setState({ruleDefinitionModalIsOpen: false});
+        this.setState({showRuleDefinitionModal: false});
         this.setState({idOfRuleToEdit: null});
     }
 
     toggleWhetherRuleDefinitionModalIsOpen() {
-        if (this.state.ruleDefinitionModalIsOpen) {
+        if (this.state.showRuleDefinitionModal) {
             this.closeRuleDefinitionModal();
         }
         else {
@@ -345,7 +345,7 @@ class Interface extends React.Component {
 
     handlePotentialHotKeyPress(e) {
         // Check for rule tabbing (note: tabbing on other views is handled in the respective components)
-        var atLeastOneModalIsOpen = (this.state.showSaveModal || this.state.showLoadModal || this.state.showExportModal || this.state.showTestModal || this.state.ruleDefinitionModalIsOpen);
+        var atLeastOneModalIsOpen = (this.state.showSaveModal || this.state.showLoadModal || this.state.showExportModal || this.state.showTestModal || this.state.showRuleDefinitionModal);
         if (e.key === 'Tab' && !atLeastOneModalIsOpen) {
             e.preventDefault();
             if (this.state.currentSymbol !== "" && this.state.nonterminals[this.state.currentSymbol].rules.length > 0) {
@@ -464,15 +464,30 @@ class Interface extends React.Component {
             }
             // Quick load: simulate clicking of the 'Load' button
             else if (quickLoadHotKeyMatch && !this.state.loadButtonSpinnerOn) {
-                document.getElementById("headerBarLoadButton").click();
+                if (this.state.showLoadModal) {
+                    this.closeLoadModal();
+                }
+                else {
+                    this.openLoadModal();
+                }
             }
             // Quick rule define: simulate clicking of the '+' button for creating a new rule
             else if (quickRuleDefineHotKeyMatch) {
-                document.getElementById("addRuleButton").click();
+                if (this.state.showRuleDefinitionModal) {
+                    this.closeRuleDefinitionModal();
+                }
+                else {
+                    this.openRuleDefinitionModal(null);
+                }
             }
             // Quick rule edit: simulate clicking of the button for editing a new rule
             else if (quickRuleEditHotKeyMatch && document.getElementById("editRuleButton")) {
-                document.getElementById("editRuleButton").click();
+                if (this.state.showRuleDefinitionModal) {
+                    this.closeRuleDefinitionModal();
+                }
+                else {
+                    document.getElementById("editRuleButton").click();
+                }
             }
             // Quick rewrite test: simulate clicking of the 'play' button for testing symbol rewriting or rule execution
             else if (quickTestRewriteHotKeyMatch) {
@@ -485,7 +500,12 @@ class Interface extends React.Component {
             }
             // Quick test: simulate clicking of the 'Test' button
             else if (quickTestHotKeyMatch && !this.state.testButtonDisabled) {
-                document.getElementById("headerBarTestButton").click();
+                if (this.state.showTestModal) {
+                    this.closeTestModal();
+                }
+                else {
+                    document.getElementById("headerBarTestButton").click();
+                }
             }
             // Quick save: do a quick save by overwriting the current grammar file
             else if (quickSaveHotKeyMatch) {
@@ -1011,7 +1031,7 @@ class Interface extends React.Component {
                                     updateGeneratedContentPackageTags={this.updateGeneratedContentPackageTags}
                                     updateGeneratedContentPackageText={this.updateGeneratedContentPackageText}
                                     toggleWhetherRuleDefinitionModalIsOpen={this.toggleWhetherRuleDefinitionModalIsOpen}
-                                    ruleDefinitionModalIsOpen={this.state.ruleDefinitionModalIsOpen}
+                                    showRuleDefinitionModal={this.state.showRuleDefinitionModal}
                                     idOfRuleToEdit={this.state.idOfRuleToEdit}
                                     ruleAlreadyExists={this.ruleAlreadyExists}
                                     currentRule={this.state.currentRule}
