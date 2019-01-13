@@ -113,15 +113,18 @@ class Interface extends React.Component {
             type: 'GET',
             cache: false,
             success: (status) => {
-                // Generate a juicy response (button lights green and turns back to gray)
-                this.setState({newButtonIsJuicing: true});
-                this.updateCurrentSymbolName('');
-                this.updateGeneratedContentPackageTags([]);
-                this.updateGeneratedContentPackageTags('');
+                this.setState({
+                    newButtonIsJuicing: true,
+                    currentSymbol: '',
+                    currentRule: -1,
+                    generatedContentPackageText: '',
+                    generatedContentPackageTags: [],
+                    currentGrammarName: "",
+                    symbolFilterQuery: ''
+                });
                 this.updateFromServer();
                 this.disableTestButton();
                 this.disableBuildButton();
-                this.setCurrentGrammarName("");
                 this.resetGrammarHistoryAndNavigationHistory();
                 unsavedChanges = false;
             }
@@ -147,13 +150,18 @@ class Interface extends React.Component {
             contentType: "json",
             data: filename,
             success: () => {
-                this.updateCurrentSymbolName('');
-                this.updateGeneratedContentPackageTags([]);
-                this.updateGeneratedContentPackageTags('');
+                this.setState({
+                    currentSymbol: '',
+                    currentRule: -1,
+                    generatedContentPackageText: '',
+                    generatedContentPackageTags: [],
+                    symbolFilterQuery: ''
+                });
                 this.updateFromServer(this.turnLoadButtonSpinnerOff);
                 this.disableTestButton();
                 this.disableBuildButton();
                 this.setCurrentGrammarName(filename);
+                this.resetGrammarHistoryAndNavigationHistory();
             },
             cache: false
         })
@@ -742,7 +750,6 @@ class Interface extends React.Component {
                     if (!grammarsAreEquivalent) {
                         grammarHistory = grammarHistory.slice(0, currentIndexInGrammarHistory+1);
                         var newEntry = [grammarState, this.state.currentSymbol, this.state.currentRule];
-                        grammarHistory.push(newEntry);
                         currentIndexInGrammarHistory += 1;
                         unsavedChanges = true;
                     }
