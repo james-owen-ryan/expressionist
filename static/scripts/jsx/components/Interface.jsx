@@ -619,7 +619,14 @@ class Interface extends React.Component {
             var rule = this.state.nonterminals[ruleHeadName].rules[i];
             if (ruleBody === rule.expansion.join('')) {
                 if (this.state.idOfRuleToEdit !== null) {
-                    if (applicationRate != rule.applicationRate) {
+                    // Only consider the application rate if the current rule is being edited in
+                    // the rule-definition modal, in which case changing the application rate is
+                    // a valid way to change the rule; in all other cases, a different application
+                    // rate would mean that the rule in question matches an existing rule in all but
+                    // its application rate, and in Expressionist that is a case of duplicate rules,
+                    // which we don't allow (the way to make a rule more likely is to modulate its
+                    // application rate, not to duplicate it, as in Tracery)
+                    if (applicationRate != rule.app_rate) {
                         return false;
                     }
                 }
@@ -884,12 +891,13 @@ class Interface extends React.Component {
 
     render() {
         this.updateNavigationHistory(this.state.currentSymbol, this.state.currentRule);
-        var definedRules = []
-        var board
-        var referents
+        var definedRules = [];
+        var board;
+        var referents;
         if (this.state.currentSymbol in this.state.nonterminals) {
             var current = this.state.nonterminals[this.state.currentSymbol]
             definedRules = this.state.nonterminals[this.state.currentSymbol].rules
+            console.log(definedRules);
             // Check which board we need to render
             if (this.state.currentRule === -1 || current.rules[this.state.currentRule] === null ) {
                 var referents = []
@@ -918,8 +926,9 @@ class Interface extends React.Component {
                                     updateGeneratedContentPackageTags={this.updateGeneratedContentPackageTags}
                                     updateGeneratedContentPackageText={this.updateGeneratedContentPackageText}
                                     expansion={definedRules[this.state.currentRule].expansion}
-                                    applicationRate={definedRules[this.state.currentRule].applicationRate}
-                                    openRuleDefinitionModal={this.openRuleDefinitionModal}/>
+                                    applicationRate={definedRules[this.state.currentRule].app_rate}
+                                    openRuleDefinitionModal={this.openRuleDefinitionModal}
+                                    ruleAlreadyExists={this.ruleAlreadyExists}/>
             }
         }
 
