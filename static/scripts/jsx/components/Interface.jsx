@@ -757,6 +757,7 @@ class Interface extends React.Component {
                     if (!grammarsAreEquivalent) {
                         grammarHistory = grammarHistory.slice(0, currentIndexInGrammarHistory+1);
                         var newEntry = [grammarState, this.state.currentSymbol, this.state.currentRule];
+                        grammarHistory.push(newEntry);
                         currentIndexInGrammarHistory += 1;
                         unsavedChanges = true;
                     }
@@ -897,7 +898,6 @@ class Interface extends React.Component {
         if (this.state.currentSymbol in this.state.nonterminals) {
             var current = this.state.nonterminals[this.state.currentSymbol]
             definedRules = this.state.nonterminals[this.state.currentSymbol].rules
-            console.log(definedRules);
             // Check which board we need to render
             if (this.state.currentRule === -1 || current.rules[this.state.currentRule] === null ) {
                 var referents = []
