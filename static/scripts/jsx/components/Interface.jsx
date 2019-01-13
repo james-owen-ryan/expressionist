@@ -89,6 +89,7 @@ class Interface extends React.Component {
             loadButtonSpinnerOn: false,
             exportButtonSpinnerOn: false,
             buildButtonSpinnerOn: false,
+            newButtonIsJuicing: false,
             loadButtonIsJuicing: false,
             saveButtonIsJuicing: false,
             exportButtonIsJuicing: false,
@@ -110,16 +111,25 @@ class Interface extends React.Component {
         ajax({
             url: $SCRIPT_ROOT + '/api/grammar/new',
             type: 'GET',
-            cache: false
+            cache: false,
+            success: (status) => {
+                // Generate a juicy response (button lights green and turns back to gray)
+                this.setState({newButtonIsJuicing: true});
+                this.updateCurrentSymbolName('');
+                this.updateGeneratedContentPackageTags([]);
+                this.updateGeneratedContentPackageTags('');
+                this.updateFromServer();
+                this.disableTestButton();
+                this.disableBuildButton();
+                this.setCurrentGrammarName("");
+                this.resetGrammarHistoryAndNavigationHistory();
+                unsavedChanges = false;
+            }
         });
-        this.updateCurrentSymbolName('');
-        this.updateGeneratedContentPackageTags([]);
-        this.updateGeneratedContentPackageTags('');
-        this.updateFromServer();
-        this.disableTestButton();
-        this.disableBuildButton();
-        this.setCurrentGrammarName("");
-        this.resetGrammarHistoryAndNavigationHistory();
+        var that = this;
+        setTimeout(function() {
+            that.setState({newButtonIsJuicing: false});
+        }, 1000);
     }
 
     loadGrammar(filename) {
@@ -949,6 +959,7 @@ class Interface extends React.Component {
                                 turnExportButtonSpinnerOn={this.turnExportButtonSpinnerOn}
                                 turnBuildButtonSpinnerOff={this.turnBuildButtonSpinnerOff}
                                 turnBuildButtonSpinnerOn={this.turnBuildButtonSpinnerOn}
+                                newButtonIsJuicing={this.state.newButtonIsJuicing}
                                 loadButtonIsJuicing={this.state.loadButtonIsJuicing}
                                 saveButtonIsJuicing={this.state.saveButtonIsJuicing}
                                 exportButtonIsJuicing={this.state.exportButtonIsJuicing}
