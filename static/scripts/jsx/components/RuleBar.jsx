@@ -5,6 +5,10 @@ var Modal = require('react-bootstrap').Modal
 var ajax = require('jquery').ajax
 var Glyphicon = require('react-bootstrap').Glyphicon
 
+
+const AUTHOR_IS_USING_A_MAC = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+
+
 class RuleBar extends React.Component {
 
     constructor(props) {
@@ -310,7 +314,7 @@ class RuleBar extends React.Component {
         var rules = [];
         this.props.rules.forEach(function (rule, i) {
             var shortened = rule.expansion.join('').substring(0, 10);
-            rules.push(<Button onClick={this.handleRuleClick.bind(this, i)} title="View production rule (hint: quickly navigate to and across a symbol's rules using 'tab' and 'shift-tab')" key={rule.expansion.join('')+this.props.currentSymbolName} style={i === this.props.currentRule ? {"backgroundColor": "#ffe97f"} : {}}>{shortened}</Button>);
+            rules.push(<Button onClick={this.handleRuleClick.bind(this, i)} title={AUTHOR_IS_USING_A_MAC ? "View production rule (toggle: ⇥, ⇧⇥)" : "View production rule (toggle: Tab, Shift+Tab)"} key={rule.expansion.join('')+this.props.currentSymbolName} style={i === this.props.currentRule ? {"backgroundColor": "#ffe97f"} : {}}>{shortened}</Button>);
         }, this);
         var ruleDefinitionAddButtonIsDisabled = this.props.ruleAlreadyExists(this.state.ruleHeadInputVal, this.state.ruleExpansionInputVal, this.state.ruleApplicationRate);
         if (this.props.idOfRuleToEdit !== null) {
@@ -345,7 +349,7 @@ class RuleBar extends React.Component {
             <div>
                 <div className="btn-test">
                         <ButtonGroup>
-                            <Button id="addRuleButton" onClick={this.openModal} title="Define new production rule (hot key: 'command+d' or 'ctrl+d')" key="addnew"><Glyphicon glyph="plus"/></Button>
+                            <Button id="addRuleButton" onClick={this.openModal} title={AUTHOR_IS_USING_A_MAC ? "Define new production rule (⌘D)" : "Define new production rule (Ctrl+D)"} key="addnew"><Glyphicon glyph="plus"/></Button>
                             {rules}
                         </ButtonGroup>
                 </div>

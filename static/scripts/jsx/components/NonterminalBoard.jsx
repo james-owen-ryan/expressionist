@@ -6,6 +6,10 @@ var ListGroupItem = require('react-bootstrap').ListGroupItem
 var ListGroup = require('react-bootstrap').ListGroup
 var ajax = require('jquery').ajax
 
+
+const AUTHOR_IS_USING_A_MAC = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+
+
 class NonterminalBoard extends React.Component {
 
     constructor(props) {
@@ -192,7 +196,7 @@ class NonterminalBoard extends React.Component {
                     }
                     <br />
                     <Button bsStyle={this.props.nonterminal.deep ? "success" : "default" } onClick={this.handleSetDeep} title={deep_str}>{glyph_nt}</Button>
-                    <Button id="playButton" onClick={this.handleExpand} title="Test symbol rewriting (hot key: 'command+Enter' or 'ctrl+Enter')"><Glyphicon glyph="play"/></Button>
+                    <Button id="playButton" onClick={this.handleExpand} title={AUTHOR_IS_USING_A_MAC ? "Test symbol rewriting (⌘↩)" : "Save grammar (Ctrl+Enter)"}><Glyphicon glyph="play"/></Button>
                     <Button onClick={this.startSymbolNameEditing} title="Rename symbol"><Glyphicon glyph="pencil"/></Button>
                     <Button onClick={this.handleNonterminalDelete} title="Delete symbol"><Glyphicon glyph="trash"/></Button>
                     </h1>

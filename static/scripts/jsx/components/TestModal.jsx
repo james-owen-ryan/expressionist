@@ -17,6 +17,10 @@ var ButtonGroup = require('react-bootstrap').ButtonGroup
 var DropdownButton = require('react-bootstrap').DropdownButton
 var MenuItem = require('react-bootstrap').MenuItem
 
+
+const AUTHOR_IS_USING_A_MAC = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+
+
 class TestModal extends React.Component {
 
     constructor(props) {
@@ -281,10 +285,10 @@ class TestModal extends React.Component {
                 </Modal.Header>
                 <div id="tags">
                     <ButtonGroup className="btn-test" id='tagsList' style={{width: "100%", backgroundColor: "#f2f2f2", marginBottom: '0px'}}>
-                        <Button id="testModalPlayButton" className="grp_button" onClick={this.sendTaggedContentRequest.bind(this, this.state.tagsets)} title={this.state.outputError ? "Resubmit content request (disabled: unsatisfiable content request)" : this.state.contentRequestAlreadySubmitted ? "Resubmit content request (hot key: 'command+Enter' or 'ctrl+Enter')" : "Submit content request (hot key: 'command+Enter' or 'ctrl+Enter')"} style={{height: '38px'}} disabled={this.state.outputError}><Glyphicon glyph={this.state.contentRequestAlreadySubmitted ? "refresh" : "play"}/></Button>
-                        <Button className="grp_button" onClick={this.viewGeneratedText} title={viewButtonsDisabledTooltip ? "Change to text view" + viewButtonsDisabledTooltip : "Change to text view (hint: quickly switch between views using 'Tab' and 'shift+Tab')"} style={this.state.showText && this.state.generatedContentPackageText && !this.state.outputError ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}} disabled={viewButtonsDisabled}><Glyphicon glyph="font"/></Button>
-                        <Button className="grp_button" onClick={this.viewGeneratedTags} title={viewButtonsDisabledTooltip ? "Change to text view" + viewButtonsDisabledTooltip : "Change to tags view (hint: quickly switch between views using 'Tab' and 'shift+Tab')"} style={this.state.showTags && this.state.generatedContentPackageText && !this.state.outputError ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}} disabled={viewButtonsDisabled}><Glyphicon glyph="tags"/></Button>
-                        <Button className="grp_button" onClick={this.viewGeneratedTreeExpression} title={viewButtonsDisabledTooltip ? "Change to text view" + viewButtonsDisabledTooltip : "Change to tree view (hint: quickly switch between views using 'Tab' and 'shift+Tab')"} style={this.state.showTreeExpression && this.state.generatedContentPackageText && !this.state.outputError ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}} disabled={viewButtonsDisabled}><Glyphicon glyph="tree-conifer"/></Button>
+                        <Button id="testModalPlayButton" className="grp_button" onClick={this.sendTaggedContentRequest.bind(this, this.state.tagsets)} title={this.state.outputError ? "Resubmit content request (disabled: unsatisfiable content request)" : this.state.contentRequestAlreadySubmitted ? AUTHOR_IS_USING_A_MAC ? "Resubmit content request (⌘↩)" : "Resubmit content request (Ctrl+Enter)" : AUTHOR_IS_USING_A_MAC ? "Submit content request (⌘↩)" : "Submit content request (Ctrl+Enter)"} style={{height: '38px'}} disabled={this.state.outputError}><Glyphicon glyph={this.state.contentRequestAlreadySubmitted ? "refresh" : "play"}/></Button>
+                        <Button className="grp_button" onClick={this.viewGeneratedText} title={viewButtonsDisabledTooltip ? "Change to text view" + viewButtonsDisabledTooltip : AUTHOR_IS_USING_A_MAC ? "Change to text view (toggle: ⇥, ⇧⇥)" : "Change to text view (toggle: Tab, Shift+Tab)"} style={this.state.showText && this.state.generatedContentPackageText && !this.state.outputError ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}} disabled={viewButtonsDisabled}><Glyphicon glyph="font"/></Button>
+                        <Button className="grp_button" onClick={this.viewGeneratedTags} title={viewButtonsDisabledTooltip ? "Change to text view" + viewButtonsDisabledTooltip : AUTHOR_IS_USING_A_MAC ? "Change to tags view (toggle: ⇥, ⇧⇥)" : "Change to tags view (toggle: Tab, Shift+Tab)"} style={this.state.showTags && this.state.generatedContentPackageText && !this.state.outputError ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}} disabled={viewButtonsDisabled}><Glyphicon glyph="tags"/></Button>
+                        <Button className="grp_button" onClick={this.viewGeneratedTreeExpression} title={viewButtonsDisabledTooltip ? "Change to text view" + viewButtonsDisabledTooltip : AUTHOR_IS_USING_A_MAC ? "Change to tree view (toggle: ⇥, ⇧⇥)" : "Change to tree view (toggle: Tab, Shift+Tab)"} style={this.state.showTreeExpression && this.state.generatedContentPackageText && !this.state.outputError ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}} disabled={viewButtonsDisabled}><Glyphicon glyph="tree-conifer"/></Button>
                         {
                             Object.keys(this.state.tagsets).map(function (tagset) {
                                 return (

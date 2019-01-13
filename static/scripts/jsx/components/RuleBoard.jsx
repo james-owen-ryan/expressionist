@@ -3,6 +3,10 @@ var Button = require('react-bootstrap').Button
 var Glyphicon = require('react-bootstrap').Glyphicon
 var ajax = require('jquery').ajax
 
+
+const AUTHOR_IS_USING_A_MAC = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+
+
 class RuleBoard extends React.Component {
 
     constructor(props) {
@@ -175,8 +179,8 @@ class RuleBoard extends React.Component {
                     <h2>
                         <span className="symbol-reference-in-rule-head" title="View rule head" onClick={this.handleRuleClickThrough.bind(this, this.props.currentSymbolName)}>{this.props.currentSymbolName}</span>
                         <br></br>
-                        <Button id="playButton" bsStyle="default" title="Test rule execution (hot key: 'command+Enter' or 'ctrl+Enter')" onClick={this.handleExecuteRule}><Glyphicon glyph="play"/></Button>
-                        <Button id="editRuleButton" bsStyle="default" title="Edit rule (hot key: 'command+shift+d' or 'ctrl+shift+d')" onClick={this.prepareForRuleDefinitionEditModal}><Glyphicon glyph="pencil"/></Button>
+                        <Button id="playButton" bsStyle="default" title={AUTHOR_IS_USING_A_MAC ? "Test rule execution (⌘↩)" : "Test rule execution (Ctrl+Enter)"} onClick={this.handleExecuteRule}><Glyphicon glyph="play"/></Button>
+                        <Button id="editRuleButton" bsStyle="default" title={AUTHOR_IS_USING_A_MAC ? "Edit rule (⇧⌘D)" : "Test rule execution (Ctrl+Shift+D)"} onClick={this.prepareForRuleDefinitionEditModal}><Glyphicon glyph="pencil"/></Button>
                         <Button bsStyle="danger" title="Delete rule" onClick={this.onRuleDelete}><Glyphicon glyph="trash"/></Button>
                         <Glyphicon title='The arrow in a production rule cues that the rule head (top) will be rewritten as the rule body (bottom).' glyph="circle-arrow-down" style={{"fontSize": "25px", "left": "10px", "top": "5px"}}/>
                     </h2>

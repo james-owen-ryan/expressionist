@@ -376,14 +376,14 @@ class Interface extends React.Component {
             var quickSaveHotKeyMatch = false;  // s
             var quickExportHotKeyMatch = false;  // e
             var quickBuildHotKeyMatch = false;  // b
-            var quickTestHotKeyMatch = false;  // y
+            var quickTestHotKeyMatch = false;  // .
             var quickRuleDefineHotKeyMatch = false; // d
             var quickRuleEditHotKeyMatch = false;  // shift+d
             var quickTestRewriteHotKeyMatch = false;  // enter
             var goBackHotKeyMatch = false; // left arrow
             var goForwardHotKeyMatch = false; // right arrow
             var undoHotKeyMatch = false;  // z
-            var redoHotKeyMatch = false;  // shift+z
+            var redoHotKeyMatch = false;  // shift+z (or y)
             if (e.ctrlKey || e.metaKey) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -396,6 +396,10 @@ class Interface extends React.Component {
                 else if (e.key === 'ArrowRight') {
                     e.preventDefault();
                     goForwardHotKeyMatch = true;
+                }
+                else if (e.key === '.') {
+                    e.preventDefault();
+                    quickTestHotKeyMatch = true;
                 }
                 else {
                     switch (String.fromCharCode(e.which).toLowerCase()) {
@@ -419,10 +423,6 @@ class Interface extends React.Component {
                         e.preventDefault();
                         quickBuildHotKeyMatch = true;
                         break;
-                    case 'y':
-                        e.preventDefault();
-                        quickTestHotKeyMatch = true;
-                        break;
                     case 'd':
                         e.preventDefault();
                         if (e.shiftKey) {
@@ -440,6 +440,10 @@ class Interface extends React.Component {
                         else {
                             undoHotKeyMatch = true;
                         }
+                        break;
+                    case 'y':
+                        e.preventDefault();
+                        redoHotKeyMatch = true;
                         break;
                     case 'r':
                         e.preventDefault();  // Disable page reloading, which breaks the app
