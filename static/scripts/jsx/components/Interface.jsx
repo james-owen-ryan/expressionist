@@ -88,6 +88,7 @@ class Interface extends React.Component {
             loadButtonSpinnerOn: false,
             exportButtonSpinnerOn: false,
             buildButtonSpinnerOn: false,
+            logoButtonIsJuicing: false,
             newButtonIsJuicing: false,
             loadButtonIsJuicing: false,
             saveButtonIsJuicing: false,
@@ -815,7 +816,8 @@ class Interface extends React.Component {
                         currentSymbol: previousGrammarStateSymbolName,
                         currentRule: previousGrammarStateRuleId,
                         generatedContentPackageText: "",
-                        generatedContentPackageTags: []
+                        generatedContentPackageTags: [],
+                        logoButtonIsJuicing: true
                     });
                     unsavedChanges = true;
                     // Reset navigation history (they don't entangle coherently)
@@ -824,6 +826,10 @@ class Interface extends React.Component {
                 },
                 cache: false
             })
+            var that = this;
+            setTimeout(function() {
+                that.setState({logoButtonIsJuicing: false});
+            }, 150);
         }
     }
 
@@ -846,7 +852,8 @@ class Interface extends React.Component {
                         currentSymbol: nextGrammarStateSymbolName,
                         currentRule: nextGrammarStateRuleId,
                         generatedContentPackageText: "",
-                        generatedContentPackageTags: []
+                        generatedContentPackageTags: [],
+                        logoButtonIsJuicing: true
                     });
                     unsavedChanges = true;
                     // Reset navigation history (they don't entangle coherently)
@@ -855,6 +862,10 @@ class Interface extends React.Component {
                 },
                 cache: false
             })
+            var that = this;
+            setTimeout(function() {
+                that.setState({logoButtonIsJuicing: false});
+            }, 150);
         }
     }
 
@@ -887,8 +898,13 @@ class Interface extends React.Component {
                 currentSymbol: previousEntryInNavigationHistory[0],
                 currentRule: previousEntryInNavigationHistory[1],
                 generatedContentPackageText: "",
-                generatedContentPackageTags: []
+                generatedContentPackageTags: [],
+                logoButtonIsJuicing: true
             })
+            var that = this;
+            setTimeout(function() {
+                that.setState({logoButtonIsJuicing: false});
+            }, 150);
         }
     }
 
@@ -901,8 +917,13 @@ class Interface extends React.Component {
                 currentSymbol: nextEntryInNavigationHistory[0],
                 currentRule: nextEntryInNavigationHistory[1],
                 generatedContentPackageText: "",
-                generatedContentPackageTags: []
+                generatedContentPackageTags: [],
+                logoButtonIsJuicing: true
             })
+            var that = this;
+            setTimeout(function() {
+                that.setState({logoButtonIsJuicing: false});
+            }, 150);
         }
     }
 
@@ -999,6 +1020,7 @@ class Interface extends React.Component {
                                 turnExportButtonSpinnerOn={this.turnExportButtonSpinnerOn}
                                 turnBuildButtonSpinnerOff={this.turnBuildButtonSpinnerOff}
                                 turnBuildButtonSpinnerOn={this.turnBuildButtonSpinnerOn}
+                                logoButtonIsJuicing={this.state.logoButtonIsJuicing}
                                 newButtonIsJuicing={this.state.newButtonIsJuicing}
                                 loadButtonIsJuicing={this.state.loadButtonIsJuicing}
                                 saveButtonIsJuicing={this.state.saveButtonIsJuicing}

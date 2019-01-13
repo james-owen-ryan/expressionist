@@ -26,7 +26,7 @@ class HeaderBar extends React.Component {
             <div>
                 <ButtonToolbar>
                     <ButtonGroup>
-                        <DropdownButton id="expressionistButton" className="grp-button" title=<Glyphicon glyph="list-alt"/> bsStyle='default'>
+                        <DropdownButton id="logoButton" className="grp-button" title=<Glyphicon glyph="list-alt"/> bsStyle={this.props.logoButtonIsJuicing ? 'success' : 'default'}>
                             <div>
                                 <Button key="goBackMenuItem" title="Go back to previous symbol or rule" style={{width: '250px', textAlign: 'left'}} onClick={this.props.goBack}>Back<span style={{position: 'absolute', right: '12px'}}>{AUTHOR_IS_USING_A_MAC ? "⌘←" : "Ctrl+Left"}</span></Button>
                                 <Button key="goForwardMenuItem" title="Go forward to next symbol or rule" style={{width: '250px', textAlign: 'left'}} onClick={this.props.goForward}>Forward<span style={{position: 'absolute', right: '12px'}}>{AUTHOR_IS_USING_A_MAC ? "⌘→" : "Ctrl+Right"}</span></Button>
