@@ -100,7 +100,10 @@ class NonterminalBoard extends React.Component {
     }
 
     startSymbolNameEditing() {
-        this.setState({editingSymbolName: true});
+        this.setState({
+            editingSymbolName: true,
+            symbolNameInputVal: this.props.currentSymbolName
+        });
     }
 
     updateSymbolNameInputVal(e) {
@@ -154,10 +157,6 @@ class NonterminalBoard extends React.Component {
 
     componentDidMount() {
         document.addEventListener("keydown", this.stopEditingRuleNameOnEnter, false);
-    }
-
-    componentWillReceiveProps(nextProps) {
-        this.setState({symbolNameInputVal: nextProps.currentSymbolName});
     }
 
     render() {
