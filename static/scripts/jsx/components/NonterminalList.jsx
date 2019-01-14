@@ -117,7 +117,6 @@ class NonterminalList extends React.Component {
                                 value={this.props.symbolFilterQuery}
                                 style={{'width': 'calc(100% - 38px - 38px)', 'height': '100%', 'padding': '8px'}}
                                 placeholder='Filter list...'
-                                autoFocus="true"
                                 // This hack is necessary to keep the cursor at the end of the query upon auto-focus
                                 onFocus={function(e) {
                                     var val = e.target.value;
