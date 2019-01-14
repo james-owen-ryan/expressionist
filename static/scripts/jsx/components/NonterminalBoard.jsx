@@ -108,6 +108,7 @@ class NonterminalBoard extends React.Component {
             editingSymbolName: true,
             symbolNameInputVal: this.props.currentSymbolName
         });
+        this.props.letInterfaceKnowTextFieldEditingHasStarted();
     }
 
     updateSymbolNameInputVal(e) {
@@ -138,6 +139,7 @@ class NonterminalBoard extends React.Component {
             // from an empty box as an action that causes the current name to be kept
             this.setState({editingSymbolName: false});
         }
+        this.props.letInterfaceKnowTextFieldEditingHasStopped();
     }
 
     renameCurrentSymbol() {

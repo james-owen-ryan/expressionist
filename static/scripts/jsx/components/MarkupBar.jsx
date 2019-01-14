@@ -61,6 +61,7 @@ class MarkupBar extends React.Component {
         if (tagBeingRenamed !== null) {
             this.setState({newTagName: tagBeingRenamed});
         }
+        this.props.letInterFaceKnowTagDefinitionModalIsOpen();
     }
 
     closeAddTagModal() {
@@ -70,6 +71,7 @@ class MarkupBar extends React.Component {
             newTagName: "",
             attachNewTagToCurrentSymbol: false
         });
+        this.props.letInterFaceKnowTagDefinitionModalIsClosed();
     }
 
     addNewTag() {

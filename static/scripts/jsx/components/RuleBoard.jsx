@@ -97,6 +97,7 @@ class RuleBoard extends React.Component {
             editingRuleBody: true,
             ruleBodyInputVal: this.props.expansion.join("")
         });
+        this.props.letInterfaceKnowTextFieldEditingHasStarted();
     }
 
     updateRuleBodyInputVal(e) {
@@ -161,6 +162,7 @@ class RuleBoard extends React.Component {
             // so send the request
             this.updateRuleBody();
         }
+        this.props.letInterfaceKnowTextFieldEditingHasStopped();
     }
 
     callbackToTurnOffQuickRuleEditing() {

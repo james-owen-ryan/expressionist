@@ -71,6 +71,10 @@ class Interface extends React.Component {
         this.getListOfMatchingSymbolNames = this.getListOfMatchingSymbolNames.bind(this);
         this.attemptToBuildProductionist = this.attemptToBuildProductionist.bind(this);
         this.buildProductionist = this.buildProductionist.bind(this);
+        this.letInterfaceKnowTextFieldEditingHasStarted = this.letInterfaceKnowTextFieldEditingHasStarted.bind(this);
+        this.letInterfaceKnowTextFieldEditingHasStopped = this.letInterfaceKnowTextFieldEditingHasStopped.bind(this);
+        this.letInterFaceKnowTagDefinitionModalIsOpen = this.letInterFaceKnowTagDefinitionModalIsOpen.bind(this);
+        this.letInterFaceKnowTagDefinitionModalIsClosed = this.letInterFaceKnowTagDefinitionModalIsClosed.bind(this);
         this.state = {
             currentGrammarName: 'new',
             bundleName: '',
@@ -99,7 +103,9 @@ class Interface extends React.Component {
             showSaveModal: false,
             showExportModal: false,
             showTestModal: false,
-            showRuleDefinitionModal: false
+            showRuleDefinitionModal: false,
+            tagDefinitionModalIsOpen: false,
+            textFieldEditingIsOccurring: false
         }
     }
 
@@ -209,6 +215,25 @@ class Interface extends React.Component {
                 }, 1000);
             }
         })
+    }
+
+    letInterfaceKnowTextFieldEditingHasStarted() {
+        // Certain hot keys are disabled while a text field is being edited, namely those for grammar
+        // navigation and undo/redo, since the browser already has established text-editing functions
+        // for those key combinations
+        this.setState({textFieldEditingIsOccurring: true});
+    }
+
+    letInterfaceKnowTextFieldEditingHasStopped() {
+        this.setState({textFieldEditingIsOccurring: false});
+    }
+
+    letInterFaceKnowTagDefinitionModalIsOpen() {
+        this.setState({tagDefinitionModalIsOpen: true});
+    }
+
+    letInterFaceKnowTagDefinitionModalIsClosed() {
+        this.setState({tagDefinitionModalIsOpen: false});
     }
 
     openLoadModal() {
@@ -347,7 +372,7 @@ class Interface extends React.Component {
 
     handlePotentialHotKeyPress(e) {
         // Check for rule tabbing (note: tabbing on other views is handled in the respective components)
-        var atLeastOneModalIsOpen = (this.state.showSaveModal || this.state.showLoadModal || this.state.showExportModal || this.state.showTestModal || this.state.showRuleDefinitionModal);
+        var atLeastOneModalIsOpen = (this.state.showSaveModal || this.state.showLoadModal || this.state.showExportModal || this.state.showTestModal || this.state.showRuleDefinitionModal || this.state.tagDefinitionModalIsOpen);
         if (e.key === 'Tab' && !atLeastOneModalIsOpen) {
             e.preventDefault();
             if (this.state.currentSymbol !== "" && this.state.nonterminals[this.state.currentSymbol].rules.length > 0) {
@@ -394,21 +419,21 @@ class Interface extends React.Component {
                 }
                 else if (e.key === 'ArrowUp') {
                     // Disable this if a modal is open or a text field is being edited
-                    if (!atLeastOneModalIsOpen && document.activeElement.type !== 'text') {
+                    if (!atLeastOneModalIsOpen && !this.state.textFieldEditingIsOccurring && document.activeElement.type !== 'text') {
                         e.preventDefault();
                         viewRuleHeadHotKeyMatch = true;
                     }
                 }
                 else if (e.key === 'ArrowLeft') {
                     // Disable this if a modal is open or a text field is being edited
-                    if (!atLeastOneModalIsOpen && document.activeElement.type !== 'text') {
+                    if (!atLeastOneModalIsOpen && !this.state.textFieldEditingIsOccurring && document.activeElement.type !== 'text') {
                         e.preventDefault();
                         goBackHotKeyMatch = true;
                     }
                 }
                 else if (e.key === 'ArrowRight') {
                     // Disable this if a modal is open or a text field is being edited
-                    if (!atLeastOneModalIsOpen && document.activeElement.type !== 'text') {
+                    if (!atLeastOneModalIsOpen && !this.state.textFieldEditingIsOccurring && document.activeElement.type !== 'text') {
                         e.preventDefault();
                         goForwardHotKeyMatch = true;
                     }
@@ -417,53 +442,59 @@ class Interface extends React.Component {
                     e.preventDefault();
                     quickTestHotKeyMatch = true;
                 }
-                else {
-                    switch (String.fromCharCode(e.which).toLowerCase()) {
-                    case 'g':
-                        e.preventDefault();
-                        quickNewHotKeyMatch = true;
-                        break;
-                    case 'o':
-                        e.preventDefault();
-                        quickLoadHotKeyMatch = true;
-                        break;
-                    case 's':
-                        e.preventDefault();
-                        quickSaveHotKeyMatch = true;
-                        break;
-                    case 'e':
-                        e.preventDefault();
-                        quickExportHotKeyMatch = true;
-                        break;
-                    case 'b':
-                        e.preventDefault();
-                        quickBuildHotKeyMatch = true;
-                        break;
-                    case 'd':
-                        e.preventDefault();
-                        if (e.shiftKey) {
-                            quickRuleEditHotKeyMatch = true;
-                        }
-                        else {
-                            quickRuleDefineHotKeyMatch = true;
-                        }
-                        break;
-                    case 'z':
-                        e.preventDefault();
+                // For some bizarre reason, these must be caught this way to not break browser undo/redo functionality
+                else if (e.key === 'z') {
+                    // Disable this if a modal is open or a text field is being edited
+                    if (!atLeastOneModalIsOpen && !this.state.textFieldEditingIsOccurring && document.activeElement.type !== 'text') {
+                        e.preventDefault
                         if (e.shiftKey) {
                             redoHotKeyMatch = true;
                         }
                         else {
                             undoHotKeyMatch = true;
                         }
-                        break;
-                    case 'y':
-                        e.preventDefault();
-                        redoHotKeyMatch = true;
-                        break;
-                    case 'r':
-                        e.preventDefault();  // Disable page reloading, which breaks the app
                     }
+                }
+                else if (e.key === 'y') {
+                    // Disable this if a modal is open or a text field is being edited
+                    if (!atLeastOneModalIsOpen && !this.state.textFieldEditingIsOccurring && document.activeElement.type !== 'text') {
+                        redoHotKeyMatch = true;
+                    }
+                }
+                else {
+                    switch (String.fromCharCode(e.which).toLowerCase()) {
+                        case 'g':
+                            e.preventDefault();
+                            quickNewHotKeyMatch = true;
+                            break;
+                        case 'o':
+                            e.preventDefault();
+                            quickLoadHotKeyMatch = true;
+                            break;
+                        case 's':
+                            e.preventDefault();
+                            quickSaveHotKeyMatch = true;
+                            break;
+                        case 'e':
+                            e.preventDefault();
+                            quickExportHotKeyMatch = true;
+                            break;
+                        case 'b':
+                            e.preventDefault();
+                            quickBuildHotKeyMatch = true;
+                            break;
+                        case 'd':
+                            e.preventDefault();
+                            if (e.shiftKey) {
+                                quickRuleEditHotKeyMatch = true;
+                            }
+                            else {
+                                quickRuleDefineHotKeyMatch = true;
+                            }
+                            break;
+                        case 'r':
+                            e.preventDefault();  // Disable page reloading, which breaks history keeping
+                   }
                 }
             }
             // View rule head: jump from current rule to the that is its rule head ("go up", if you will)
@@ -984,7 +1015,9 @@ class Interface extends React.Component {
                                             currentSymbolName={this.state.currentSymbol}
                                             nonterminal={this.state.nonterminals[this.state.currentSymbol]}
                                             symbolNameAlreadyExists={this.symbolNameAlreadyExists}
-                                            playButtonIsJuicing={this.state.playButtonIsJuicing}/>
+                                            playButtonIsJuicing={this.state.playButtonIsJuicing}
+                                            letInterfaceKnowTextFieldEditingHasStarted={this.letInterfaceKnowTextFieldEditingHasStarted}
+                                            letInterfaceKnowTextFieldEditingHasStopped={this.letInterfaceKnowTextFieldEditingHasStopped}/>
             }
             else {
                 board = <RuleBoard  currentSymbolName={this.state.currentSymbol}
@@ -999,7 +1032,9 @@ class Interface extends React.Component {
                                     applicationRate={definedRules[this.state.currentRule].app_rate}
                                     openRuleDefinitionModal={this.openRuleDefinitionModal}
                                     ruleAlreadyExists={this.ruleAlreadyExists}
-                                    playButtonIsJuicing={this.state.playButtonIsJuicing}/>
+                                    playButtonIsJuicing={this.state.playButtonIsJuicing}
+                                    letInterfaceKnowTextFieldEditingHasStarted={this.letInterfaceKnowTextFieldEditingHasStarted}
+                                    letInterfaceKnowTextFieldEditingHasStopped={this.letInterfaceKnowTextFieldEditingHasStopped}/>
             }
         }
 
@@ -1066,7 +1101,9 @@ class Interface extends React.Component {
                                         tagsets={this.state.tagsets}
                                         updateSymbolFilterQuery={this.updateSymbolFilterQuery}
                                         currentSymbolName={this.state.currentSymbol}
-                                        currentRule={this.state.currentRule}/>
+                                        currentRule={this.state.currentRule}
+                                        letInterFaceKnowTagDefinitionModalIsOpen={this.letInterFaceKnowTagDefinitionModalIsOpen}
+                                        letInterFaceKnowTagDefinitionModalIsClosed={this.letInterFaceKnowTagDefinitionModalIsClosed}/>
                         </div>
                     </div>
                     {board}
