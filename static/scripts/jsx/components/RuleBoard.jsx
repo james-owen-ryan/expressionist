@@ -100,10 +100,6 @@ class RuleBoard extends React.Component {
     }
 
     updateRuleBodyInputVal(e) {
-        this.setState({ruleBodyInputVal: e.target.value});
-    }
-
-    updateRuleBodyInputVal(e) {
         if (e.target.value.indexOf('\n') === -1) {
             var inputValue = e.target.value;
             var positionToMoveCursorTo = null;
