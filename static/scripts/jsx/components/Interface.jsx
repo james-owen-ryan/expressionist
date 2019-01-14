@@ -392,12 +392,18 @@ class Interface extends React.Component {
                     quickTestRewriteHotKeyMatch = true;
                 }
                 else if (e.key === 'ArrowLeft') {
-                    e.preventDefault();
-                    goBackHotKeyMatch = true;
+                    // Disable this if a modal is open or a text field is being edited
+                    if (!atLeastOneModalIsOpen && document.activeElement.type !== 'text') {
+                        e.preventDefault();
+                        goBackHotKeyMatch = true;
+                    }
                 }
                 else if (e.key === 'ArrowRight') {
-                    e.preventDefault();
-                    goForwardHotKeyMatch = true;
+                    // Disable this if a modal is open or a text field is being edited
+                    if (!atLeastOneModalIsOpen && document.activeElement.type !== 'text') {
+                        e.preventDefault();
+                        goForwardHotKeyMatch = true;
+                    }
                 }
                 else if (e.key === '.') {
                     e.preventDefault();
