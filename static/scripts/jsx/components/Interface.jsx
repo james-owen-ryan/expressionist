@@ -382,6 +382,7 @@ class Interface extends React.Component {
             var quickRuleDefineHotKeyMatch = false; // d
             var quickRuleEditHotKeyMatch = false;  // shift+d
             var quickTestRewriteHotKeyMatch = false;  // enter
+            var viewRuleHeadHotKeyMatch = false; // up arrow
             var goBackHotKeyMatch = false; // left arrow
             var goForwardHotKeyMatch = false; // right arrow
             var undoHotKeyMatch = false;  // z
@@ -390,6 +391,13 @@ class Interface extends React.Component {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     quickTestRewriteHotKeyMatch = true;
+                }
+                else if (e.key === 'ArrowUp') {
+                    // Disable this if a modal is open or a text field is being edited
+                    if (!atLeastOneModalIsOpen && document.activeElement.type !== 'text') {
+                        e.preventDefault();
+                        viewRuleHeadHotKeyMatch = true;
+                    }
                 }
                 else if (e.key === 'ArrowLeft') {
                     // Disable this if a modal is open or a text field is being edited
@@ -458,16 +466,20 @@ class Interface extends React.Component {
                     }
                 }
             }
+            // View rule head: jump from current rule to the that is its rule head ("go up", if you will)
+            if (viewRuleHeadHotKeyMatch) {
+                this.setState({currentRule: -1});
+            }
             // Go back: return to the previous symbol or rule
-            if (goBackHotKeyMatch) {
+            else if (goBackHotKeyMatch) {
                 this.goBack();
             }
             // Go forward: return to the next symbol or rule (after having gone back already)
-            if (goForwardHotKeyMatch) {
+            else if (goForwardHotKeyMatch) {
                 this.goForward();
             }
             // Quick new: simulate clicking of the 'New' button
-            if (quickNewHotKeyMatch) {
+            else if (quickNewHotKeyMatch) {
                 document.getElementById("headerBarNewButton").click();
             }
             // Quick load: simulate clicking of the 'Load' button
