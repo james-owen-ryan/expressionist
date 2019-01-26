@@ -287,13 +287,12 @@ def export():
     # Strip off .json, in the case that it was included (otherwise, we will export, e.g., 'myGrammar.json.meanings')
     if content_bundle_name.endswith('.json'):
         content_bundle_name = content_bundle_name[:-5]
-    output_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'exports'))
-    output_path_and_filename = "{}/{}".format(output_path, content_bundle_name)
+    output_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ''.join(['exports/', content_bundle_name])))
     # Index the grammar and save out the resulting files (Productionist-format grammar file [.grammar],
     # trie file (.marisa), and expressible meanings file [.meanings])
     reductionist = Reductionist(
         raw_grammar_json=app.flask_grammar.to_json(to_file=True),  # JOR: I'm not sure what to_file actually does
-        path_to_write_output_files_to=output_path_and_filename,
+        path_to_write_output_files_to=output_path,
         verbosity=1 if debug is False else 2
     )
     if not reductionist.validator.errors:
