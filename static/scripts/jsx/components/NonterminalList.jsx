@@ -102,13 +102,14 @@ class NonterminalList extends React.Component {
     }
 
     render() {
-        var nonterminals = this.formatList(this.props.getListOfMatchingSymbolNames(this.props.symbolFilterQuery));
+        var symbolMatches = this.formatList(this.props.getListOfMatchingSymbolNames(this.props.symbolFilterQuery));
         return (
             <div>
                 <ListGroup id='nonterminalList'>
                     <ListGroupItem bsSize='xsmall' key='nonterminalListSearchGroupItem' style={{'padding': '0px'}}>
                         <Button key="ADDNEW" onClick={this.addNonterminal} title="Add new symbol" style={{'height': '35px', 'marginBottom': '2px'}}><Glyphicon glyph="plus"/></Button>
-                        {nonterminals.some(function (name) {return name.indexOf("$symbol") === -1})
+                        {
+                            Object.keys(this.props.nonterminals).some(function (name) {return name.indexOf("$symbol") === -1})
                             ?
                             <input  id='nonterminalListSearch'
                                 title="Hint: try '$text:[text from symbol rewriting]', e.g., '$text:typoo'"
@@ -122,13 +123,15 @@ class NonterminalList extends React.Component {
                                     var val = e.target.value;
                                     e.target.value = '';
                                     e.target.value = val;
-                            }}/>
+                                }}
+                                autoFocus="true"
+                            />
                             :
                             ""
                         }
                         {this.props.symbolFilterQuery ? <Button onClick={this.clearSymbolFilterQuery} title="Clear filter" style={{'height': '35px', 'marginBottom': '2px'}}><Glyphicon glyph="remove"/></Button> : ""}
                     </ListGroupItem>
-                    {   nonterminals.map((name) => {
+                    {   symbolMatches.map((name) => {
                             var complete = this.props.nonterminals[name].complete;
                             var deep = this.props.nonterminals[name].deep;
                             var thisIsANewSymbol = false
