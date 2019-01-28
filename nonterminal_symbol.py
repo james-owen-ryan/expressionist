@@ -1,6 +1,5 @@
 import itertools
 import random
-
 from intermediate_derivation import IntermediateDeriv
 from rule import Rule
 from terminal_symbol import TerminalSymbol

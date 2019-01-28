@@ -6,14 +6,12 @@ import collections
 import csv
 import json
 import re
-
-# from IPython import embed
+import copy
+import jsontree
 from nonterminal_symbol import NonterminalSymbol
 from tags import Markup, MarkupSet
 from terminal_symbol import TerminalSymbol, SystemVar
-import copy
 
-import jsontree
 
 N_RULES_FIRED = 0
 

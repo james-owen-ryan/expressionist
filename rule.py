@@ -2,7 +2,6 @@ import itertools
 import operator
 
 
-
 class Rule(object):
     """A production rule in a grammar."""
 

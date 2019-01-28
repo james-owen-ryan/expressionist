@@ -1,5 +1,3 @@
-import re  # Used to parse definitions of rule bodies
-import argparse  # Used to handle command-line arguments for this program
 import json  # Used to generate JSON grammar files in the Productionist format
 import operator  # Used to determine total number of generable lines of dialogue for a symbol/rule/grammar
 import itertools  # Used to efficiently compute combinatorics when deriving grammar paths

@@ -1,6 +1,5 @@
 """import unittest for running tests"""
 import unittest
-
 from intermediate_derivation import IntermediateDeriv
 from tags import Markup, MarkupSet
 from nonterminal_symbol import NonterminalSymbol

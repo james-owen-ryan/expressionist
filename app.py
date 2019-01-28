@@ -1,16 +1,10 @@
 import os
-import sys
-from flask import Flask, render_template, request
-from flask import jsonify
-import webbrowser
-import tags
-import nonterminal_symbol
-from test_gram import test
-# from IPython import embed
 import re
-import grammar
-import threading
 import json
+import grammar
+import nonterminal_symbol
+import tags
+from flask import Flask, render_template, request, jsonify
 from reductionist import Reductionist
 from productionist import Productionist, ContentRequest
 
