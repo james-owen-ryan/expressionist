@@ -131,7 +131,7 @@ class TestModal extends React.Component {
             }
         }
         ajax({
-            url: $SCRIPT_ROOT + '/api/grammar/tagged_content_request',
+            url: $SCRIPT_ROOT + '/api/grammar/content_request',
             type: "POST",
             contentType: "application/json",
             data: JSON.stringify({

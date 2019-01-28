@@ -332,7 +332,7 @@ def build_productionist():
     return jsonify({'status': "Successfully built a content generator.", 'bundleName': content_bundle_name})
 
 
-@app.route('/api/grammar/tagged_content_request', methods=['POST'])
+@app.route('/api/grammar/content_request', methods=['POST'])
 def tagged_content_request():
     """Furnish generated content that satisfies an author-defined content request."""
     # Receive the raw content request (as JSON data)
@@ -351,13 +351,12 @@ def tagged_content_request():
     )
     print "\n-- Attempting to fulfill the following content request:\n{}".format(content_request)
     # Fulfill the content request to generate N outputs (each being an object of the class productionist.Output)
-    output = app.productionist.fulfill_content_request(content_request=content_request)
-    if output:
+    content_package = app.productionist.fulfill_content_request(content_request=content_request)
+    if content_package:
         print "\n\n-- Successfully fulfilled the content request!"
         # Send the generated outputs back to the authoring tool as a single JSON package
-        output_as_json_package = json.dumps(output.payload)
-        print output_as_json_package
-        return output_as_json_package
+        content_package_json = json.dumps(content_package.payload)
+        return content_package_json
     print "\n\n-- The content request cannot be satisfied by the exported content bundle."
     return "The content request cannot be satisfied by the exported content bundle."
 
