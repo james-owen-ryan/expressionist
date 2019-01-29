@@ -414,8 +414,10 @@ class Interface extends React.Component {
             var redoHotKeyMatch = false;  // shift+z (or y)
             if (e.ctrlKey || e.metaKey) {
                 if (e.key === 'Enter') {
-                    e.preventDefault();
-                    quickTestRewriteHotKeyMatch = true;
+                    if (!this.state.showRuleDefinitionModal) {
+                        e.preventDefault();
+                        quickTestRewriteHotKeyMatch = true;
+                    }
                 }
                 else if (e.key === 'ArrowUp') {
                     // Disable this if a modal is open or a text field is being edited
