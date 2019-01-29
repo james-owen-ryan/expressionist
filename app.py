@@ -15,7 +15,7 @@ debug = False
 @app.route('/api/default', methods=['GET'])
 def default():
 
-    return app.flask_grammar.to_json()
+    return app.grammar.to_json()
 
 
 @app.route('/')
@@ -56,8 +56,8 @@ def load_bundle():
 @app.route('/api/grammar/load', methods=['POST'])
 def load_grammar():
     """Load a grammar into memory given a JSON string sent via POST (allows the app to reflect undo and redo changes)."""
-    app.flask_grammar = grammar.from_json(str(request.data))
-    return app.flask_grammar.to_json()
+    app.grammar = grammar.from_json(str(request.data))
+    return app.grammar.to_json()
 
 
 @app.route('/api/grammar/from_file', methods=['POST'])
@@ -66,8 +66,8 @@ def load_file_grammar():
     user_file = os.path.abspath(os.path.join(os.path.dirname(__file__), ''.join(['grammars/', grammar_name])))
     grammar_file = open(user_file, 'r')
     if grammar_file:
-        app.flask_grammar = grammar.from_json(str(grammar_file.read()))
-    return app.flask_grammar.to_json()
+        app.grammar = grammar.from_json(str(grammar_file.read()))
+    return app.grammar.to_json()
 
 
 @app.route('/api/grammar/save', methods=['GET', 'POST'])
@@ -79,7 +79,7 @@ def save_grammar():
     try:
         filename = os.path.abspath(os.path.join(os.path.dirname(__file__), ''.join(['grammars/', grammar_name])))
         outfile = open(filename, 'w+')
-        outfile.write(app.flask_grammar.to_json(to_file=True))
+        outfile.write(app.grammar.to_json(to_file=True))
     except Exception as error:
         print repr(error)
         return "Unable to save grammar. Please check console for more details."
@@ -88,15 +88,15 @@ def save_grammar():
 
 @app.route('/api/grammar/new', methods=['GET'])
 def new_grammar():
-    app.flask_grammar = grammar.PCFG()
-    return app.flask_grammar.to_json()
+    app.grammar = grammar.PCFG()
+    return app.grammar.to_json()
 
 
 @app.route('/api/nonterminal/add', methods=['POST'])
 def add_nt():
     data = request.get_json()
-    app.flask_grammar.add_nonterminal(nonterminal_symbol.NonterminalSymbol(data['nonterminal']))
-    return app.flask_grammar.to_json()
+    app.grammar.add_nonterminal(nonterminal_symbol.NonterminalSymbol(data['nonterminal']))
+    return app.grammar.to_json()
 
 
 @app.route('/api/nonterminal/rename', methods=['POST'])
@@ -104,37 +104,37 @@ def rename_nt():
     data = request.get_json()
     old = data['old']
     new = data['new']
-    app.flask_grammar.rename_nonterminal_symbol(old, new)
-    return app.flask_grammar.to_json()
+    app.grammar.rename_nonterminal_symbol(old, new)
+    return app.grammar.to_json()
 
 
 @app.route('/api/nonterminal/delete', methods=['POST'])
 def delete_nt():
     data = request.get_json()
     nonterminal = re.search('[^\[\]]+', data['nonterminal']).group(0)
-    app.flask_grammar.delete_nonterminal(nonterminal)
-    return app.flask_grammar.to_json()
+    app.grammar.delete_nonterminal(nonterminal)
+    return app.grammar.to_json()
 
 
 @app.route('/api/nonterminal/deep', methods=['POST'])
 def set_deep():
     data = request.get_json()
-    nonterminal = app.flask_grammar.nonterminals.get(data["nonterminal"])
+    nonterminal = app.grammar.nonterminals.get(data["nonterminal"])
     if nonterminal:
         nonterminal.deep = not nonterminal.deep
-    return app.flask_grammar.to_json()
+    return app.grammar.to_json()
 
 
 @app.route('/api/nonterminal/expand', methods=['POST', 'GET'])
 def expand_nt():
     data = request.get_json()
-    return app.flask_grammar.expand(nonterminal_symbol.NonterminalSymbol(data['nonterminal'])).to_json()
+    return app.grammar.expand(nonterminal_symbol.NonterminalSymbol(data['nonterminal'])).to_json()
 
 
 @app.route('/api/rule/expand', methods=['POST', 'GET'])
 def expand_rule():
     data = request.get_json()
-    return app.flask_grammar.expand_rule(data['nonterminal'], int(data['index']) ).to_json()
+    return app.grammar.expand_rule(data['nonterminal'], int(data['index'])).to_json()
 
 
 @app.route('/api/rule/swap', methods=['POST'])
@@ -143,8 +143,8 @@ def swap_rule():
     index = int(data['index'])
     original = re.search('[^\[\]]+', data['original']).group(0)
     new = re.search('[^\[\]]+', data['new']).group(0)
-    app.flask_grammar.copy_rule(original, index, new)
-    return app.flask_grammar.to_json()
+    app.grammar.copy_rule(original, index, new)
+    return app.grammar.to_json()
 
 
 @app.route('/api/rule/add', methods=['POST'])
@@ -154,12 +154,12 @@ def add_rule():
     rule_body = data['rule body']
     application_rate = int(data['application rate'])
     try:
-        rule_head_object = app.flask_grammar.nonterminals[rule_head_name]
+        rule_head_object = app.grammar.nonterminals[rule_head_name]
     except KeyError:
         rule_head_object = nonterminal_symbol.NonterminalSymbol(rule_head_name)
-        app.flask_grammar.add_nonterminal(rule_head_object)
-    app.flask_grammar.add_rule(rule_head_object, grammar.parse_rule(rule_body), application_rate)
-    return app.flask_grammar.to_json()
+        app.grammar.add_nonterminal(rule_head_object)
+    app.grammar.add_rule(rule_head_object, grammar.parse_rule(rule_body), application_rate)
+    return app.grammar.to_json()
 
 
 @app.route('/api/rule/edit', methods=['POST'])
@@ -172,23 +172,23 @@ def edit_rule():
     rule_id = int(data['rule id'])
     if rule_head_name == original_rule_head_name:
         # Simply update the application rate and expansion
-        app.flask_grammar.modify_application_rate(
+        app.grammar.modify_application_rate(
             nonterminal_symbol.NonterminalSymbol(rule_head_name), rule_id, application_rate
         )
-        app.flask_grammar.modify_rule_expansion(
+        app.grammar.modify_rule_expansion(
             rule_id, nonterminal_symbol.NonterminalSymbol(rule_head_name),
             grammar.parse_rule(rule_body), application_rate
         )
     else:
         # Delete the old rule and create a new one that is associated with the new rule head
-        app.flask_grammar.remove_rule_by_index(nonterminal_symbol.NonterminalSymbol(original_rule_head_name), rule_id)
+        app.grammar.remove_rule_by_index(nonterminal_symbol.NonterminalSymbol(original_rule_head_name), rule_id)
         try:
-            new_rule_head_object = app.flask_grammar.nonterminals[rule_head_name]
+            new_rule_head_object = app.grammar.nonterminals[rule_head_name]
         except KeyError:
             new_rule_head_object = nonterminal_symbol.NonterminalSymbol(rule_head_name)
-            app.flask_grammar.add_nonterminal(new_rule_head_object)
-        app.flask_grammar.add_rule(new_rule_head_object, grammar.parse_rule(rule_body), application_rate)
-    return app.flask_grammar.to_json()
+            app.grammar.add_nonterminal(new_rule_head_object)
+        app.grammar.add_rule(new_rule_head_object, grammar.parse_rule(rule_body), application_rate)
+    return app.grammar.to_json()
 
 
 @app.route('/api/rule/delete', methods=['POST'])
@@ -196,8 +196,8 @@ def del_rule():
     data = request.get_json()
     rule = int(data['rule'])
     nonterminal = data['nonterminal']
-    app.flask_grammar.remove_rule_by_index(nonterminal_symbol.NonterminalSymbol(nonterminal), rule)
-    return app.flask_grammar.to_json()
+    app.grammar.remove_rule_by_index(nonterminal_symbol.NonterminalSymbol(nonterminal), rule)
+    return app.grammar.to_json()
 
 
 @app.route('/api/rule/set_app', methods=['POST'])
@@ -206,8 +206,8 @@ def set_app():
     rule = data['rule']
     nonterminal = data['nonterminal']
     app_rate = int(data['app_rate'])
-    app.flask_grammar.modify_application_rate(nonterminal_symbol.NonterminalSymbol(nonterminal), rule, app_rate)
-    return app.flask_grammar.to_json()
+    app.grammar.modify_application_rate(nonterminal_symbol.NonterminalSymbol(nonterminal), rule, app_rate)
+    return app.grammar.to_json()
 
 
 @app.route('/api/markup/addtag', methods=['POST'])
@@ -215,16 +215,16 @@ def add_tag():
     data = request.get_json()
     markupSet = tags.MarkupSet(data['markupSet'])
     markup = tags.Markup(data['tag'], markupSet)
-    app.flask_grammar.add_unused_markup(markup)
-    return app.flask_grammar.to_json()
+    app.grammar.add_unused_markup(markup)
+    return app.grammar.to_json()
 
 
 @app.route('/api/markup/addtagset', methods=['POST'])
 def add_tagset():
     data = request.get_json()
     markupSet = tags.MarkupSet(data["markupSet"])
-    app.flask_grammar.add_new_markup_set(markupSet)
-    return app.flask_grammar.to_json()
+    app.grammar.add_new_markup_set(markupSet)
+    return app.grammar.to_json()
 
 
 @app.route('/api/markup/toggle', methods=['POST'])
@@ -233,9 +233,9 @@ def toggle_tag():
     nonterminal = nonterminal_symbol.NonterminalSymbol(data["nonterminal"])
     markupSet = tags.MarkupSet(data['markupSet'])
     markup = tags.Markup(data['tag'], markupSet)
-    app.flask_grammar.toggle_markup(nonterminal, markup)
+    app.grammar.toggle_markup(nonterminal, markup)
 
-    return app.flask_grammar.to_json()
+    return app.grammar.to_json()
 
 
 @app.route('/api/markup/renameset', methods=['POST'])
@@ -243,8 +243,8 @@ def rename_markupset():
     data = request.get_json()
     oldset = data['oldset']
     newset = data['newset']
-    app.flask_grammar.modify_markupset(oldset, newset)
-    return app.flask_grammar.to_json()
+    app.grammar.modify_markupset(oldset, newset)
+    return app.grammar.to_json()
 
 
 @app.route('/api/markup/renametag', methods=['POST'])
@@ -253,8 +253,8 @@ def rename_tag():
     tagset_name = data['markupset']
     old_tag_name = data['oldtag']
     new_tag_name = data['newtag']
-    app.flask_grammar.rename_tag(tagset_name=tagset_name, old_tag_name=old_tag_name, new_tag_name=new_tag_name)
-    return app.flask_grammar.to_json()
+    app.grammar.rename_tag(tagset_name=tagset_name, old_tag_name=old_tag_name, new_tag_name=new_tag_name)
+    return app.grammar.to_json()
 
 
 @app.route('/api/markup/removetag', methods=['POST'])
@@ -262,15 +262,15 @@ def remove_tag():
     data = request.get_json()
     tagset_name = data['tagSet']
     tag_name = data['tagName']
-    app.flask_grammar.remove_tag(tagset_name=tagset_name, tag_name=tag_name)
-    return app.flask_grammar.to_json()
+    app.grammar.remove_tag(tagset_name=tagset_name, tag_name=tag_name)
+    return app.grammar.to_json()
 
 
 @app.route('/api/markup/deletetagset', methods=['POST'])
 def delete_tagset():
     name = request.get_json()['tagsetName']
-    app.flask_grammar.delete_tagset(name)
-    return app.flask_grammar.to_json()
+    app.grammar.delete_tagset(name)
+    return app.grammar.to_json()
 
 
 @app.route('/api/grammar/export', methods=['GET', 'POST'])
@@ -285,7 +285,7 @@ def export():
     # Index the grammar and save out the resulting files (Productionist-format grammar file [.grammar],
     # trie file (.marisa), and expressible meanings file [.meanings])
     reductionist = Reductionist(
-        raw_grammar_json=app.flask_grammar.to_json(to_file=True),  # JOR: I'm not sure what to_file actually does
+        raw_grammar_json=app.grammar.to_json(to_file=True),  # JOR: I'm not sure what to_file actually does
         path_to_write_output_files_to=output_path,
         verbosity=1 if debug is False else 2
     )
@@ -341,7 +341,9 @@ def tagged_content_request():
     ]
     # Time to generate content; prepare the actual ContentRequest object that Productionist will process
     content_request = ContentRequest(
-        must_have=required_tags, must_not_have=prohibited_tags, scoring_metric=scoring_metric
+        required_tags=required_tags,
+        prohibited_tags=prohibited_tags,
+        scoring_metric=scoring_metric
     )
     print "\n-- Attempting to fulfill the following content request:\n{}".format(content_request)
     # Fulfill the content request to generate N outputs (each being an object of the class productionist.Output)
@@ -356,7 +358,7 @@ def tagged_content_request():
 
 
 if __name__ == '__main__':
-    app.flask_grammar = grammar.from_json(str(open('./grammars/new.json', 'r').read()))
+    app.grammar = grammar.from_json(str(open('./grammars/new.json', 'r').read()))
     app.productionist = None  # Gets set upon export
     app.debug = debug
     app.run()
