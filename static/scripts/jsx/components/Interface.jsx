@@ -85,6 +85,7 @@ class Interface extends React.Component {
             currentSymbol: "",
             currentRule: -1,
             idOfRuleToEdit: null,
+            idOfRuleToDuplicate: null,
             symbolFilterQuery: "",
             exportButtonDisabled: true,
             buildButtonDisabled: true,
@@ -268,9 +269,12 @@ class Interface extends React.Component {
         this.setState({showTestModal: false});
     }
 
-    openRuleDefinitionModal(idOfRuleToEdit) {
-        this.setState({showRuleDefinitionModal: true});
-        this.setState({idOfRuleToEdit: idOfRuleToEdit});
+    openRuleDefinitionModal(idOfRuleToEdit, idOfRuleToDuplicate) {
+        this.setState({
+            showRuleDefinitionModal: true,
+            idOfRuleToEdit: idOfRuleToEdit,
+            idOfRuleToDuplicate: idOfRuleToDuplicate
+        });
     }
 
     closeRuleDefinitionModal() {
@@ -283,7 +287,7 @@ class Interface extends React.Component {
             this.closeRuleDefinitionModal();
         }
         else {
-            this.openRuleDefinitionModal(null);
+            this.openRuleDefinitionModal(null, null);
         }
     }
 
@@ -530,7 +534,7 @@ class Interface extends React.Component {
                     this.closeRuleDefinitionModal();
                 }
                 else {
-                    this.openRuleDefinitionModal(null);
+                    this.openRuleDefinitionModal(null, null);
                 }
             }
             // Quick rule edit: simulate clicking of the button for editing a new rule
@@ -1121,6 +1125,7 @@ class Interface extends React.Component {
                                     toggleWhetherRuleDefinitionModalIsOpen={this.toggleWhetherRuleDefinitionModalIsOpen}
                                     showRuleDefinitionModal={this.state.showRuleDefinitionModal}
                                     idOfRuleToEdit={this.state.idOfRuleToEdit}
+                                    idOfRuleToDuplicate={this.state.idOfRuleToDuplicate}
                                     ruleAlreadyExists={this.ruleAlreadyExists}
                                     currentRule={this.state.currentRule}
                                     getListOfMatchingSymbolNames={this.getListOfMatchingSymbolNames}/>

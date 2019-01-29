@@ -32,13 +32,20 @@ class RuleBar extends React.Component {
         this.displayConnectBackCheckbox = this.displayConnectBackCheckbox.bind(this);
         this.callbackToSwitchViewToNewlyDefinedView = this.callbackToSwitchViewToNewlyDefinedView.bind(this);
         this.moveCursorToPosition = this.moveCursorToPosition.bind(this);
+        this.switchToRuleView = this.switchToRuleView.bind(this);
+        this.switchToPreconditionsView = this.switchToPreconditionsView.bind(this);
+        this.switchToEffectsView = this.switchToEffectsView.bind(this);
+        this.handlePotentialTabbingHotKeyPress = this.handlePotentialTabbingHotKeyPress.bind(this);
         this.state = {
             ruleHeadInputVal: '',
             ruleExpansionInputVal: '',
             ruleApplicationRate: 1,
             ruleBodyInputIsActive: false,
             ruleDefinitionSymbolFilterQuery: '',
-            connectNewRuleHeadToCurrentSymbol: false
+            connectNewRuleHeadToCurrentSymbol: false,
+            showRuleView: true,
+            showPreconditionsView: false,
+            showEffectsView: false
         }
     }
 
@@ -48,6 +55,61 @@ class RuleBar extends React.Component {
 
     closeModal() {
         this.props.toggleWhetherRuleDefinitionModalIsOpen();
+    }
+
+    switchToRuleView() {
+        this.setState({
+            showRuleView: true,
+            showPreconditionsView: false,
+            showEffectsView: false
+        })
+    }
+
+    switchToPreconditionsView() {
+        this.setState({
+            showRuleView: false,
+            showPreconditionsView: true,
+            showEffectsView: false
+        })
+    }
+
+    switchToEffectsView() {
+        this.setState({
+            showRuleView: false,
+            showPreconditionsView: false,
+            showEffectsView: true
+        })
+    }
+
+    handlePotentialTabbingHotKeyPress(e) {
+        if (e.key === 'Tab' && this.props.showRuleDefinitionModal) {
+            e.preventDefault();
+            if (this.state.showRuleView) {
+                if (e.shiftKey) {
+                    this.switchToEffectsView();
+                }
+                else {
+                    this.switchToPreconditionsView();
+                }
+            }
+            else if (this.state.showPreconditionsView) {
+                if (e.shiftKey) {
+                    this.switchToRuleView();
+                }
+                else {
+                    this.switchToEffectsView();
+                }
+            }
+            else if (this.state.showEffectsView) {
+                if (e.shiftKey) {
+                    this.switchToPreconditionsView();
+                }
+                else {
+                    this.switchToRuleView();
+                }
+
+            }
+        }
     }
 
     updateRuleDefinitionSymbolFilterQuery(e) {
@@ -335,6 +397,7 @@ class RuleBar extends React.Component {
 
     componentDidMount(){
         document.addEventListener("keydown", this.submitRuleDefinitionOnEnter, false);
+        document.addEventListener("keydown", this.handlePotentialTabbingHotKeyPress, false);
     }
 
     componentWillReceiveProps(nextProps) {
@@ -343,6 +406,14 @@ class RuleBar extends React.Component {
                 ruleHeadInputVal: nextProps.currentSymbolName,
                 ruleExpansionInputVal: nextProps.rules[nextProps.idOfRuleToEdit].expansion.join(''),
                 ruleApplicationRate: nextProps.rules[nextProps.idOfRuleToEdit].app_rate,
+                connectNewRuleHeadToCurrentSymbol: false
+            });
+        }
+        else if (nextProps.idOfRuleToDuplicate !== null) {
+            this.setState({
+                ruleHeadInputVal: nextProps.currentSymbolName,
+                ruleExpansionInputVal: nextProps.rules[nextProps.idOfRuleToDuplicate].expansion.join(''),
+                ruleApplicationRate: nextProps.rules[nextProps.idOfRuleToDuplicate].app_rate,
                 connectNewRuleHeadToCurrentSymbol: false
             });
         }
@@ -362,6 +433,64 @@ class RuleBar extends React.Component {
             var shortened = rule.expansion.join('').substring(0, 10);
             rules.push(<Button onClick={this.handleRuleClick.bind(this, i)} title={AUTHOR_IS_USING_A_MAC ? "View production rule (toggle: ⇥, ⇧⇥)" : "View production rule (toggle: Tab, Shift+Tab)"} key={rule.expansion.join('')+this.props.currentSymbolName} style={i === this.props.currentRule ? {"backgroundColor": "#ffe97f"} : {}}>{shortened}</Button>);
         }, this);
+        if (this.state.showRuleView) {
+            var ruleModalSearchBar = (
+                Object.keys(this.props.nonterminals).some(function (symbolName) {return symbolName.indexOf("$symbol") === -1})
+                ?
+                <input  id='ruleDefinitionNonterminalListSearch'
+                    title="Hint: try '$text:[text from symbol rewriting]', e.g., '$text:typoo'"
+                    type='text'
+                    onChange={this.updateRuleDefinitionSymbolFilterQuery}
+                    value={this.state.ruleDefinitionSymbolFilterQuery}
+                    style={{'width': '100%', 'height': '43px', 'fontSize': '18px', 'padding': '0 12px'}}
+                    placeholder='Filter list...'
+                    // This hack is necessary to keep the cursor at the end of the query upon auto-focus
+                    onFocus={function(e) {
+                        var val = e.target.value;
+                        e.target.value = '';
+                        e.target.value = val;
+                    }}
+                />
+                :
+                ""
+            );
+            var ruleModalSearchResults = (
+                <div id='nonterminalsListModal' style={{'overflowY': 'scroll', 'marginBottom': '15px', 'height': '200px'}}>
+                    {
+                        this.formatList(this.props.getListOfMatchingSymbolNames(this.state.ruleDefinitionSymbolFilterQuery)).map((name) => {
+                            var color = this.props.nonterminals[name].complete ? "success" : "danger"
+                            return (
+                                <button className={'list-group-item list-group-item-xs nonterminal list-group-item-'.concat(color)}
+                                style={{'margin':'0', 'border':'0px'}}
+                                title={this.state.ruleBodyInputIsActive ? "Insert symbol reference into rule body (hint: when editing rule head, clicking here changes the head to the selected symbol)" : "Change rule head to symbol (hint: when editing rule body, clicking here inserts the selected symbol into the body)"}
+                                onClick={this.handleSymbolReferenceClick.bind(this, name)} key={name}>{this.props.nonterminals[name].deep ? <Glyphicon glyph="star"/> : ""}{this.props.nonterminals[name].deep ? " " : ""}{name}
+                                </button>
+                            )
+                        })
+                    }
+                </div>
+            );
+            var ruleModalContent = (
+                <div style={{'textAlign': 'center'}}>
+                    <textarea id='ruleHeadInput' type='text' title="This is the rule head: the symbol that is rewritten when this rule is executed." value={this.state.ruleHeadInputVal} onChange={this.updateRuleHeadInputVal} onFocus={this.deregisterRuleBodyInputFocus} style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '43px', 'marginTop': '10px', 'marginBottom': '15px', 'fontSize': '18px', 'padding': '8px 12px', backgroundColor: '#f2f2f2'}} autoFocus={this.state.ruleHeadInputVal === ""}/>
+                    <p title='The arrow in a production rule cues that the rule head (top) will be rewritten as the rule body (bottom).'><Glyphicon glyph="circle-arrow-down" style={{"fontSize": "25px", "top": "5px"}}/></p>
+                    <textarea id='ruleExpansionInput' type='text' title="This is the rule body: what the rule head will be rewritten as when this rule is executed." value={this.state.ruleExpansionInputVal} onChange={this.updateRuleExpansionInputVal} onFocus={this.registerRuleBodyInputFocus} style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '100px', 'marginTop': '10px', 'marginBottom': '15px', 'fontSize': '18px', 'padding': '0 12px', backgroundColor: '#f2f2f2'}} autoFocus={this.state.ruleHeadInputVal !== ""}/>
+                    <br/>
+                    <input title="This is the application rate: a number that specifies how frequently this rule will be used relative to any sibling rules (a higher number increases the frequency)." id='appRateModal' type='text' value={this.state.ruleApplicationRate} onChange={this.updateApplicationRate} onFocus={this.deregisterRuleBodyInputFocus} style={{'width': '50px', 'border': '0px solid #d7d7d7', 'height': '43px', 'marginBottom': '25px', 'fontSize': '18px', 'padding': '0 12px', 'textAlign': 'center'}}/>
+                    <br/>
+                    {
+                        (this.displayConnectBackCheckbox())
+                        ?
+                        <label title={"If checked, the following production rule will also be created: '" + this.props.currentSymbolName + " -> [[" + this.state.ruleHeadInputVal + "]]'. This can be used as a way of attaching tags to a production rule, which requires it to be associated with a dedicated symbol."} style={{"fontWeight": "normal", "position": "absolute", "left": "0px", "padding": "20px 0px 21px 31px"}}><input title={"If checked, the following production rule will also be created: '" + this.props.currentSymbolName + " -> [[" + this.state.ruleHeadInputVal + "]]'. This can be used as a way of attaching tags to a production rule, which requires it to be associated with a dedicated symbol."} name="isGoing" type="checkbox" checked={this.state.connectNewRuleHeadToCurrentSymbol} onChange={this.toggleConnectNewRuleHeadToCurrentSymbol}/> Connect to current symbol</label>
+                        :
+                        ""
+                    }
+                </div>
+            )
+        }
+//        else if (this.state.showPreconditionsView) {
+//
+//        }
         var ruleDefinitionAddButtonIsDisabled = this.props.ruleAlreadyExists(this.state.ruleHeadInputVal, this.state.ruleExpansionInputVal, this.state.ruleApplicationRate);
         if (this.props.idOfRuleToEdit !== null) {
             var ruleDefinitionModalButtonText = 'Update Rule';
@@ -394,61 +523,26 @@ class RuleBar extends React.Component {
         return (
             <div>
                 <div className="btn-test">
-                        <ButtonGroup>
-                            <Button id="addRuleButton" onClick={this.openModal} title={AUTHOR_IS_USING_A_MAC ? "Define new production rule (⌘D)" : "Define new production rule (Ctrl+D)"} key="addnew"><Glyphicon glyph="plus"/></Button>
-                            {rules}
-                        </ButtonGroup>
+                    <ButtonGroup>
+                        <Button id="addRuleButton" onClick={this.openModal} title={AUTHOR_IS_USING_A_MAC ? "Define new production rule (⌘D)" : "Define new production rule (Ctrl+D)"} key="addnew"><Glyphicon glyph="plus"/></Button>
+                        {rules}
+                    </ButtonGroup>
                 </div>
                 <div>
                     <Modal show={this.props.showRuleDefinitionModal} onHide={this.closeModal}>
                         <Modal.Header closeButton>
                             <Modal.Title>Rule Definition</Modal.Title>
                         </Modal.Header>
-                        {Object.keys(this.props.nonterminals).some(function (name) {return name.indexOf("$symbol") === -1})
-                            ?
-                            <input  id='ruleDefinitionNonterminalListSearch'
-                                title="Hint: try '$text:[text from symbol rewriting]', e.g., '$text:typoo'"
-                                type='text'
-                                onChange={this.updateRuleDefinitionSymbolFilterQuery}
-                                value={this.state.ruleDefinitionSymbolFilterQuery}
-                                style={{'width': '100%', 'height': '43px', 'fontSize': '18px', 'padding': '0 12px'}}
-                                placeholder='Filter list...'
-                                // This hack is necessary to keep the cursor at the end of the query upon auto-focus
-                                onFocus={function(e) {
-                                    var val = e.target.value;
-                                    e.target.value = '';
-                                    e.target.value = val;
-                            }}/>
-                            :
-                            ""
-                        }
-                        <div id='nonterminalsListModal' style={{'overflowY': 'scroll', 'marginBottom': '15px', 'height': '200px'}}>
-                            {   this.formatList(this.props.getListOfMatchingSymbolNames(this.state.ruleDefinitionSymbolFilterQuery)).map((name) => {
-                                    var color = this.props.nonterminals[name].complete ? "success" : "danger"
-                                    return (
-                                        <button className={'list-group-item list-group-item-xs nonterminal list-group-item-'.concat(color)}
-                                        style={{'margin':'0', 'border':'0px'}}
-                                        title={this.state.ruleBodyInputIsActive ? "Insert symbol reference into rule body (hint: when editing rule head, clicking here changes the head to the selected symbol)" : "Change rule head to symbol (hint: when editing rule body, clicking here inserts the selected symbol into the body)"}
-                                        onClick={this.handleSymbolReferenceClick.bind(this, name)} key={name}>{this.props.nonterminals[name].deep ? <Glyphicon glyph="star"/> : ""}{this.props.nonterminals[name].deep ? " " : ""}{name}
-                                        </button>
-                                    )
-                                })
-                            }
-                        </div>
+                        {ruleModalSearchBar}
+                        {ruleModalSearchResults}
+                        {ruleModalContent}
                         <div style={{'textAlign': 'center'}}>
-                            <textarea id='ruleHeadInput' type='text' title="This is the rule head: the symbol that is rewritten when this rule is executed." value={this.state.ruleHeadInputVal} onChange={this.updateRuleHeadInputVal} onFocus={this.deregisterRuleBodyInputFocus} style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '43px', 'marginTop': '10px', 'marginBottom': '15px', 'fontSize': '18px', 'padding': '8px 12px', backgroundColor: '#f2f2f2'}} autoFocus={this.state.ruleHeadInputVal === ""}/>
-                            <p title='The arrow in a production rule cues that the rule head (top) will be rewritten as the rule body (bottom).'><Glyphicon glyph="circle-arrow-down" style={{"fontSize": "25px", "top": "5px"}}/></p>
-                            <textarea id='ruleExpansionInput' type='text' title="This is the rule body: what the rule head will be rewritten as when this rule is executed." value={this.state.ruleExpansionInputVal} onChange={this.updateRuleExpansionInputVal} onFocus={this.registerRuleBodyInputFocus} style={{'width': '90%', 'border': '0px solid #d7d7d7', 'height': '100px', 'marginTop': '10px', 'marginBottom': '15px', 'fontSize': '18px', 'padding': '0 12px', backgroundColor: '#f2f2f2'}} autoFocus={this.state.ruleHeadInputVal !== ""}/>
-                            <br/>
-                            <input title="This is the application rate: a number that specifies how frequently this rule will be used relative to any sibling rules (a higher number increases the frequency)." id='appRateModal' type='text' value={this.state.ruleApplicationRate} onChange={this.updateApplicationRate} onFocus={this.deregisterRuleBodyInputFocus} style={{'width': '50px', 'border': '0px solid #d7d7d7', 'height': '43px', 'marginBottom': '25px', 'fontSize': '18px', 'padding': '0 12px', 'textAlign': 'center'}}/>
-                            <br/>
-                            {(this.displayConnectBackCheckbox())
-                                ?
-                                <label title={"If checked, the following production rule will also be created: '" + this.props.currentSymbolName + " -> [[" + this.state.ruleHeadInputVal + "]]'. This can be used as a way of attaching tags to a production rule, which requires it to be associated with a dedicated symbol."} style={{"fontWeight": "normal", "position": "absolute", "left": "0px", "padding": "20px 0px 21px 31px"}}><input title={"If checked, the following production rule will also be created: '" + this.props.currentSymbolName + " -> [[" + this.state.ruleHeadInputVal + "]]'. This can be used as a way of attaching tags to a production rule, which requires it to be associated with a dedicated symbol."} name="isGoing" type="checkbox" checked={this.state.connectNewRuleHeadToCurrentSymbol} onChange={this.toggleConnectNewRuleHeadToCurrentSymbol}/> Connect to current symbol</label>
-                                :
-                                ""
-                            }
                             <Button id="submitRuleButton" title={ruleDefinitionModalButtonHoverText} disabled={ruleDefinitionAddButtonIsDisabled} bsStyle="primary" bsSize="large" style={{'marginBottom': '25px'}} onClick={ruleDefinitionModalButtonCallback}>{ruleDefinitionModalButtonText}</Button>
+                            <ButtonGroup style={{position: 'absolute', left: '30px', marginBottom: '25px'}} >
+                                <Button className="grp_button" id="ruleViewButton" title={AUTHOR_IS_USING_A_MAC ? "Switch to rule view (toggle: ⇥, ⇧⇥)" : "Switch to rule view (toggle: Tab, Shift+Tab)"} bsStyle="primary" bsSize="large" onClick={this.switchToRuleView} style={this.state.showRuleView ? {backgroundColor: "#ffe97f"} : {}}><Glyphicon glyph="object-align-vertical"/></Button>
+                                <Button className="grp_button" id="preconditionViewButton" title={AUTHOR_IS_USING_A_MAC ? "Switch to preconditions view (toggle: ⇥, ⇧⇥)" : "Switch to preconditions view (toggle: Tab, Shift+Tab)"} bsStyle="primary" bsSize="large" onClick={this.switchToPreconditionsView} style={this.state.showPreconditionsView ? {backgroundColor: "#ffe97f"} : {}}><Glyphicon glyph="object-align-left"/></Button>
+                                <Button className="grp_button" id="effectViewButton" title={AUTHOR_IS_USING_A_MAC ? "Switch to effects view (toggle: ⇥, ⇧⇥)" : "Switch to effects view (toggle: Tab, Shift+Tab)"} bsStyle="primary" bsSize="large" onClick={this.switchToEffectsView} style={this.state.showEffectsView ? {backgroundColor: "#ffe97f"} : {}}><Glyphicon glyph="object-align-right"/></Button>
+                            </ButtonGroup>
                         </div>
                     </Modal>
                 </div>
