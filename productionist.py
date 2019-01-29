@@ -913,7 +913,7 @@ class State(object):
         """Evaluate the given predicate."""
         # If it's a string literal, strip off the single quotes and return the result (the actual string
         # being referenced in the string literal)
-        if value.startswith("'") and value.endswith("'"):
+        if value.startswith("'") or value.startswith('"'):
             return value[1:-1]
         # Otherwise the value references a variable, potentially using dot notation, so parse that reference
         keys = value.split('.')
@@ -1232,11 +1232,11 @@ class Grammar(object):
             if type(element) is NonterminalSymbol:
                 expression_as_template.append(element)
             else:
-                for expression_operator in re.split("('.*?')", element):
+                for expression_operator in re.split(r"""("[^"]*"|'[^']*')""", element):
                     # Note: re.split injects empty strings if matches occur at the beginning or end of the
                     # string that is being parsed, which is why we check for empty strings here
                     if expression_operator != '':
-                        if expression_operator.startswith("'"):
+                        if expression_operator.startswith("'") or expression_operator.startswith('"'):
                             # String literal, so append to the template
                             expression_as_template.append(expression_operator)
                         else:
