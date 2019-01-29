@@ -210,11 +210,11 @@ class RuleBoard extends React.Component {
             }
             else {
                 // Terminal symbol
-                stylizedRuleBody.push(<span title="Click to edit rule body" onClick={this.startQuickRuleBodyEditing}>{symbolReference}</span>)
+                stylizedRuleBody.push(<span title="Rule body (click to edit)" onClick={this.startQuickRuleBodyEditing}>{symbolReference}</span>)
             }
         }
         // Add a small chunk of whitespace that the author may click on to do a quick edit on the rule body
-        stylizedRuleBody.push(<span title="Click to edit rule body" onClick={this.startQuickRuleBodyEditing}>&nbsp;&nbsp;&nbsp;&nbsp;</span>)
+        stylizedRuleBody.push(<span title="Rule body (click to edit)" onClick={this.startQuickRuleBodyEditing}>&nbsp;&nbsp;&nbsp;&nbsp;</span>)
 
         return (
             <div>
