@@ -229,7 +229,7 @@ class RuleBoard extends React.Component {
                         <br></br>
                         <Button id="playButton" bsStyle="default" title={AUTHOR_IS_USING_A_MAC ? "Test rule execution (⌘↩)" : "Test rule execution (Ctrl+Enter)"} onClick={this.handleExecuteRule} bsStyle={this.props.playButtonIsJuicing ? 'success' : 'default'}><Glyphicon glyph="play"/></Button>
                         <Button id="editRuleButton" bsStyle="default" title={AUTHOR_IS_USING_A_MAC ? "Edit rule (⇧⌘D)" : "Test rule execution (Ctrl+Shift+D)"} onClick={this.prepareForRuleDefinitionEditModal}><Glyphicon glyph="pencil"/></Button>
-                        <Button id="editRuleButton" bsStyle="default" title={AUTHOR_IS_USING_A_MAC ? "Copy rule definition (⇧⌘C)" : "Copy rule definition (Ctrl+Shift+C)"} onClick={this.prepareForRuleDuplication}><Glyphicon glyph="duplicate"/></Button>
+                        <Button id="copyRuleButton" bsStyle="default" title={AUTHOR_IS_USING_A_MAC ? "Copy rule definition (⇧⌘C)" : "Copy rule definition (Ctrl+Shift+C)"} onClick={this.prepareForRuleDuplication}><Glyphicon glyph="duplicate"/></Button>
                         <Button bsStyle="danger" title="Delete rule" onClick={this.onRuleDelete}><Glyphicon glyph="trash"/></Button>
                         <Glyphicon title='The arrow in a production rule cues that the rule head (top) will be rewritten as the rule body (bottom).' glyph="circle-arrow-down" style={{"fontSize": "25px", "left": "10px", "top": "5px"}}/>
                     </h2>

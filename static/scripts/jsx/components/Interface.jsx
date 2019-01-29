@@ -410,6 +410,7 @@ class Interface extends React.Component {
             var quickTestHotKeyMatch = false;  // .
             var quickRuleDefineHotKeyMatch = false; // d
             var quickRuleEditHotKeyMatch = false;  // shift+d
+            var quickRuleCopyHotKeyMatch = false; // shift+c
             var quickTestRewriteHotKeyMatch = false;  // enter
             var viewRuleHeadHotKeyMatch = false; // up arrow
             var goBackHotKeyMatch = false; // left arrow
@@ -498,6 +499,12 @@ class Interface extends React.Component {
                                 quickRuleDefineHotKeyMatch = true;
                             }
                             break;
+                        case 'c':
+                            if (e.shiftKey) {
+                                e.preventDefault();
+                                quickRuleCopyHotKeyMatch = true;
+                            }
+                            break;
                         case 'r':
                             e.preventDefault();  // Disable page reloading, which breaks history keeping
                    }
@@ -544,6 +551,15 @@ class Interface extends React.Component {
                 }
                 else {
                     document.getElementById("editRuleButton").click();
+                }
+            }
+            // Quick rule copy: simulate clicking of the button for copying a rule definition
+            else if (quickRuleCopyHotKeyMatch && document.getElementById("copyRuleButton")) {
+                if (this.state.showRuleDefinitionModal) {
+                    this.closeRuleDefinitionModal();
+                }
+                else {
+                    document.getElementById("copyRuleButton").click();
                 }
             }
             // Quick rewrite test: simulate clicking of the 'play' button for testing symbol rewriting or rule execution
