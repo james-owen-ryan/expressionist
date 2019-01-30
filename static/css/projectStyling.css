@@ -100,3 +100,59 @@
 .test-productionist-module-modal-utility-form:hover {
     background-color: #ffe97f;
 }
+
+.rule-button-when-rule-has-preconditions-and-no-effects {
+    background: linear-gradient(to bottom, #57f7e0 5px, #f2f2f2 5px);
+}
+
+.rule-button-when-rule-has-effects-and-no-preconditions {
+    background: linear-gradient(to bottom, #57f7e0 5px, #f2f2f2 5px);
+}
+
+.rule-button-when-rule-has-preconditions-and-effects {
+    background: linear-gradient(to bottom, #57f7e0 5px, #f2f2f2 5px);
+}
+
+.rule-button-when-rule-has-preconditions-and-no-effects-and-is-the-current-rule {
+    background: linear-gradient(to bottom, #57f7e0 5px, #ffe97f 5px);
+}
+
+.rule-button-when-rule-has-effects-and-no-preconditions-and-is-the-current-rule {
+    background: linear-gradient(to bottom, #57f7e0 5px, #ffe97f 5px);
+}
+
+.rule-button-when-rule-has-preconditions-and-effects-and-is-the-current-rule {
+    background: linear-gradient(to bottom, #57f7e0 5px, #ffe97f 5px);
+}
+
+.rule-button-when-rule-has-effects-and-no-preconditions {
+    background: linear-gradient(to bottom, #57f7e0 5px, #f2f2f2 5px);
+}
+
+.rule-button-when-rule-has-preconditions-and-effects {
+    background: linear-gradient(to bottom, #57f7e0 5px, #f2f2f2 5px);
+}
+
+.rule-button-when-rule-has-preconditions-and-no-effects:focus {
+    background: linear-gradient(to bottom, #57f7e0 5px, #ffe97f 5px);
+}
+
+.rule-button-when-rule-has-effects-and-no-preconditions:focus {
+    background: linear-gradient(to bottom, #57f7e0 5px, #ffe97f 5px);
+}
+
+.rule-button-when-rule-has-preconditions-and-effects:focus {
+    background: linear-gradient(to bottom, #57f7e0 5px, #ffe97f 5px);
+}
+
+.rule-button-when-rule-has-preconditions-and-no-effects:hover {
+    background: linear-gradient(to bottom, #57f7e0 5px, #ffe97f 5px);
+}
+
+.rule-button-when-rule-has-effects-and-no-preconditions:hover {
+    background: linear-gradient(to bottom, #57f7e0 5px, #ffe97f 5px);
+}
+
+.rule-button-when-rule-has-preconditions-and-effects:hover {
+    background: linear-gradient(to bottom, #57f7e0 5px, #ffe97f 5px);
+}

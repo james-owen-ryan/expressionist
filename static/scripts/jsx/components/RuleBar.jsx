@@ -531,10 +531,41 @@ class RuleBar extends React.Component {
     }
 
     render() {
-        var rules = [];
+        var ruleButtons = [];
         this.props.rules.forEach(function (rule, i) {
-            var shortened = rule.expansion.join('').substring(0, 10);
-            rules.push(<Button onClick={this.handleRuleClick.bind(this, i)} title={AUTHOR_IS_USING_A_MAC ? "View production rule (toggle: ⇥, ⇧⇥)" : "View production rule (toggle: Tab, Shift+Tab)"} key={rule.expansion.join('')+this.props.currentSymbolName} style={i === this.props.currentRule ? {"backgroundColor": "#ffe97f"} : {}}>{shortened}</Button>);
+            var ruleNameExcerpt = rule.expansion.join('').substring(0, 10);
+            var buttonIsForTheCurrentRule = i === this.props.currentRule;
+            var buttonBackgroundColor = buttonIsForTheCurrentRule ? "#ffe97f" : "#f2f2f2";
+            var buttonExtraClassName = '';
+            if (rule.preconditionsStr && rule.effectsStr) {
+                if (buttonIsForTheCurrentRule) {
+                    buttonExtraClassName = 'rule-button-when-rule-has-preconditions-and-effects-and-is-the-current-rule'
+                }
+                else {
+                    buttonExtraClassName = 'rule-button-when-rule-has-preconditions-and-effects'
+                }
+            }
+            else if (rule.preconditionsStr) {
+                if (buttonIsForTheCurrentRule) {
+                    buttonExtraClassName = 'rule-button-when-rule-has-preconditions-and-no-effects-and-is-the-current-rule'
+                }
+                else {
+                    buttonExtraClassName = 'rule-button-when-rule-has-preconditions-and-no-effects'
+                }
+            }
+            else if (rule.effectsStr) {
+                if (buttonIsForTheCurrentRule) {
+                    buttonExtraClassName = 'rule-button-when-rule-has-effects-and-no-preconditions-and-is-the-current-rule'
+                }
+                else {
+                    buttonExtraClassName = 'rule-button-when-rule-has-effects-and-no-preconditions'
+                }
+            }
+            ruleButtons.push(
+                <Button onClick={this.handleRuleClick.bind(this, i)} title={AUTHOR_IS_USING_A_MAC ? "View production rule (toggle: ⇥, ⇧⇥)" : "View production rule (toggle: Tab, Shift+Tab)"} key={rule.expansion.join('')+this.props.currentSymbolName} className={buttonExtraClassName} style={buttonExtraClassName ? {} : {backgroundColor: buttonBackgroundColor}}>
+                    {ruleNameExcerpt}
+                </Button>
+            );
         }, this);
         if (this.state.showRuleView) {
             var ruleModalSearchBar = (
@@ -665,7 +696,7 @@ class RuleBar extends React.Component {
                 <div className="btn-test">
                     <ButtonGroup>
                         <Button id="addRuleButton" onClick={this.openModal} title={AUTHOR_IS_USING_A_MAC ? "Define new production rule (⌘D)" : "Define new production rule (Ctrl+D)"} key="addnew"><Glyphicon glyph="plus"/></Button>
-                        {rules}
+                        {ruleButtons}
                     </ButtonGroup>
                 </div>
                 <div>
