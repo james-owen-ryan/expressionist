@@ -958,8 +958,16 @@ class State(object):
                     associated_state_entry[key] = {}
                 associated_state_entry = associated_state_entry[key]
             else:
-                # Set the final key, which stores the value associated with the given key string,
-                # as the evaluated value (note that the previous value will be overwritten)
+                # Set the final key (which stores the value associated with the given key string) as the
+                # evaluated value; note that any previous value will be overwritten; note also that if a
+                # new state element is declared as an alias for an existing one, the assignment will occur
+                # in a 'pass by reference' manner if the alias is being set to a dict value and in a 'pass
+                # by value' manner if the value is of a different type; this is simply a byproduct of how
+                # dictionaries work in Python, but it works nicely for our purposes here; for example, the
+                # runtime expression {villain.name with hero.worst_enemy as villain}' would make 'state.villain'
+                # resolve to the dictionary stored at 'state.hero.worst_enemy', which means subsequent changes
+                # to either 'state.villain' or 'state.hero.worst_enemy' would modify the same object; my sense
+                # is that this will tend to match author expectations, and is thus a good thing
                 associated_state_entry[key] = evaluated_value
         # Finally, record this update
         self.updates_this_generation_instance.append((key, value))
@@ -1412,4 +1420,3 @@ class RuntimeExpression(object):
         assert self.is_simple_expression or self.is_as_expression or self.is_with_expression, (
             "Invalid syntax in runtime expression '{raw_definition}'".format(raw_definition=raw_definition)
         )
-
