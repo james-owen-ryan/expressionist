@@ -513,7 +513,7 @@ class Productionist(object):
                 )
                 if result_of_runtime_expression is None:
                     # The runtime expression referenced something that could not be evaluated; short-circuit
-                    # TODO THIS SHOULD PROBABLY SURFACE ON ERROR ON THE AUTHORING INTERFACE
+                    # TODO SHOULD PROBABLY SURFACE ON ERROR ON THE AUTHORING INTERFACE
                     return None, None
                 # This may be a StateElement object, so we need to cast to string to make the join() call below work
                 result_of_rule_execution.append(str(result_of_runtime_expression))
@@ -548,15 +548,19 @@ class Productionist(object):
         # Finally, execute the runtime expression and return the result (note: side effects may also
         # trigger updates to the state)
         result, updated_state = self._execute_runtime_expression(
+            runtime_expression=runtime_expression,
             realized_expression_definition=grounded_expression_definition,
             state=state,
             n_tabs_for_debug=n_tabs_for_debug+1
         )
-        # Finally, execute the runtime expression and return the result
+        # Before returning the result, make sure it's a viable type for inclusion in a text
+        # output (unicode, str, int, float)
+        if type(result) not in (unicode, str, int, float):
+            return None, None
         return result, updated_state
 
     @staticmethod
-    def _execute_runtime_expression(realized_expression_definition, state, n_tabs_for_debug):
+    def _execute_runtime_expression(runtime_expression, realized_expression_definition, state, n_tabs_for_debug):
         """Execute the given runtime expression."""
         # # Next, check if there is a conditional in the expression, since these must be processed first
         # if 'if' in realized_expression_definition:
@@ -572,16 +576,16 @@ class Productionist(object):
         #     )
         variable_to_set = None
         value_to_set_variable_to = None
-        if 'with' in realized_expression_definition:
-            # Example: ['best_friend.last_name', 'with', 'speaker.best_friend', 'as', 'best_friend']
+        if runtime_expression.is_with_expression:
+            # Example: ['villain.name.last', 'with', 'speaker.worst_enemy', 'as', 'villain']
             reference, with_operator, value_to_set_variable_to, as_operator, variable_to_set = (
                 realized_expression_definition
             )
-        elif 'as' in realized_expression_definition:
+        elif runtime_expression.is_as_expression:
             # Example: ["'Jeff'", 'as', 'name']
             value_to_set_variable_to, as_operator, variable_to_set = realized_expression_definition
             reference = variable_to_set
-        else:
+        else:  # runtime_expression.is_simple_expression
             # Example: [name]
             reference = realized_expression_definition[0]
         if variable_to_set:
@@ -915,6 +919,12 @@ class State(object):
         # being referenced in the string literal)
         if value.startswith("'") or value.startswith('"'):
             return value[1:-1]
+        # If it's an int or a float, which are also valid types, return the evaluated form
+        try:
+            if type(eval(value)) in (int, float):
+                return eval(value)
+        except NameError:
+            pass
         # Otherwise the value references a variable, potentially using dot notation, so parse that reference
         keys = value.split('.')
         associated_state_entry = self.now
@@ -923,15 +933,7 @@ class State(object):
                 # The variable cannot be resolved because there is no associated state entry; return None
                 return None
             associated_state_entry = associated_state_entry[key]
-        if type(associated_state_entry) is not dict:
-            return associated_state_entry
-        # The variable was resolved, but it evaluates to a state entry that itself has keys, so return None;
-        # this is likely due to an authoring error whereby a variable that was set to a valid type was
-        # overwritten as a variable that has keys; for instance, if "'Sheldon Klein' as writer.name" were
-        # to update the state and then later on "'Sheldon' as writer.name.first" overwrote 'writer.name' to
-        # a state entry of the form '{"first": 'Sheldon'}', subsequently referencing 'writer.name' would
-        # fail here, because a dictionary '{"first": 'Sheldon'}' is not a valid type
-        return None
+        return associated_state_entry
 
     def update(self, key, value):
         """Update the state."""
@@ -949,6 +951,10 @@ class State(object):
             if i != len(keys)-1:
                 if key not in associated_state_entry:
                     # Create the key
+                    associated_state_entry[key] = {}
+                elif type(associated_state_entry[key]) is not dict:
+                    # Overwrite an earlier primitive value (e.g., 'story.villain.name' was 'Bart Hume' but
+                    # now we're processing a runtime expression such as "'Paul' as story.villain.name.first"
                     associated_state_entry[key] = {}
                 associated_state_entry = associated_state_entry[key]
             else:
@@ -1364,7 +1370,7 @@ class ProductionRule(object):
             if type(element) is NonterminalSymbol:
                 body_str += '[[{symbol_name}]]'.format(symbol_name=element.name)
             elif type(element) is RuntimeExpression:
-                body_str += '[{expression_definition}]'.format(expression_definition=element.raw_definition)
+                body_str += '{{expression_definition}}'.format(expression_definition=element.raw_definition)
             else:
                 body_str += '{terminal_symbol}'.format(terminal_symbol=element)
         return '{head} -> {body}'.format(head=self.head, body=body_str)
@@ -1398,13 +1404,12 @@ class RuntimeExpression(object):
         self.raw_definition = raw_definition
         self.definition = parsed_definition  # A list of expression fragments (strings) and NonterminalSymbol objects
         # Validate the syntax of this expression
-        this_is_a_simple_expression = len(parsed_definition) == 1
-        this_is_an_as_expression = (
-            len(parsed_definition) == 3 and parsed_definition[1] == 'as'
+        self.is_simple_expression = len(parsed_definition) == 1
+        self.is_as_expression = len(parsed_definition) == 3 and parsed_definition[1] == 'as'
+        self.is_with_expression = (
+            len(parsed_definition) == 5 and parsed_definition[1] == 'with' and parsed_definition[3] == 'as'
         )
-        this_is_a_with_expression = (
-            len(parsed_definition) == 4 and parsed_definition[1] == 'with' and parsed_definition[3] == 'as'
-        )
-        assert this_is_a_simple_expression or this_is_an_as_expression or this_is_a_with_expression, (
+        assert self.is_simple_expression or self.is_as_expression or self.is_with_expression, (
             "Invalid syntax in runtime expression '{raw_definition}'".format(raw_definition=raw_definition)
         )
+
