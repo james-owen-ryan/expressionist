@@ -38,7 +38,7 @@ class NonterminalSymbol(object):
         rule_object = Rule(symbol=self, derivation=derivation, application_rate=application_rate)
         if rule_object not in self.rules:
             self.rules.append(rule_object)
-            self._fit_probability_distribution()
+            self.fit_probability_distribution()
             return True
         else:
             return False
@@ -46,7 +46,7 @@ class NonterminalSymbol(object):
     def add_rule_object(self, rule_object):
         if rule_object not in self.rules:
             self.rules.append(rule_object)
-            self._fit_probability_distribution()
+            self.fit_probability_distribution()
             return True
         else:
             return False
@@ -56,11 +56,11 @@ class NonterminalSymbol(object):
         rule_object = Rule(symbol=self, derivation=derivation)
         if rule_object in self.rules:
             self.rules.remove(rule_object)
-            self._fit_probability_distribution()
+            self.fit_probability_distribution()
 
     def remove_by_index(self, index):
         self.rules.remove(self.rules[index])
-        self._fit_probability_distribution()
+        self.fit_probability_distribution()
 
     def expand(self, markup=None):
         if markup is None:
@@ -195,7 +195,7 @@ class NonterminalSymbol(object):
     def __repr__(self):
         return self.__str__()
 
-    def _fit_probability_distribution(self):
+    def fit_probability_distribution(self):
         """Return a probability distribution fitted to the given application-rates dictionary."""
         if self.rules:
             application_rates_dictionary = {rule: rule.application_rate for rule in self.rules}
