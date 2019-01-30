@@ -287,7 +287,7 @@ def export():
     reductionist = Reductionist(
         raw_grammar_json=app.grammar.to_json(to_file=True),  # JOR: I'm not sure what to_file actually does
         path_to_write_output_files_to=output_path,
-        verbosity=1 if debug is False else 2
+        verbosity=0 if debug is False else 2
     )
     if not reductionist.validator.errors:
         print "\n--Success! Indexed this grammar's {n} generable lines to infer {m} expressible meanings.--".format(
@@ -345,15 +345,12 @@ def tagged_content_request():
         prohibited_tags=prohibited_tags,
         scoring_metric=scoring_metric
     )
-    print "\n-- Attempting to fulfill the following content request:\n{}".format(content_request)
     # Fulfill the content request to generate N outputs (each being an object of the class productionist.Output)
     content_package = app.productionist.fulfill_content_request(content_request=content_request)
     if content_package:
-        print "\n\n-- Successfully fulfilled the content request!"
         # Send the generated outputs back to the authoring tool as a single JSON package
         content_package_json = json.dumps(content_package.payload)
         return content_package_json
-    print "\n\n-- The content request cannot be satisfied by the exported content bundle."
     return "The content request cannot be satisfied by the exported content bundle."
 
 
