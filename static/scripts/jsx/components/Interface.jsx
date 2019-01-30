@@ -69,6 +69,7 @@ class Interface extends React.Component {
         this.symbolNameAlreadyExists = this.symbolNameAlreadyExists.bind(this);
         this.ruleAlreadyExists = this.ruleAlreadyExists.bind(this);
         this.getListOfMatchingSymbolNames = this.getListOfMatchingSymbolNames.bind(this);
+        this.getListOfMatchingStateElements = this.getListOfMatchingStateElements.bind(this);
         this.attemptToBuildProductionist = this.attemptToBuildProductionist.bind(this);
         this.buildProductionist = this.buildProductionist.bind(this);
         this.letInterfaceKnowTextFieldEditingHasStarted = this.letInterfaceKnowTextFieldEditingHasStarted.bind(this);
@@ -106,7 +107,8 @@ class Interface extends React.Component {
             showTestModal: false,
             showRuleDefinitionModal: false,
             tagDefinitionModalIsOpen: false,
-            textFieldEditingIsOccurring: false
+            textFieldEditingIsOccurring: false,
+            stateElements: []
         }
     }
 
@@ -639,7 +641,7 @@ class Interface extends React.Component {
         }
     }
 
-    // returns an array of nonterminal names that match the symbolFilterQuery.
+    // Returns an array of nonterminal names that match the symbolFilterQuery.
     getListOfMatchingSymbolNames(symbolFilterQuery) {
         var allSymbolNames = Object.keys(this.state.nonterminals);
         // If there's no filter query, all symbols match
@@ -702,17 +704,37 @@ class Interface extends React.Component {
             }
             return matches;
         }
-        // Lastly, handle conventional filter queries, which simply match against the symbol names (in
-        // a case-insensitive manner)
+        // Lastly, handle conventional filter queries, which simply match against the symbol
+        // names (in a case-insensitive manner)
         return allSymbolNames.filter( (symbolName) => {
             // A given symbol is a match if the filter query is a substring of its name
             var isMatch = symbolName.toLowerCase().indexOf(symbolFilterQuery.toLowerCase());
-            if (isMatch != -1){ return true; }
+            if (isMatch != -1) {
+                return true;
+            }
             return false;
         })
     }
 
-    ruleAlreadyExists(ruleHeadName, ruleBody, applicationRate) {
+    getListOfMatchingStateElements(stateElementFilterQuery) {
+        var allStateElements = this.state.stateElements;
+        // If there's no filter query, all state elements match
+        if (stateElementFilterQuery == ''){
+            return allStateElements
+        }
+        // Otherwise, match against the state elements that have been used so far (in a
+        // case-insensitive manner)
+        return allStateElements.filter( (stateElement) => {
+            // A given state element is a match if the filter query is a substring of it
+            var isMatch = stateElement.toLowerCase().indexOf(stateElementFilterQuery.toLowerCase());
+            if (isMatch != -1) {
+                return true;
+            }
+            return false;
+        })
+    }
+
+    ruleAlreadyExists(ruleHeadName, ruleBody, applicationRate, preconditionsStr, effectsStr) {
         // Return whether a rule with the given attributes has already been defined
         if (!(ruleHeadName in this.state.nonterminals)) {
             return false
@@ -727,8 +749,13 @@ class Interface extends React.Component {
                     // rate would mean that the rule in question matches an existing rule in all but
                     // its application rate, and in Expressionist that is a case of duplicate rules,
                     // which we don't allow (the way to make a rule more likely is to modulate its
-                    // application rate, not to duplicate it, as in Tracery)
+                    // application rate, not to duplicate it as in Tracery)
                     if (applicationRate != rule.app_rate) {
+                        return false;
+                    }
+                    // Additionally, changing the rule being edited's preconditions or effects
+                    // is a viable modification
+                    if (preconditionsStr != rule.preconditionsStr || effectsStr != rule.effectsStr) {
                         return false;
                     }
                 }
@@ -1052,6 +1079,8 @@ class Interface extends React.Component {
                                     updateGeneratedContentPackageText={this.updateGeneratedContentPackageText}
                                     expansion={definedRules[this.state.currentRule].expansion}
                                     applicationRate={definedRules[this.state.currentRule].app_rate}
+                                    preconditionsStr={definedRules[this.state.currentRule].preconditionsStr}
+                                    effectsStr={definedRules[this.state.currentRule].effectsStr}
                                     openRuleDefinitionModal={this.openRuleDefinitionModal}
                                     ruleAlreadyExists={this.ruleAlreadyExists}
                                     playButtonIsJuicing={this.state.playButtonIsJuicing}
@@ -1144,7 +1173,9 @@ class Interface extends React.Component {
                                     idOfRuleToDuplicate={this.state.idOfRuleToDuplicate}
                                     ruleAlreadyExists={this.ruleAlreadyExists}
                                     currentRule={this.state.currentRule}
-                                    getListOfMatchingSymbolNames={this.getListOfMatchingSymbolNames}/>
+                                    getListOfMatchingSymbolNames={this.getListOfMatchingSymbolNames}
+                                    getListOfMatchingStateElements={this.getListOfMatchingStateElements}
+                                    stateElements={this.state.stateElements}/>
                     </div>
                 </div>
 

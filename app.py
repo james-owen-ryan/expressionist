@@ -153,35 +153,57 @@ def add_rule():
     rule_head_name = data['rule head name']
     rule_body = data['rule body']
     application_rate = int(data['application rate'])
+    preconditions_str = data['preconditions']
+    effects_str = data['effects']
     try:
+        # Retrieve the nonterminal symbol named in the rule head
         rule_head_object = app.grammar.nonterminals[rule_head_name]
     except KeyError:
+        # No such nonterminal symbol exists yet, so create one
         rule_head_object = nonterminal_symbol.NonterminalSymbol(rule_head_name)
         app.grammar.add_nonterminal(rule_head_object)
-    app.grammar.add_rule(rule_head_object, grammar.parse_rule(rule_body), application_rate)
+    app.grammar.add_rule(
+        rule_head=rule_head_object,
+        rule_body=grammar.parse_rule(rule_body),
+        application_rate=application_rate,
+        preconditions_str=preconditions_str,
+        effects_str=effects_str
+    )
     return app.grammar.to_json()
 
 
 @app.route('/api/rule/edit', methods=['POST'])
 def edit_rule():
     data = request.get_json()
-    rule_head_name = data['rule head name']
     original_rule_head_name = data['original rule head name']
+    original_rule_index = int(data['rule id'])
+    rule_head_name = data['rule head name']
     rule_body = data['rule body']
     application_rate = int(data['application rate'])
-    rule_id = int(data['rule id'])
+    preconditions_str = data['preconditions']
+    effects_str = data['effects']
     if rule_head_name == original_rule_head_name:
         # Simply update the application rate and expansion
         app.grammar.modify_application_rate(
-            nonterminal_symbol.NonterminalSymbol(rule_head_name), rule_id, application_rate
+            rule_head=nonterminal_symbol.NonterminalSymbol(rule_head_name),
+            rule_index=original_rule_index,
+            application_rate=application_rate
         )
         app.grammar.modify_rule_expansion(
-            rule_id, nonterminal_symbol.NonterminalSymbol(rule_head_name),
-            grammar.parse_rule(rule_body), application_rate
+            rule_head=nonterminal_symbol.NonterminalSymbol(rule_head_name),
+            rule_index=original_rule_index,
+            derivation=grammar.parse_rule(rule_body),
+            application_rate=application_rate
+        ),
+        app.grammar.modify_rule_preconditions_and_effects(
+            rule_head=nonterminal_symbol.NonterminalSymbol(rule_head_name),
+            rule_index=original_rule_index,
+            new_preconditions_str=preconditions_str,
+            new_effects_str=effects_str
         )
     else:
         # Delete the old rule and create a new one that is associated with the new rule head
-        app.grammar.remove_rule_by_index(nonterminal_symbol.NonterminalSymbol(original_rule_head_name), rule_id)
+        app.grammar.remove_rule_by_index(nonterminal_symbol.NonterminalSymbol(original_rule_head_name), original_rule_index)
         try:
             new_rule_head_object = app.grammar.nonterminals[rule_head_name]
         except KeyError:

@@ -409,12 +409,14 @@ class Productionist(object):
         # Select a production rule
         rule_to_execute = None
         if self.remaining_path and self.remaining_path[0] in nonterminal_symbol.production_rules:
-            rule_to_execute = self.remaining_path.pop(0)
+            next_rule_on_path = self.remaining_path.pop(0)
+            if next_rule_on_path.preconditions_hold(state=state):
+                rule_to_execute = next_rule_on_path
         else:
             if self.targeting_meaning:
-                candidate_wildcard_rules = [
-                    rule for rule in nonterminal_symbol.production_rules if not rule.semantically_meaningful
-                ]
+                candidate_wildcard_rules = (
+                    [rule for rule in nonterminal_symbol.production_rules if not rule.semantically_meaningful]
+                )
             else:
                 candidate_wildcard_rules = list(nonterminal_symbol.production_rules)
             while candidate_wildcard_rules:
@@ -427,8 +429,8 @@ class Productionist(object):
                     rule_to_execute = selected_wildcard_rule
                     break
                 candidate_wildcard_rules.remove(selected_wildcard_rule)
-            if not rule_to_execute:
-                return None,  None
+        if not rule_to_execute:
+            return None,  None
         # Terminally expand the symbol
         terminal_expansion, updated_state = self._execute_production_rule(
             rule=rule_to_execute,
@@ -520,6 +522,9 @@ class Productionist(object):
             else:  # type(element) is unicode
                 # Terminal symbol (no need to expand)
                 result_of_rule_execution.append(element)
+        # Further update the state (in addition to any updates that may have been triggered by processing runtime
+        # expressions in the rule body) by executing any effects that are attached to this production rule
+        state = rule.execute_effects(state=state)
         # Concatenate the results and return that string, along with the updated state
         expansion_yielded_by_this_rule = ''.join(result_of_rule_execution)
         return expansion_yielded_by_this_rule, state
@@ -590,7 +595,7 @@ class Productionist(object):
             reference = realized_expression_definition[0]
         if variable_to_set:
             state.update(key=variable_to_set, value=value_to_set_variable_to)
-        result = state.evaluate(reference)
+        result = state.resolve(reference)
         return result, state
 
     def _resolve_conditional_expression_in_runtime_expression(self, conditional_expression, state):
@@ -606,7 +611,7 @@ class Productionist(object):
         condition_str = ''.join(
             conditional_expression[conditional_expression.index('if'):conditional_expression.index('else')]
         )
-        if state.evaluate(value=condition_str):
+        if state.resolve(value=condition_str):
             resolved_conditional_expression = conditional_expression[0]
         else:
             resolved_conditional_expression = conditional_expression[conditional_expression.index('else')+1:]
@@ -913,15 +918,15 @@ class State(object):
         else:
             self.updates_this_generation_instance = updates_this_generation_instance
 
-    def evaluate(self, value):
-        """Evaluate the given predicate."""
+    def resolve(self, value):
+        """Resolve the given value, which is either a primitive type or a state reference."""
         # If it's a string literal, strip off the single quotes and return the result (the actual string
         # being referenced in the string literal)
         if value.startswith("'") or value.startswith('"'):
             return value[1:-1]
-        # If it's an int or a float, which are also valid types, return the evaluated form
+        # If it evaluates to a valid primitive type (int, float, bool), return the evaluated form
         try:
-            if type(eval(value)) in (int, float):
+            if type(eval(value)) in (int, float, bool):
                 return eval(value)
         except NameError:
             pass
@@ -939,7 +944,7 @@ class State(object):
         """Update the state."""
         # First, attempt to evaluate the value; if it doesn't evaluate, the author has made an error, so
         # propagate that to the authoring interface TODO
-        evaluated_value = self.evaluate(value=value)
+        evaluated_value = self.resolve(value=value)
         assert value is not None, (
             "AuthoringError: State value {value} was encountered but could not be evaluated".format(value=value)
         )
@@ -971,6 +976,47 @@ class State(object):
                 associated_state_entry[key] = evaluated_value
         # Finally, record this update
         self.updates_this_generation_instance.append((key, value))
+
+    def evaluate(self, predicate):
+        """Evaluate the given predicate (a 'definition' attribute of a RuntimeExpression object)."""
+        operator = predicate[1]
+        if operator == 'exists':
+            # Return True if the state reference exists in the state
+            state_reference = predicate[0]
+            return bool(self.resolve(value=state_reference))
+        else:
+            first_value = self.resolve(value=predicate[0])
+            second_value = self.resolve(value=predicate[2])
+            if operator == '==':
+                # Return True if the given values are equivalent (in terms of Python's '==' operator)
+                return first_value == second_value
+            if operator == '!=':
+                # Return True if the given values are not equivalent (in terms of Python's '!=' operator)
+                return first_value != second_value
+            if operator == '>':
+                # Return True if the both arguments resolve to ints or floats and the first value is greater
+                # than the second
+                if type(first_value) not in (int, float) or type(second_value) not in (int, float):
+                    return False
+                return first_value > second_value
+            if operator == '>=':
+                # Return True if the both arguments resolve to ints or floats and the first value is greater
+                # than or equal to the second
+                if type(first_value) not in (int, float) or type(second_value) not in (int, float):
+                    return False
+                return first_value >= second_value
+            if operator == '<':
+                # Return True if the both arguments resolve to ints or floats and the first value is less
+                # than the second
+                if type(first_value) not in (int, float) or type(second_value) not in (int, float):
+                    return False
+                return first_value < second_value
+            if operator == '<=':
+                # Return True if the both arguments resolve to ints or floats and the first value is less
+                # than or equal to the second
+                if type(first_value) not in (int, float) or type(second_value) not in (int, float):
+                    return False
+                return first_value <= second_value
 
     def copy(self):
         """Create a copy of this state."""
@@ -1309,6 +1355,8 @@ class NonterminalSymbol(object):
                 rule_id = rule_specification['id']
                 body_specification = rule_specification['body']
                 application_frequency = rule_specification['application_frequency']
+                raw_preconditions_str = rule_specification['preconditions']
+                raw_effects_str = rule_specification['effects']
                 rule_is_semantically_meaningful = rule_specification['is_semantically_meaningful']
                 production_rule_objects.append(
                     ProductionRule(
@@ -1316,8 +1364,8 @@ class NonterminalSymbol(object):
                         head=self,
                         raw_body_definition=body_specification,
                         application_frequency=application_frequency,
-                        preconditions=[],
-                        effects=[],
+                        raw_preconditions_str=raw_preconditions_str,
+                        raw_effects_str=raw_effects_str,
                         semantically_meaningful=rule_is_semantically_meaningful
                     )
                 )
@@ -1337,8 +1385,8 @@ class NonterminalSymbol(object):
 class ProductionRule(object):
     """A production rule in an annotated state-free grammar authored using an Expressionist-like tool."""
 
-    def __init__(self, rule_id, head, raw_body_definition, application_frequency, preconditions, effects,
-                 semantically_meaningful):
+    def __init__(self, rule_id, head, raw_body_definition, application_frequency, raw_preconditions_str,
+                 raw_effects_str, semantically_meaningful):
         """Initialize a ProductionRule object."""
         self.id = rule_id
         self.head = head
@@ -1357,19 +1405,14 @@ class ProductionRule(object):
         self.semantically_meaningful = semantically_meaningful
         self.tags = []  # Gets set by self.compile_tags() once all the NonterminalSymbol objects are instantiated
         # Set preconditions for executing this rule; these are runtime expressions that reference the state and
-        # return a truthy value; technically any Python operator will work here, but the interface currently
+        # return a boolean value; technically any Python operator will work here, but the interface currently
         # surfaces only some basic ones: '==', '!=', '>', '<', '<=', '>='
-        self.preconditions = preconditions
+        self.preconditions = self._build_preconditions(raw_preconditions_str=raw_preconditions_str)
+        self.raw_preconditions_str = raw_preconditions_str
         # Set effects that will be triggered upon this rule being executed; these are runtime expressions of
         # the specific form 'state.some.element.attribute as state.some.other.variable'
-        self.effects = effects
-        for effect_definition in effects:
-            assert len(effect_definition.split()) == 3 and effect_definition.split()[1] == 'as', (
-                "AuthoringError: Malformed effect definition for rule {rule_id}: '{effect_definition}'".format(
-                    rule_id=rule_id,
-                    effect_definition=effect_definition
-                )
-            )
+        self.effects = self._build_effects(raw_effects_str=raw_effects_str)
+        self.raw_effects_str = raw_effects_str
 
     def __str__(self):
         """Return string representation."""
@@ -1393,15 +1436,64 @@ class ProductionRule(object):
                     if tag not in self.tags:
                         self.tags.append(tag)
 
+    def _build_preconditions(self, raw_preconditions_str):
+        """Instantiate RuntimeExpression objects for the preconditions attached to this production rule."""
+        preconditions = []
+        # First, parse out any substrings enclosed in curly braces; we ignore all characters between
+        # such elements, which allows an author to easily include code comments, indentation, etc.
+        raw_preconditions = re.findall("\{.*?\}", raw_preconditions_str)
+        for precondition_definition in raw_preconditions:
+            precondition_definition_with_braces_removed = precondition_definition[1:-1]
+            # Note that we don't allow references to nonterminal symbols in preconditions
+            parsed_precondition_definition = precondition_definition_with_braces_removed.split()
+            runtime_expression_object = RuntimeExpression(
+                raw_definition=precondition_definition_with_braces_removed,
+                parsed_definition=parsed_precondition_definition
+            )
+            preconditions.append(runtime_expression_object)
+            # Make sure the runtime expression is a valid 'as' expression
+            assert runtime_expression_object.is_condition_expression, (
+                "AuthoringError: Malformed precondition definition for rule {rule_id}: '{effect_definition}'".format(
+                    rule_id=self.id,
+                    effect_definition=precondition_definition
+                )
+            )
+        return preconditions
+
+    def _build_effects(self, raw_effects_str):
+        """Instantiate RuntimeExpression objects for the effects attached to this production rule."""
+        effects = []
+        # First, parse out any substrings enclosed in curly braces; we ignore all characters between
+        # such elements, which allows an author to easily include code comments, indentation, etc.
+        raw_effects = re.findall("\{.*?\}", raw_effects_str)
+        for effect_definition in raw_effects:
+            effect_definition_with_braces_removed = effect_definition[1:-1]
+            # Note that we don't allow references to nonterminal symbols in effects
+            parsed_effect_definition = effect_definition_with_braces_removed.split()
+            runtime_expression_object = RuntimeExpression(
+                raw_definition=effect_definition_with_braces_removed,
+                parsed_definition=parsed_effect_definition
+            )
+            effects.append(runtime_expression_object)
+            # Make sure the runtime expression is a valid 'as' expression
+            assert runtime_expression_object.is_as_expression, (
+                "AuthoringError: Malformed effect definition for rule {rule_id}: '{effect_definition}'".format(
+                    rule_id=self.id,
+                    effect_definition=effect_definition
+                )
+            )
+        return effects
+
     def preconditions_hold(self, state):
         """Return whether this production rule's preconditions hold."""
-        return all(state.evaluate(value=precondition) for precondition in self.preconditions)
+        return all(state.evaluate(predicate=precondition.definition) for precondition in self.preconditions)
 
     def execute_effects(self, state):
         """Execute all of the effects that are attached to this production rule."""
         for effect in self.effects:
-            value, key = effect.split(' as ')
+            value, as_operator, key = effect.definition
             state.update(key=key, value=value)
+        return state
 
 
 class RuntimeExpression(object):
@@ -1417,6 +1509,16 @@ class RuntimeExpression(object):
         self.is_with_expression = (
             len(parsed_definition) == 5 and parsed_definition[1] == 'with' and parsed_definition[3] == 'as'
         )
-        assert self.is_simple_expression or self.is_as_expression or self.is_with_expression, (
+        self.is_condition_expression = (
+            (len(parsed_definition) == 2 and parsed_definition[1] == 'exists') or
+            (len(parsed_definition) == 3 and parsed_definition[1] in ('==', '!=', '>', '<', '>=', '<='))
+        )
+        definition_is_well_formed = (
+            self.is_simple_expression or
+            self.is_as_expression or
+            self.is_with_expression or
+            self.is_condition_expression
+        )
+        assert definition_is_well_formed, (
             "Invalid syntax in runtime expression '{raw_definition}'".format(raw_definition=raw_definition)
         )

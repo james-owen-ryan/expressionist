@@ -179,12 +179,16 @@ class RuleBoard extends React.Component {
         var ruleHeadName = this.props.currentSymbolName;
         var applicationRate = this.props.applicationRate;
         var ruleBody = this.state.ruleBodyInputVal;
+        var preconditionsStr = this.props.preconditionsStr;
+        var effectsStr = this.props.effectsStr;
         var object = {
+            "original rule head name": ruleHeadName,
+            "rule head name": ruleHeadName,
             "rule id": ruleId,
             "rule body": ruleBody,
             "application rate": applicationRate,
-            "rule head name": ruleHeadName,
-            "original rule head name": ruleHeadName
+            "preconditions": preconditionsStr,
+            "effects": effectsStr
         }
         ajax({
             url: $SCRIPT_ROOT + '/api/rule/edit',

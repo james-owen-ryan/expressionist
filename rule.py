@@ -5,18 +5,19 @@ import operator
 class Rule(object):
     """A production rule in a grammar."""
 
-    def __init__(self, symbol, derivation, application_rate=1):
+    def __init__(self, rule_head, rule_body, application_rate=1, preconditions_str="", effects_str=""):
         """Initialize a Rule object.
-        :param symbol: Nonterminal symbol(lhs) for this rule
-        :type symbol: nonterminal_symbol.NonterminalSymbol
-        :param derivation: Derivation of the NonterminalSymbol
-        :type derivation: list()
+        :param rule_head: Nonterminal symbol(lhs) for this rule
+        :type rule_head: nonterminal_symbol.NonterminalSymbol
+        :param rule_body: Derivation of the NonterminalSymbol
+        :type rule_body: list()
         :param application_rate: application_rate(probability) for this rule
         """
-        self.symbol = symbol  # NonterminalSymbol that is lhs of rule
-        self.derivation = derivation  # An ordered list of nonterminal and terminal symbols
+        self.head = rule_head  # NonterminalSymbol that is lhs of rule
+        self.body = rule_body  # An ordered list of nonterminal and terminal symbols
         self.application_rate = application_rate
-        # specific rules can have markup to represent variation within nonterminal that does not warrant a new nonterminal
+        self.preconditions = preconditions_str
+        self.effects = effects_str
         # This attribute holds a list containing all possible derivations of this rule (each being represented by
         # an agglomerated IntermediateDerivation object); it's built once and only once the first time
         # self.exhaustively_and_nonprobabilistically_derive() is called
@@ -25,19 +26,19 @@ class Rule(object):
     def __eq__(self, other):
         # equality does not consider application_rate
         if isinstance(other, Rule):
-            return self.symbol.tag == other.symbol.tag and self.derivation == other.derivation
+            return self.head.tag == other.head.tag and self.body == other.body
         else:
             return False
 
     def __str__(self):
-        return self.symbol.__str__() + ' -> ' + self.derivation.__str__()
+        return self.head.__str__() + ' -> ' + self.body.__str__()
 
     def __repr__(self):
         return self.__str__()
 
     def modify_derivation(self, expansion):
         """Update the right-hand side (expansion) for this rule."""
-        self.derivation = expansion
+        self.body = expansion
 
     def modify_application_rate(self, application_rate):
         """
@@ -49,18 +50,18 @@ class Rule(object):
         """Carry out the derivation specified for this rule."""
         if markup is None:
             markup = set()
-        return (sum(symbol.expand(markup=markup) for symbol in self.derivation))
+        return (sum(symbol.expand(markup=markup) for symbol in self.body))
 
     def derivation_json(self):
         def stringify(x): return x.__str__()
 
-        return map(stringify, self.derivation)
+        return map(stringify, self.body)
 
     def mcm_derive(self, samplesscalar, markup):
         """carry out montecarlo derivation for this rule"""
         ret_list = []
         # for each value in derivation side of the rule
-        for symbol in self.derivation:
+        for symbol in self.body:
             # if the symbol is a nonterminal, monte_carlo_expand returns an array
             if type(symbol) == "NonterminalSymbol":
                 # List containing the mcm expansions for a given symbol
@@ -96,7 +97,7 @@ class Rule(object):
             # Build up a list containing all the possible intermediate derivations for each
             # symbol that is used in this rule
             intermediate_derivations = []
-            for symbol in self.derivation:
+            for symbol in self.body:
                 if type(symbol) == "NonterminalSymbol":
                     # If a symbol is nonterminal, then calling exhaustively_and_nonprobabilistically_expand()
                     # for it will return a list of IntermediateDerivation objects
@@ -126,6 +127,6 @@ class Rule(object):
         # Since there's no product() built-in function in Python that works like sum()
         # does, we have to use this ugly reduce thing
         n_terminal_expansions = (
-            reduce(operator.mul, (symbol.n_terminal_expansions() for symbol in self.derivation), 1)
+            reduce(operator.mul, (symbol.n_terminal_expansions() for symbol in self.body), 1)
         )
         return n_terminal_expansions

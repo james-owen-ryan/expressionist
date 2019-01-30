@@ -1,6 +1,6 @@
 """
 Module designed to be used for the generation of generative grammars that focuses entirely on
-generating grammars as opposed to parsing them
+generating grammars as opposed to parsing them; code by Ethan Seither.
 """
 import collections
 import csv
@@ -57,7 +57,7 @@ class PCFG(object):
         for markups in list(nonterminal.markup):
             self.add_markup(nonterminal, markups)
 
-    def add_rule(self, nonterminal, derivation, application_rate=1):
+    def add_rule(self, rule_head, rule_body, application_rate=1, preconditions_str="", effects_str=""):
         """
         add a rule to a nonterminal
         recursion makes this a paaaain
@@ -67,10 +67,10 @@ class PCFG(object):
         or else we end up with nonterminals that have the same tag but do not have the same
         productions associated with them
         """
-        nonterm_add = self.nonterminals.get(str(nonterminal.tag))
+        nonterm_add = self.nonterminals.get(str(rule_head.tag))
         if nonterm_add:
             new_derivation = []
-            for token in derivation:
+            for token in rule_body:
                 if isinstance(token, NonterminalSymbol):
                     if self.nonterminals.get(token.tag):
                         new_derivation.append(self.nonterminals.get(token.tag))
@@ -82,11 +82,16 @@ class PCFG(object):
                     new_derivation.append(token)
                 else:
                     new_derivation.append(token)
-            nonterm_add.add_rule(new_derivation, application_rate)
+            nonterm_add.add_rule(
+                new_derivation,
+                application_rate,
+                preconditions_str=preconditions_str,
+                effects_str=effects_str
+            )
 
-    def modify_rule_expansion(self, rule_id, nonterminal, derivation, application_rate=1):
+    def modify_rule_expansion(self, rule_head, rule_index, derivation, application_rate=1):
         """Modify the expansion for a production rule."""
-        nonterminal_for_this_rule = self.nonterminals.get(str(nonterminal.tag))
+        nonterminal_for_this_rule = self.nonterminals.get(str(rule_head.tag))
         if nonterminal_for_this_rule:
             new_derivation = []
             for token in derivation:
@@ -101,27 +106,35 @@ class PCFG(object):
                     new_derivation.append(token)
                 else:
                     new_derivation.append(token)
-            rules = self.nonterminals.get(str(nonterminal.tag)).rules
-            rules[rule_id].modify_derivation(expansion=new_derivation)
+            rules = self.nonterminals.get(str(rule_head.tag)).rules
+            rules[rule_index].modify_derivation(expansion=new_derivation)
             nonterminal_for_this_rule.add_rule(new_derivation, application_rate)
 
-    def remove_rule(self, nonterminal, derivation):
-        """remove a rule from a nonterminal"""
-        self.nonterminals.get(str(nonterminal.tag)).remove_rule(derivation)
+    def modify_application_rate(self, rule_head, rule_index, application_rate):
+        """modify application_rate for the given nonterminal and derivation"""
+        rules_associated_with_that_rule_head = self.nonterminals.get(str(rule_head.tag)).rules
+        rule_to_be_modified = rules_associated_with_that_rule_head[rule_index]
+        rule_to_be_modified.modify_application_rate(application_rate)
+        self.nonterminals.get(str(rule_head.tag)).fit_probability_distribution()
 
-    def remove_rule_by_index(self, nonterminal, rule_index):
+    def modify_rule_preconditions_and_effects(self, rule_head, rule_index, new_preconditions_str, new_effects_str):
+        """Modify the given rule's precondition string and/or effect string."""
+        rules_associated_with_that_rule_head = self.nonterminals.get(str(rule_head.tag)).rules
+        rule_to_be_modified = rules_associated_with_that_rule_head[rule_index]
+        rule_to_be_modified.preconditions = new_preconditions_str
+        rule_to_be_modified.effects = new_effects_str
+
+    def remove_rule(self, rule_head, derivation):
+        """remove a rule from a nonterminal"""
+        self.nonterminals.get(str(rule_head.tag)).remove_rule(derivation)
+
+    def remove_rule_by_index(self, rule_head, rule_index):
         """ remove a rule from a nonterminal by its index"""
-        self.nonterminals.get(str(nonterminal.tag)).remove_by_index(rule_index)
+        self.nonterminals.get(str(rule_head.tag)).remove_by_index(rule_index)
 
     def expand(self, nonterminal):
         """expand a given nonterminal"""
         return self.nonterminals.get(str(nonterminal.tag)).expand(markup=set())
-
-    def modify_application_rate(self, nonterminal, rule_index, application_rate):
-        """modify application_rate for the given nonterminal and derivation"""
-        rules = self.nonterminals.get(str(nonterminal.tag)).rules
-        rules[rule_index].modify_application_rate(application_rate)
-        self.nonterminals.get(str(nonterminal.tag))._fit_probability_distribution()
 
     def monte_carlo_expand(self, nonterminal, samplesscalar=1):
         """
@@ -264,10 +277,10 @@ class PCFG(object):
 
             rules_list = []
             i = 0
-            for rules in value.rules:
+            for rule in value.rules:
                 # createJSON representation for individual rule markup
                 if to_file == False:
-                    for symbol in rules.derivation:
+                    for symbol in rule.body:
                         if isinstance(symbol, NonterminalSymbol):
                             if not nonterminals.get(symbol.tag):
                                 nonterminals[symbol.tag] = collections.defaultdict()
@@ -276,7 +289,12 @@ class PCFG(object):
                             ref_tag = {"symbol": str(value.tag), "index": i}
                             if not ref_tag in nonterminals[symbol.tag]['referents']:
                                 nonterminals[symbol.tag]['referents'].append(ref_tag)
-                rules_list.append({'expansion': rules.derivation_json(), 'app_rate': rules.application_rate, })
+                rules_list.append({
+                    'expansion': rule.derivation_json(),
+                    'app_rate': rule.application_rate,
+                    'preconditionsStr': rule.preconditions,
+                    'effectsStr': rule.effects
+                })
                 i += 1
             temp['rules'] = rules_list
 
@@ -412,7 +430,7 @@ class PCFG(object):
 
     def copy_rule(self, original, index, new):
         rule = copy.copy(self.nonterminals[original].rules[index])
-        rule.symbol = self.nonterminals[new]
+        rule.head = self.nonterminals[new]
         self.nonterminals[new].add_rule_object(rule)
 
     # want to make this insert changed rule at old index, to preserve order
@@ -447,7 +465,15 @@ def from_json(json_in):
             # rule is an object
             expansion = parse_rule(''.join(rule['expansion']))
             application_rate = rule['app_rate']
-            gram_res.add_rule(temp_nonterm, expansion, application_rate)
+            preconditions_str = rule['preconditionsStr']
+            effects_str = rule['effectsStr']
+            gram_res.add_rule(
+                rule_head=temp_nonterm,
+                rule_body=expansion,
+                application_rate=application_rate,
+                preconditions_str=preconditions_str,
+                effects_str=effects_str
+            )
 
     for markupSet in dict_rep.get('markups'):
         x = MarkupSet(markupSet)

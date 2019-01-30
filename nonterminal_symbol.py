@@ -33,9 +33,15 @@ class NonterminalSymbol(object):
         else:
             return False
 
-    def add_rule(self, derivation, application_rate=1):
+    def add_rule(self, rule_body, application_rate=1, preconditions_str="", effects_str=""):
         """Add a new production rule for this nonterminal symbol."""
-        rule_object = Rule(symbol=self, derivation=derivation, application_rate=application_rate)
+        rule_object = Rule(
+            rule_head=self,
+            rule_body=rule_body,
+            application_rate=application_rate,
+            preconditions_str=preconditions_str,
+            effects_str=effects_str
+        )
         if rule_object not in self.rules:
             self.rules.append(rule_object)
             self.fit_probability_distribution()
@@ -53,7 +59,7 @@ class NonterminalSymbol(object):
 
     def remove_rule(self, derivation):
         """remove a production rule for this nonterminal symbol."""
-        rule_object = Rule(symbol=self, derivation=derivation)
+        rule_object = Rule(rule_head=self, rule_body=derivation)
         if rule_object in self.rules:
             self.rules.remove(rule_object)
             self.fit_probability_distribution()
