@@ -231,7 +231,7 @@ class MarkupBar extends React.Component {
                         {
                             (this.props.currentSymbolName && (!this.state.tagBeingRenamed))
                             ?
-                            <label title="This determines whether the newly created tag will be attached to the current symbol upon being created." style={{"fontWeight": "normal", "position": "absolute", "left": "0px", "padding": "20px 0px 21px 31px"}}><input title="This determines whether the newly created tag will be attached to the current symbol upon being created." name="isGoing" type="checkbox" checked={this.state.attachNewTagToCurrentSymbol} onChange={this.toggleAttachNewTagToCurrentSymbol}/> Attach to current symbol</label>
+                            <label title="This determines whether the newly created tag will be attached to the current symbol upon being created." style={{"fontWeight": "normal", "position": "absolute", "left": "0px", "padding": "20px 0px 21px 31px"}}><input title="This determines whether the newly created tag will be attached to the current symbol upon being created." name="isGoing" type="checkbox" checked={this.state.attachNewTagToCurrentSymbol} onChange={this.toggleAttachNewTagToCurrentSymbol}/> Attach to {this.props.currentRule === -1 ? "current symbol" : "rule head"}</label>
                             :
                             ""
                         }
