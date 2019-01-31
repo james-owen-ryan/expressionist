@@ -142,7 +142,7 @@ class TestModal extends React.Component {
             var newProductionistStateStr = '{}';
         }
         else {
-            var newProductionistStateStr = productionistStateStr;
+            var newProductionistStateStr = e.target.value;
         }
         this.setState({productionistStateStr: newProductionistStateStr});
     }
@@ -152,6 +152,8 @@ class TestModal extends React.Component {
     }
 
     sendTaggedContentRequest(tagsets) {
+        // Turn off state editing, in case it was on
+        this.setState({editingState: false})
         // Productionist requires tags to be formatted as `tagset:tag` strings
         var contentRequest = []
         for (var tagset in tagsets) {
@@ -385,7 +387,7 @@ class TestModal extends React.Component {
                     ?
                     <div style={{backgroundColor: '#ff9891', color: '#fff', height: '70vh', padding: '25px'}}>Content request is unsatisfiable given the exported content bundle.</div>
                     :
-                    <div style={this.state.editingState ? {whiteSpace: 'pre-wrap', height: '70vh', padding: '25px', overflowY: 'scroll', backgroundColor: "#f2f2f2"} : {whiteSpace: 'pre-wrap', height: '70vh', padding: '25px', overflowY: 'scroll', backgroundColor: "#fff"}}>
+                    <div style={this.state.editingState ? {whiteSpace: 'pre-wrap', height: '70vh', padding: '25px', overflowY: 'scroll', backgroundColor: "#f2f2f2"} : {whiteSpace: 'pre-wrap', height: '70vh', padding: '25px', overflowY: 'scroll', backgroundColor: "#fff"}} onClick={this.state.showState && !this.state.editingState ? this.startStateEditing : ""}>
                         {
                             this.state.showText
                             ?
@@ -411,9 +413,9 @@ class TestModal extends React.Component {
                             :
                             this.state.editingState
                             ?
-                            <textarea id="stateEditInput" type='text' title="Press Enter or click outside this area to submit your changes." value={this.state.productionistStateStr} onChange={this.updateProductionistStateStr} onBlur={this.stopStateEditing} style={{position: "relative", width: '100%', height: '100%', border: '0px', fontSize: '18px', backgroundColor: '#f2f2f2', overflowY: 'scroll', resize: 'none'}} autoFocus="true"/>
+                            <textarea id="stateEditInput" type='text' title="Submit a content request or click outside this area to freeze your changes." value={this.state.productionistStateStr} onChange={this.updateProductionistStateStr} onBlur={this.stopStateEditing} style={{position: "relative", width: '100%', height: '100%', border: '0px', fontSize: '18px', backgroundColor: '#f2f2f2', overflowY: 'scroll', resize: 'none'}} autoFocus="true"/>
                             :
-                            <span onClick={this.startStateEditing} style={{position: "relative", width: '100%', height: '100%', overflowY: 'scroll'}}>{this.state.productionistStateStr}</span>
+                            <span style={{position: "relative", width: '100%', height: '100%', overflowY: 'scroll'}}>{this.state.productionistStateStr}</span>
                         }
                     </div>
                 }
