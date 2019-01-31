@@ -34,6 +34,7 @@ class TestModal extends React.Component {
         this.viewGeneratedText = this.viewGeneratedText.bind(this);
         this.viewGeneratedTags = this.viewGeneratedTags.bind(this);
         this.viewGeneratedTreeExpression = this.viewGeneratedTreeExpression.bind(this);
+        this.viewProductionistState = this.viewProductionistState.bind(this);
         this.handlePotentialTabbingHotKeyPress = this.handlePotentialTabbingHotKeyPress.bind(this);
         this.state = {
             grammarFileNames: [],
@@ -44,11 +45,13 @@ class TestModal extends React.Component {
             generatedContentPackageText: null,
             generatedContentPackageTags: [],
             generatedContentPackageTreeExpression: '',
+            productionistStateStr: '{}',  // The state is represented as a JSON string
             outputError: false,
             contentRequestAlreadySubmitted: false,
             showText: true,
             showTags: false,
-            showTreeExpression: false
+            showTreeExpression: false,
+            showState: false
         };
     }
 
@@ -135,7 +138,8 @@ class TestModal extends React.Component {
             contentType: "application/json",
             data: JSON.stringify({
                 tags: contentRequest,
-                bundleName: this.state.bundleName
+                bundleName: this.state.bundleName,
+                state: this.state.productionistStateStr
             }),
             async: true,
             cache: false,
@@ -144,11 +148,12 @@ class TestModal extends React.Component {
                 data = JSON.parse(data)
                 var sortedTags = data.tags.sort();
                 this.setState({
-                  generatedContentPackageText: data.text,
-                  generatedContentPackageTags: sortedTags,
-                  generatedContentPackageTreeExpression: data.treeExpression,
-                  outputError: false,
-                  contentRequestAlreadySubmitted: true
+                    generatedContentPackageText: data.text,
+                    generatedContentPackageTags: sortedTags,
+                    generatedContentPackageTreeExpression: data.treeExpression,
+                    productionistStateStr: data.state,
+                    outputError: false,
+                    contentRequestAlreadySubmitted: true
                 })
               }
               else {
@@ -168,7 +173,8 @@ class TestModal extends React.Component {
         this.setState({
             showText: true,
             showTags: false,
-            showTreeExpression: false
+            showTreeExpression: false,
+            showState: false
         })
     }
 
@@ -176,7 +182,8 @@ class TestModal extends React.Component {
         this.setState({
             showText: false,
             showTags: true,
-            showTreeExpression: false
+            showTreeExpression: false,
+            showState: false
         })
     }
 
@@ -184,16 +191,30 @@ class TestModal extends React.Component {
         this.setState({
             showText: false,
             showTags: false,
-            showTreeExpression: true
+            showTreeExpression: true,
+            showState: false
+        })
+    }
+
+    viewProductionistState() {
+        this.setState({
+            showText: false,
+            showTags: false,
+            showTreeExpression: false,
+            showState: true
         })
     }
 
     handlePotentialTabbingHotKeyPress(e) {
         if (e.key === 'Tab' && this.props.show) {
             e.preventDefault();
-            if (this.state.showText) {
+            if (this.state.generatedContentPackageText === null || this.state.outputError) {
+                // If all the other views are disabled, go to the state view
+                this.viewProductionistState();
+            }
+            else if (this.state.showText) {
                 if (e.shiftKey) {
-                    this.viewGeneratedTreeExpression();
+                    this.viewProductionistState();
                 }
                 else {
                     this.viewGeneratedTags();
@@ -210,6 +231,15 @@ class TestModal extends React.Component {
             else if (this.state.showTreeExpression) {
                 if (e.shiftKey) {
                     this.viewGeneratedTags();
+                }
+                else {
+                    this.viewProductionistState();
+                }
+
+            }
+            else if (this.state.showState) {
+                if (e.shiftKey) {
+                    this.viewGeneratedTreeExpression();
                 }
                 else {
                     this.viewGeneratedText();
@@ -276,7 +306,6 @@ class TestModal extends React.Component {
     render() {
         var viewButtonsDisabledTooltip = this.state.generatedContentPackageText === null ? " (disabled: must submit content request)" : this.state.outputError ? " (disabled: unsatisfiable content request)" : "";
         var viewButtonsDisabled = !!viewButtonsDisabledTooltip;
-        console.log(this.state.generatedContentPackageTreeExpression);
         return (
             <Modal show={this.props.show} onHide={this.props.onHide} dialogClassName="test-productionist-module-modal" style={{overflowY: "hidden"}}>
                 <Modal.Header closeButton>
@@ -288,6 +317,7 @@ class TestModal extends React.Component {
                         <Button className="grp_button" onClick={this.viewGeneratedText} title={viewButtonsDisabledTooltip ? "Change to text view" + viewButtonsDisabledTooltip : AUTHOR_IS_USING_A_MAC ? "Change to text view (toggle: ⇥, ⇧⇥)" : "Change to text view (toggle: Tab, Shift+Tab)"} style={this.state.showText && this.state.generatedContentPackageText !== null && !this.state.outputError ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}} disabled={viewButtonsDisabled}><Glyphicon glyph="font"/></Button>
                         <Button className="grp_button" onClick={this.viewGeneratedTags} title={viewButtonsDisabledTooltip ? "Change to text view" + viewButtonsDisabledTooltip : AUTHOR_IS_USING_A_MAC ? "Change to tags view (toggle: ⇥, ⇧⇥)" : "Change to tags view (toggle: Tab, Shift+Tab)"} style={this.state.showTags && this.state.generatedContentPackageText !== null && !this.state.outputError ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}} disabled={viewButtonsDisabled}><Glyphicon glyph="tags"/></Button>
                         <Button className="grp_button" onClick={this.viewGeneratedTreeExpression} title={viewButtonsDisabledTooltip ? "Change to text view" + viewButtonsDisabledTooltip : AUTHOR_IS_USING_A_MAC ? "Change to tree view (toggle: ⇥, ⇧⇥)" : "Change to tree view (toggle: Tab, Shift+Tab)"} style={this.state.showTreeExpression && this.state.generatedContentPackageText !== null && !this.state.outputError ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}} disabled={viewButtonsDisabled}><Glyphicon glyph="tree-conifer"/></Button>
+                        <Button className="grp_button" onClick={this.viewProductionistState} title={AUTHOR_IS_USING_A_MAC ? "Change to state view (toggle: ⇥, ⇧⇥)" : "Change to state view (toggle: Tab, Shift+Tab)"} style={this.state.showState ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}}><Glyphicon glyph="list-alt"/></Button>
                         {
                             Object.keys(this.state.tagsets).map(function (tagset) {
                                 return (
@@ -343,7 +373,11 @@ class TestModal extends React.Component {
                                 </span>
                             ))
                             :
+                            this.state.showTreeExpression
+                            ?
                             this.state.generatedContentPackageTreeExpression
+                            :
+                            JSON.stringify(JSON.parse(this.state.productionistStateStr), null, 4)
                         }
                     </div>
                 }

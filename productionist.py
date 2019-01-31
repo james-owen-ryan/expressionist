@@ -161,16 +161,23 @@ class Productionist(object):
             print "\t\tGrammar has {n} expressible meanings".format(n=len(expressible_meanings))
         return expressible_meanings
 
-    def fulfill_content_request(self, content_request, state_overwrites=None):
+    def fulfill_content_request(self, content_request):
         """Satisfy the given content request."""
         # Reset temporary attributes
         self._reset_temporary_attributes()
         # Save the given content request, in case we'd like to inspect it for debugging purposes
         self.content_request = content_request
-        state_overwrites = state_overwrites if state_overwrites is not None else {}
-        # Prepare a new merged state (note: this does not alter the persistent state, but eventually could
-        # if this generation instance is ultimately successful)
-        new_merged_state = self.state.merge(state_overwrites)
+        # Prepare a new copy of the state either by merging or replacing (note: this does not alter the
+        # persistent state, because we make a copy here, but eventually it will if this generation instance
+        # is ultimately successful)
+        if content_request.merge_state:
+            initial_state_for_this_instance = self.state.merge(content_request.merge_state)
+        else:
+            initial_state_for_this_instance = State(initial_state_dictionary=content_request.state)
+        # Reset the temporary variable that stores state updates made in a given generation
+        # instance (ultimately this information will be stored in a ContentPackage object, if
+        # this generation instance is successful)
+        initial_state_for_this_instance.updates_this_generation_instance = []
         # Find all of the expressible meanings that are satisficing, given the content request
         satisficing_expressible_meanings = self._compile_satisficing_expressible_meanings(
             content_request=content_request
@@ -180,7 +187,8 @@ class Productionist(object):
             return None
         # Otherwise, rank the satisficing expressible meanings
         satisficing_expressible_meanings = self._rank_satisficing_expressible_meanings(
-            candidates=satisficing_expressible_meanings, scoring_metric=content_request.scoring_metric
+            candidates=satisficing_expressible_meanings,
+            scoring_metric=content_request.scoring_metric
         )
         # Target these meanings one by one, attempting to produce content (note that the only reason that
         # it may not be possible to produce content for a given candidate expressible meaning is if
@@ -192,11 +200,16 @@ class Productionist(object):
             # Select one of the grammar paths associated with this expressible meaning
             selected_recipe = self._select_recipe_for_expressible_meaning(expressible_meaning=expressible_meaning)
             # Execute that grammar path to produce the generated content satisfying the content request
-            generated_text, updated_state = self._follow_recipe(recipe=selected_recipe, state=new_merged_state)
-            if generated_text:
+            generated_text, updated_state = self._follow_recipe(
+                recipe=selected_recipe,
+                state=initial_state_for_this_instance
+            )
+            if generated_text is not None:  # Note that an empty string is valid here
                 # Package that up with all the associated metadata
                 content_package = self._build_content_package(
-                    generated_text=generated_text, updated_state=updated_state, selected_recipe=selected_recipe,
+                    generated_text=generated_text,
+                    updated_state=updated_state,
+                    selected_recipe=selected_recipe,
                     content_request=content_request
                 )
                 # Update Productionist's persistent state, which allows for state to be maintained
@@ -846,7 +859,7 @@ class Recipe(object):
 class ContentRequest(object):
     """A content request submitted to a Productionist module."""
 
-    def __init__(self, required_tags=None, prohibited_tags=None, scoring_metric=None):
+    def __init__(self, required_tags=None, prohibited_tags=None, scoring_metric=None, state=None, merge_state=True):
         """Initialize a ContentRequest object."""
         # Tags that must come packaged with the generated content
         self.required_tags = required_tags if required_tags else set()
@@ -854,6 +867,12 @@ class ContentRequest(object):
         self.prohibited_tags = prohibited_tags if prohibited_tags else set()
         # A set of (tag, weight) tuples specifying the desirability of optional tags
         self.scoring_metric = scoring_metric if scoring_metric else set()
+        # The state included in a content request will be set as the initial Productionist state
+        # prior to that module's attempt to fulfill the content request
+        self.state = state if state is not None else {}
+        # If 'merge_state' == True, the state given here will be merged with the existing Productionist
+        # state, otherwise the state given here will replace that state
+        self.merge_state = merge_state
 
     def __str__(self):
         """Return string representation."""
@@ -1027,8 +1046,7 @@ class State(object):
 class ContentPackage(object):
     """A generated output, comprising both the textual content itself and its associated tags."""
 
-    def __init__(self, text, tags, recipe, explicit_grammar_path_taken, bracketed_expression, updated_state,
-                 state_dictionary=None, state_update_key_value_pairs=None):
+    def __init__(self, text, tags, recipe, explicit_grammar_path_taken, bracketed_expression, updated_state):
         """Initialize an Output object."""
         # The realized textual content
         self.text = text
@@ -1049,20 +1067,11 @@ class ContentPackage(object):
         # A more cluttered, but potentially more useful, tree expression that displays the tags
         # inherited from each expanded symbol
         self.tree_expression_with_tags = self._construct_tree_expression(exclude_tags=False)
-        if updated_state is not None:
-            # Attach the updated state to this content package, which will allow an author to inspect which
-            # content packages introduced which new changes into the state)
-            self.state = updated_state
-        else:
-            # We need to reconstruct a State object given the information included in the imported state
-            self.state = State(
-                initial_state_dictionary=state_dictionary,
-                updates_this_generation_instance=state_update_key_value_pairs
-            )
+        # Attach the updated state to this content package
+        self.state = updated_state
         # Attach grounded state updates and obligations pushed (these are used for training data and
         # could conceivably be useful for debugging as well)
         self.grounded_state_updates = list(self.state.updates_this_generation_instance)
-        self.state.updates_this_generation_instance = []
 
     def __str__(self):
         """Return string representation."""

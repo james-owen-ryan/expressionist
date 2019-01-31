@@ -360,11 +360,14 @@ def handle_content_request():
     scoring_metric = [
         (tag["name"], int(tag["frequency"])) for tag in content_request["tags"] if tag["status"] == "enabled"
     ]
+    state = json.loads(content_request["state"])
     # Time to generate content; prepare the actual ContentRequest object that Productionist will process
     content_request = ContentRequest(
         required_tags=required_tags,
         prohibited_tags=prohibited_tags,
-        scoring_metric=scoring_metric
+        scoring_metric=scoring_metric,
+        state=state,
+        merge_state=False
     )
     # Fulfill the content request to generate N outputs (each being an object of the class productionist.Output)
     content_package = app.productionist.fulfill_content_request(content_request=content_request)
@@ -373,7 +376,8 @@ def handle_content_request():
         content_package_json = json.dumps({
             "text": content_package.text,
             "tags": list(content_package.tags),
-            "treeExpression": content_package.tree_expression
+            "treeExpression": content_package.tree_expression,
+            "state": json.dumps(content_package.state.now)
         })
         return content_package_json
     return "The content request cannot be satisfied by the exported content bundle."
