@@ -165,7 +165,7 @@ class TestModal extends React.Component {
         var lockedProductionistStateStr = this.state.lockedProductionistStateStr;
         var updatedProductionistStateStr = this.state.productionistStateStr;
         this.setState({
-            productionistStateStr: this.viewLockedState ? lockedProductionistStateStr : updateProductionistStateStr,
+            productionistStateStr: this.viewLockedState ? lockedProductionistStateStr : updatedProductionistStateStr,
             lockedProductionistStateStr: null,
             viewLockedState: false,
         })
