@@ -30,6 +30,9 @@ class TestModal extends React.Component {
         this.toggleTagStatus = this.toggleTagStatus.bind(this);
         this.getTagColorFromStatus = this.getTagColorFromStatus.bind(this);
         this.cycleStatus = this.cycleStatus.bind(this);
+        this.startStateEditing = this.startStateEditing.bind(this);
+        this.updateProductionistStateStr = this.updateProductionistStateStr.bind(this);
+        this.stopStateEditing = this.stopStateEditing.bind(this);
         this.sendTaggedContentRequest = this.sendTaggedContentRequest.bind(this);
         this.viewGeneratedText = this.viewGeneratedText.bind(this);
         this.viewGeneratedTags = this.viewGeneratedTags.bind(this);
@@ -46,6 +49,7 @@ class TestModal extends React.Component {
             generatedContentPackageTags: [],
             generatedContentPackageTreeExpression: '',
             productionistStateStr: '{}',  // The state is represented as a JSON string
+            editingState: false,
             outputError: false,
             contentRequestAlreadySubmitted: false,
             showText: true,
@@ -120,6 +124,33 @@ class TestModal extends React.Component {
         return 'enabled'
     }
 
+    startStateEditing() {
+        this.setState({
+            editingState: true,
+            // The state is now out of sync with regard to the other views, so reset the state
+            // that drives them, thereby disabling those other views and reverting the button
+            // for submitting a content request to 'submit' state as opposed to 'resubmit' state
+            generatedContentPackageText: null,
+            generatedContentPackageTags: [],
+            generatedContentPackageTreeExpression: '',
+            contentRequestAlreadySubmitted: false
+        });
+    }
+
+    updateProductionistStateStr(e) {
+        if (e.target.value === '') {
+            var newProductionistStateStr = '{}';
+        }
+        else {
+            var newProductionistStateStr = productionistStateStr;
+        }
+        this.setState({productionistStateStr: newProductionistStateStr});
+    }
+
+    stopStateEditing() {
+        this.setState({editingState: false});
+    }
+
     sendTaggedContentRequest(tagsets) {
         // Productionist requires tags to be formatted as `tagset:tag` strings
         var contentRequest = []
@@ -151,7 +182,8 @@ class TestModal extends React.Component {
                     generatedContentPackageText: data.text,
                     generatedContentPackageTags: sortedTags,
                     generatedContentPackageTreeExpression: data.treeExpression,
-                    productionistStateStr: data.state,
+                    // JSON.stringify allows us to pretty-print the state in Expressionist
+                    productionistStateStr: JSON.stringify(JSON.parse(data.state), null, 4),
                     outputError: false,
                     contentRequestAlreadySubmitted: true
                 })
@@ -353,7 +385,7 @@ class TestModal extends React.Component {
                     ?
                     <div style={{backgroundColor: '#ff9891', color: '#fff', height: '70vh', padding: '25px'}}>Content request is unsatisfiable given the exported content bundle.</div>
                     :
-                    <div style={{whiteSpace: 'pre-wrap', height: '70vh', padding: '25px', overflowY: 'scroll'}}>
+                    <div style={this.state.editingState ? {whiteSpace: 'pre-wrap', height: '70vh', padding: '25px', overflowY: 'scroll', backgroundColor: "#f2f2f2"} : {whiteSpace: 'pre-wrap', height: '70vh', padding: '25px', overflowY: 'scroll', backgroundColor: "#fff"}}>
                         {
                             this.state.showText
                             ?
@@ -377,7 +409,11 @@ class TestModal extends React.Component {
                             ?
                             this.state.generatedContentPackageTreeExpression
                             :
-                            JSON.stringify(JSON.parse(this.state.productionistStateStr), null, 4)
+                            this.state.editingState
+                            ?
+                            <textarea id="stateEditInput" type='text' title="Press Enter or click outside this area to submit your changes." value={this.state.productionistStateStr} onChange={this.updateProductionistStateStr} onBlur={this.stopStateEditing} style={{position: "relative", width: '100%', height: '100%', border: '0px', fontSize: '18px', backgroundColor: '#f2f2f2', overflowY: 'scroll', resize: 'none'}} autoFocus="true"/>
+                            :
+                            <span onClick={this.startStateEditing} style={{position: "relative", width: '100%', height: '100%', overflowY: 'scroll'}}>{this.state.productionistStateStr}</span>
                         }
                     </div>
                 }
