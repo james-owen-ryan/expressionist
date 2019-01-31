@@ -44,7 +44,6 @@ class TestModal extends React.Component {
             generatedContentPackageText: '',
             generatedContentPackageTags: [],
             generatedContentPackageTreeExpression: '',
-            generatedContentPackageBracketedExpression: '',
             outputError: false,
             contentRequestAlreadySubmitted: false,
             showText: true,
@@ -148,7 +147,6 @@ class TestModal extends React.Component {
                   generatedContentPackageText: data.text,
                   generatedContentPackageTags: sortedTags,
                   generatedContentPackageTreeExpression: data.treeExpression,
-                  generatedContentPackageBracketedExpression: data.bracketedExpression,
                   outputError: false,
                   contentRequestAlreadySubmitted: true
                 })
@@ -278,6 +276,7 @@ class TestModal extends React.Component {
     render() {
         var viewButtonsDisabledTooltip = !this.state.generatedContentPackageText ? " (disabled: must submit content request)" : this.state.outputError ? " (disabled: unsatisfiable content request)" : "";
         var viewButtonsDisabled = !!viewButtonsDisabledTooltip;
+        console.log(this.state.generatedContentPackageTreeExpression);
         return (
             <Modal show={this.props.show} onHide={this.props.onHide} dialogClassName="test-productionist-module-modal" style={{overflowY: "hidden"}}>
                 <Modal.Header closeButton>

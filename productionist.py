@@ -85,9 +85,9 @@ class Productionist(object):
         # be included in the remaining path); this is saved a record of the generation process that
         # produced a line, and is critically utilized to produce the bracketed expression for a line
         self.explicit_path_taken = []
-        # The persistent state, which includes state that was introduced by the author or by
+        # The Productionist state, which includes state that was introduced by the author or by
         # state updates executed upon expanding nonterminal symbols during previous generation instances;
-        # the persistent state is continuously updated over the course of generating an email message
+        # the state is continuously updated over the course of generating a content package
         self.state = State(initial_state_dictionary=None)
         # Whether Productionist is currently targeting a particular expressible meaning, which means
         # that it cannot go down paths that would accumulate tags outside that meaning, or whether
@@ -160,17 +160,6 @@ class Productionist(object):
         if self.verbosity >= 1:
             print "\t\tGrammar has {n} expressible meanings".format(n=len(expressible_meanings))
         return expressible_meanings
-
-    def save_repetition_penalties_file(self):
-        """Save a serialized version of the repetition-penalties dictionary, for use in any subsequent
-        generation instances.
-        """
-        # TODO CONSIDER REMOVING THIS METHOD, UNLESS YOU THINK IT COULD BE USED TO CONTROL REPETITION
-        # ACROSS MULTIPLE EMAIL MESSAGES? NOT SURE THIS WOULD BE A VALID AIM, THOUGH.
-        path_to_repetitions_file = '{content_bundle}.repetitions'.format(content_bundle=self.content_bundle)
-        repetitions_file = open(path_to_repetitions_file, 'wb')
-        pickle.dump(self.repetition_penalties, repetitions_file)
-        repetitions_file.close()
 
     def fulfill_content_request(self, content_request, state_overwrites=None):
         """Satisfy the given content request."""
@@ -636,13 +625,11 @@ class Productionist(object):
         # need to save a copy of the explicit path that we took through the grammar, since this
         # will be consumed as we build the bracketed expression
         explicit_path_taken = list(self.explicit_path_taken)
-        # if targeted_symbol:
-        #     bracketed_expression = self._produce_bracketed_expression(symbol_to_start_from=targeted_symbol)
-        # else:
-        #     bracketed_expression = self._produce_bracketed_expression()
+        if targeted_symbol:
+            bracketed_expression = self._produce_bracketed_expression(symbol_to_start_from=targeted_symbol)
+        else:
+            bracketed_expression = self._produce_bracketed_expression()
         # Postprocess the generated text to programmatically clean it up
-        bracketed_expression = ''  # TODO
-        generated_text = generated_text.replace('<empty>', '')
         generated_text = generated_text.replace('?.', '?')
         generated_text = generated_text.replace('!.', '!')
         # Instantiate an Output object
@@ -706,26 +693,24 @@ class Productionist(object):
 
     def _execute_production_rule_to_produce_bracketed_expression_fragment(self, rule):
         """Execute the given production rule to produce the next fragment of the bracketed expression being produced."""
-        # Terminally expand this symbol
-        terminally_expanded_symbols_in_this_rule_body = []
+        results_of_executing_this_rule = []
         for symbol in rule.body:
             if type(symbol) == unicode:  # Terminal symbol (no need to expand)
-                terminally_expanded_symbols_in_this_rule_body.append(
+                results_of_executing_this_rule.append(
                     '"{terminal_symbol}"'.format(terminal_symbol=symbol)
                 )
             elif type(symbol) is NonterminalSymbol:  # Nonterminal symbol (we must expand it)
                 terminal_expansion_of_that_symbol = (
-                    self._expand_nonterminal_symbol_to_produce_bracketed_expression_fragment(
-                        nonterminal_symbol=symbol)
+                    self._expand_nonterminal_symbol_to_produce_bracketed_expression_fragment(nonterminal_symbol=symbol)
                 )
-                terminally_expanded_symbols_in_this_rule_body.append(terminal_expansion_of_that_symbol)
+                results_of_executing_this_rule.append(terminal_expansion_of_that_symbol)
             else:  # type(symbol) == RuntimeExpression
                 pass  # TODO
         # Concatenate the results and return that string
         bracketed_expression_fragment = "{head}{head_tags}[{results}]".format(
             head=rule.head.name,
             head_tags=' <{tags}>'.format(tags=', '.join(t for t in rule.head.tags)) if rule.head.tags else '',
-            results=' + '.join(terminally_expanded_symbols_in_this_rule_body)
+            results='|'.join(results_of_executing_this_rule)
         )
         return bracketed_expression_fragment
 
@@ -789,28 +774,6 @@ class Productionist(object):
                 key=lambda candidate: probability_ranges[candidate][1] - probability_ranges[candidate][0]
             )
         return selection
-
-    def _execute_effects(self, content_package):
-        """Execute any effects attached to the nonterminal symbols that were expanded to produce the content package."""
-        pass  # TODO
-        # executed_effect_definitions = []
-        # for production_rule in content_package.explicit_grammar_path_taken:
-        #     for symbol in production_rule.body:
-        #         if type(symbol) != unicode:
-        #             for effect in symbol.effects:
-        #                 effect(state=content_package.state)
-        #                 if self.verbosity >= 3:
-        #                     # Retrieve the human-readable definition for this effect function
-        #                     index_of_effect_function = symbol.effects.index(effect)
-        #                     function_definition = symbol.effect_definitions[index_of_effect_function]
-        #                     executed_effect_definitions.append(function_definition)
-        # if self.verbosity >= 3:
-        #     print "-- Executed the following effects:\n  {effects}".format(
-        #         effects=(
-        #             '\n  '.join(effect_definition for effect_definition in executed_effect_definitions)
-        #             if executed_effect_definitions else '(none)'
-        #         )
-        #     )
 
 
 class ExpressibleMeaning(object):
@@ -1108,25 +1071,22 @@ class ContentPackage(object):
     def _construct_tree_expression(self, exclude_tags):
         """Construct a more understandable version of the bracketed expression, presented as a tree."""
         bracketed_expression = self.bracketed_expression
+        # Strip off the virtual START symbol jazz
+        bracketed_expression = bracketed_expression.lstrip('START[').rstrip(']')
         if exclude_tags:  # Strip out the tags, which are enclosed in angle brackets
             bracketed_expression = re.sub(r' <.+?>', '', bracketed_expression)
         tree_expression = ''
         indent = 0
         for character in bracketed_expression:
-            if character in '[]+':
+            if character in '[]|':
                 indent += 4 if character == '[' else -4 if character == ']' else 0
-            if character in '[+':
+            if character in '[|':
                 tree_expression += '\n{whitespace}'.format(whitespace=' ' * indent)
             elif character == ']':
                 pass
             else:
                 tree_expression += character
         return tree_expression
-
-    @property
-    def payload(self):
-        """Return a dictionary containing data associated with this output, for use by the authoring interface."""
-        return {"text": self.text, "tags": list(self.tags)}
 
 
 class Grammar(object):
