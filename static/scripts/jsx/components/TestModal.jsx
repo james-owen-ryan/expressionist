@@ -31,6 +31,8 @@ class TestModal extends React.Component {
         this.getTagColorFromStatus = this.getTagColorFromStatus.bind(this);
         this.cycleStatus = this.cycleStatus.bind(this);
         this.startStateEditing = this.startStateEditing.bind(this);
+        this.lockProductionistStateStr = this.lockProductionistStateStr.bind(this);
+        this.unlockProductionistStateStr = this.unlockProductionistStateStr.bind(this);
         this.updateProductionistStateStr = this.updateProductionistStateStr.bind(this);
         this.stopStateEditing = this.stopStateEditing.bind(this);
         this.sendTaggedContentRequest = this.sendTaggedContentRequest.bind(this);
@@ -39,6 +41,8 @@ class TestModal extends React.Component {
         this.viewGeneratedTreeExpression = this.viewGeneratedTreeExpression.bind(this);
         this.viewProductionistState = this.viewProductionistState.bind(this);
         this.handlePotentialTabbingHotKeyPress = this.handlePotentialTabbingHotKeyPress.bind(this);
+        this.changeToLockedStateView = this.changeToLockedStateView.bind(this);
+        this.changeToUpdatedStateView = this.changeToUpdatedStateView.bind(this);
         this.state = {
             grammarFileNames: [],
             tagsets: [],
@@ -48,6 +52,7 @@ class TestModal extends React.Component {
             generatedContentPackageText: null,
             generatedContentPackageTags: [],
             generatedContentPackageTreeExpression: '',
+            lockedProductionistStateStr: null,
             productionistStateStr: '{}',  // The state is represented as a JSON string
             editingState: false,
             outputError: false,
@@ -55,7 +60,8 @@ class TestModal extends React.Component {
             showText: true,
             showTags: false,
             showTreeExpression: false,
-            showState: false
+            showState: false,
+            viewLockedState: false
         };
     }
 
@@ -125,6 +131,7 @@ class TestModal extends React.Component {
     }
 
     startStateEditing() {
+        this.unlockProductionistStateStr();
         this.setState({
             editingState: true,
             // The state is now out of sync with regard to the other views, so reset the state
@@ -147,8 +154,33 @@ class TestModal extends React.Component {
         this.setState({productionistStateStr: newProductionistStateStr});
     }
 
+    lockProductionistStateStr() {
+        this.setState({
+            lockedProductionistStateStr: this.state.productionistStateStr,
+            viewLockedState: true
+        })
+    }
+
+    unlockProductionistStateStr() {
+        var lockedProductionistStateStr = this.state.lockedProductionistStateStr;
+        var updatedProductionistStateStr = this.state.productionistStateStr;
+        this.setState({
+            productionistStateStr: this.viewLockedState ? lockedProductionistStateStr : updateProductionistStateStr,
+            lockedProductionistStateStr: null,
+            viewLockedState: false,
+        })
+    }
+
     stopStateEditing() {
         this.setState({editingState: false});
+    }
+
+    changeToLockedStateView() {
+        this.setState({viewLockedState: true});
+    }
+
+    changeToUpdatedStateView() {
+        this.setState({viewLockedState: false});
     }
 
     sendTaggedContentRequest(tagsets) {
@@ -172,7 +204,7 @@ class TestModal extends React.Component {
             data: JSON.stringify({
                 tags: contentRequest,
                 bundleName: this.state.bundleName,
-                state: this.state.productionistStateStr
+                state: this.state.lockedProductionistStateStr ? this.state.lockedProductionistStateStr : this.state.productionistStateStr
             }),
             async: true,
             cache: false,
@@ -385,9 +417,9 @@ class TestModal extends React.Component {
                 {
                     this.state.outputError
                     ?
-                    <div style={{backgroundColor: '#ff9891', color: '#fff', height: '70vh', padding: '25px'}}>Content request is unsatisfiable given the exported content bundle.</div>
+                    <div style={{backgroundColor: '#ff9891', color: '#fff', height: '70vh', padding: '25px', fontSize: '18px'}}>Content request is unsatisfiable given the exported content bundle.</div>
                     :
-                    <div style={this.state.editingState ? {whiteSpace: 'pre-wrap', height: '70vh', padding: '25px', overflowY: 'scroll', backgroundColor: "#f2f2f2"} : {whiteSpace: 'pre-wrap', height: '70vh', padding: '25px', overflowY: 'scroll', backgroundColor: "#fff"}} onClick={this.state.showState && !this.state.editingState ? this.startStateEditing : ""}>
+                    <div style={this.state.editingState ? {whiteSpace: 'pre-wrap', height: '70vh', overflowY: 'scroll', backgroundColor: "#f2f2f2", padding: '25px'} : {whiteSpace: 'pre-wrap', height: '70vh', overflowY: 'scroll', backgroundColor: "#fff", fontSize: '18px', padding: '25px'}}>
                         {
                             this.state.showText
                             ?
@@ -413,9 +445,28 @@ class TestModal extends React.Component {
                             :
                             this.state.editingState
                             ?
-                            <textarea id="stateEditInput" type='text' title="Submit a content request or click outside this area to freeze your changes." value={this.state.productionistStateStr} onChange={this.updateProductionistStateStr} onBlur={this.stopStateEditing} style={{position: "relative", width: '100%', height: '100%', border: '0px', fontSize: '18px', backgroundColor: '#f2f2f2', overflowY: 'scroll', resize: 'none'}} autoFocus="true"/>
+                            <textarea id="stateEditInput" type='text' title="Submit a content request or click outside this area to freeze your changes." value={this.state.lockedProductionistStateStr ? this.state.lockedProductionistStateStr : this.state.productionistStateStr} onChange={this.updateProductionistStateStr} onBlur={this.stopStateEditing} style={{position: "relative", width: '100%', height: '100%', border: '0px', fontSize: '18px', backgroundColor: '#f2f2f2', overflowY: 'scroll', resize: 'none'}} autoFocus="true"/>
                             :
-                            <span style={{position: "relative", width: '100%', height: '100%', overflowY: 'scroll'}}>{this.state.productionistStateStr}</span>
+                            <div>
+                                <div style={{position: 'relative', height: '60vh', width: '100%'}} onClick={this.startStateEditing}>
+                                    <span style={{width: '100%', height: '60vh', padding: '25px', overflowY: 'scroll'}}>{this.state.viewLockedState ? this.state.lockedProductionistStateStr : this.state.productionistStateStr}</span>
+                                </div>
+                                {
+                                    this.state.lockedProductionistStateStr
+                                    ?
+                                    <div style={{height: '10%'}}>
+                                        <ButtonGroup style={{position: 'absolute', bottom: '0px', left: '0px'}}>
+                                            <Button className="grp_button" onClick={this.state.lockedProductionistStateStr ? this.unlockProductionistStateStr : this.lockProductionistStateStr} title={this.state.lockedProductionistStateStr ? "Unlock this state in the content request (the updated state will always be sent instead)" : "Lock this state in the content request (this state will be resent instead of the updated state)"} style={this.state.lockedProductionistStateStr ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}}><Glyphicon glyph="lock"/></Button>
+                                            <Button className="grp_button" onClick={this.changeToLockedStateView} title="View locked state (sent via the content request)" style={this.state.viewLockedState ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}}><Glyphicon glyph="open"/></Button>
+                                            <Button className="grp_button" onClick={this.changeToUpdatedStateView} title="View updated state (received in the content package)" style={this.state.viewLockedState ? {height: '38px'} : {height: '38px', backgroundColor: "#ffe97f"}}><Glyphicon glyph="save"/></Button>
+                                        </ButtonGroup>
+                                    </div>
+                                    :
+                                    <div style={{height: '10%'}}>
+                                        <Button className="grp_button" onClick={this.state.lockedProductionistStateStr ? this.unlockProductionistStateStr : this.lockProductionistStateStr} title={this.state.lockedProductionistStateStr ? "Unlock this state in the content request (the updated state will always be sent instead)" : "Lock this state in the content request (this state will be resent instead of the updated state)"} style={this.state.lockedProductionistStateStr ? {position: 'absolute', bottom: '0px', left: '0px', height: '38px', backgroundColor: "#ffe97f"} : {position: 'absolute', bottom: '0px', left: '0px', height: '38px'}}><Glyphicon glyph="lock"/></Button>
+                                    </div>
+                                }
+                            </div>
                         }
                     </div>
                 }
