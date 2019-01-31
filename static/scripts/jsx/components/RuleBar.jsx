@@ -314,20 +314,48 @@ class RuleBar extends React.Component {
         var expansion = this.state.ruleExpansionInputVal;
         var preconditions = this.state.rulePreconditionsInputVal;
         var effects = this.state.ruleEffectsInputVal;
-        if (expansion != '') {
-            // Generate a juicy response (button lights yellow and fades back to gray)
-            document.getElementById('submitRuleButton').style.backgroundColor = 'rgb(87, 247, 224)';
-            document.getElementById('submitRuleButton').innerHTML = 'Added!'
-            var juicingIntervalFunction = setInterval(this.juiceRuleDefinitionSubmitButton, 1);
-            // Reset the application rate, but we'll keep the expansion (in case the author wishes
-            // to define a bunch of similar variants quickly)
-            this.setState({ruleApplicationRate: 1})
+        // Generate a juicy response (button lights yellow and fades back to gray)
+        document.getElementById('submitRuleButton').style.backgroundColor = 'rgb(87, 247, 224)';
+        document.getElementById('submitRuleButton').innerHTML = 'Added!'
+        var juicingIntervalFunction = setInterval(this.juiceRuleDefinitionSubmitButton, 1);
+        // Reset the application rate, but we'll keep the expansion (in case the author wishes
+        // to define a bunch of similar variants quickly)
+        this.setState({ruleApplicationRate: 1})
+        var object = {
+            "rule head name": ruleHeadName,
+            "rule body": expansion,
+            "application rate": appRate,
+            "preconditions": preconditions,
+            "effects": effects
+        }
+        ajax({
+            url: $SCRIPT_ROOT + '/api/rule/add',
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(object),
+            success: () => {
+                if (ruleHeadName === this.props.currentSymbolName) {
+                    // If the author has just created a new rule for the current symbol, navigate the
+                    // view to that new rule
+                    this.props.updateFromServer(this.pullNewRuleInWorkspaceAndRefocusOnRuleBodyInput);
+                }
+                else {
+                    this.props.updateFromServer(this.refocusOnRuleBodyInput);
+                }
+                this.props.updateGeneratedContentPackageTags([]);
+                this.props.updateGeneratedContentPackageText('');
+            },
+            cache: false
+        })
+        if (this.state.connectNewRuleHeadToCurrentSymbol) {
+            var ruleHeadOfConnectingRule = this.props.currentSymbolName;
+            var ruleBodyOfConnectingRule = "[[" + ruleHeadName + "]]";
             var object = {
-                "rule head name": ruleHeadName,
-                "rule body": expansion,
-                "application rate": appRate,
-                "preconditions": preconditions,
-                "effects": effects
+                "rule head name": ruleHeadOfConnectingRule,
+                "rule body": ruleBodyOfConnectingRule,
+                "application rate": 1,
+                "preconditions": "",
+                "effects": ""
             }
             ajax({
                 url: $SCRIPT_ROOT + '/api/rule/add',
@@ -335,46 +363,16 @@ class RuleBar extends React.Component {
                 contentType: "application/json",
                 data: JSON.stringify(object),
                 success: () => {
-                    if (ruleHeadName === this.props.currentSymbolName) {
-                        // If the author has just created a new rule for the current symbol, navigate the
-                        // view to that new rule
-                        this.props.updateFromServer(this.pullNewRuleInWorkspaceAndRefocusOnRuleBodyInput);
-                    }
-                    else {
-                        this.props.updateFromServer(this.refocusOnRuleBodyInput);
-                    }
-                    this.props.updateGeneratedContentPackageTags([]);
-                    this.props.updateGeneratedContentPackageText('');
+                    this.props.updateFromServer(this.refocusOnRuleBodyInput);
                 },
                 cache: false
             })
-            if (this.state.connectNewRuleHeadToCurrentSymbol) {
-                var ruleHeadOfConnectingRule = this.props.currentSymbolName;
-                var ruleBodyOfConnectingRule = "[[" + ruleHeadName + "]]";
-                var object = {
-                    "rule head name": ruleHeadOfConnectingRule,
-                    "rule body": ruleBodyOfConnectingRule,
-                    "application rate": 1,
-                    "preconditions": "",
-                    "effects": ""
-                }
-                ajax({
-                    url: $SCRIPT_ROOT + '/api/rule/add',
-                    type: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify(object),
-                    success: () => {
-                        this.props.updateFromServer(this.refocusOnRuleBodyInput);
-                    },
-                    cache: false
-                })
-            }
-            setTimeout(function() {
-                clearInterval(juicingIntervalFunction);
-                document.getElementById('submitRuleButton').innerHTML = 'Create Rule';
-                document.getElementById('submitRuleButton').style.backgroundColor = 'rgb(242, 242, 242)';
-            }, 1250);
         }
+        setTimeout(function() {
+            clearInterval(juicingIntervalFunction);
+            document.getElementById('submitRuleButton').innerHTML = 'Create Rule';
+            document.getElementById('submitRuleButton').style.backgroundColor = 'rgb(242, 242, 242)';
+        }, 1250);
     }
 
     editRule() {
@@ -388,52 +386,50 @@ class RuleBar extends React.Component {
         var expansion = this.state.ruleExpansionInputVal;
         var preconditions = this.state.rulePreconditionsInputVal;
         var effects = this.state.ruleEffectsInputVal;
-        if (expansion != '') {
+        var object = {
+            "original rule head name": originalRuleHeadName,
+            "rule id": originalRuleId,
+            "rule head name": ruleHeadName,
+            "rule body": expansion,
+            "application rate": appRate,
+            "preconditions": preconditions,
+            "effects": effects
+        }
+        ajax({
+            url: $SCRIPT_ROOT + '/api/rule/edit',
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(object),
+            success: () => {
+                this.props.updateGeneratedContentPackageTags([]);
+                this.props.updateGeneratedContentPackageText('');
+                this.props.updateFromServer()
+                this.closeModal()
+            },
+            cache: false
+        })
+        if (this.state.connectNewRuleHeadToCurrentSymbol) {
+            var ruleHeadOfConnectingRule = this.props.currentSymbolName;
+            var ruleBodyOfConnectingRule = "[[" + this.state.ruleHeadInputVal + "]]";
             var object = {
-                "original rule head name": originalRuleHeadName,
-                "rule id": originalRuleId,
-                "rule head name": ruleHeadName,
-                "rule body": expansion,
-                "application rate": appRate,
-                "preconditions": preconditions,
-                "effects": effects
+                "rule head name": ruleHeadOfConnectingRule,
+                "rule body": ruleBodyOfConnectingRule,
+                "application rate": 1,
+                "preconditions": "",
+                "effects": ""
             }
             ajax({
-                url: $SCRIPT_ROOT + '/api/rule/edit',
+                url: $SCRIPT_ROOT + '/api/rule/add',
                 type: "POST",
                 contentType: "application/json",
                 data: JSON.stringify(object),
                 success: () => {
                     this.props.updateGeneratedContentPackageTags([]);
                     this.props.updateGeneratedContentPackageText('');
-                    this.props.updateFromServer()
-                    this.closeModal()
+                    this.props.updateFromServer();
                 },
                 cache: false
             })
-            if (this.state.connectNewRuleHeadToCurrentSymbol) {
-                var ruleHeadOfConnectingRule = this.props.currentSymbolName;
-                var ruleBodyOfConnectingRule = "[[" + this.state.ruleHeadInputVal + "]]";
-                var object = {
-                    "rule head name": ruleHeadOfConnectingRule,
-                    "rule body": ruleBodyOfConnectingRule,
-                    "application rate": 1,
-                    "preconditions": "",
-                    "effects": ""
-                }
-                ajax({
-                    url: $SCRIPT_ROOT + '/api/rule/add',
-                    type: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify(object),
-                    success: () => {
-                        this.props.updateGeneratedContentPackageTags([]);
-                        this.props.updateGeneratedContentPackageText('');
-                        this.props.updateFromServer();
-                    },
-                    cache: false
-                })
-            }
         }
     }
 
@@ -539,30 +535,33 @@ class RuleBar extends React.Component {
             var buttonExtraClassName = '';
             if (rule.preconditionsStr && rule.effectsStr) {
                 if (buttonIsForTheCurrentRule) {
-                    buttonExtraClassName = 'rule-button-when-rule-has-preconditions-and-effects-and-is-the-current-rule'
+                    buttonExtraClassName = 'rule-button-when-rule-has-preconditions-and-effects-and-is-the-current-rule';
                 }
                 else {
-                    buttonExtraClassName = 'rule-button-when-rule-has-preconditions-and-effects'
+                    buttonExtraClassName = 'rule-button-when-rule-has-preconditions-and-effects';
                 }
             }
             else if (rule.preconditionsStr) {
                 if (buttonIsForTheCurrentRule) {
-                    buttonExtraClassName = 'rule-button-when-rule-has-preconditions-and-no-effects-and-is-the-current-rule'
+                    buttonExtraClassName = 'rule-button-when-rule-has-preconditions-and-no-effects-and-is-the-current-rule';
                 }
                 else {
-                    buttonExtraClassName = 'rule-button-when-rule-has-preconditions-and-no-effects'
+                    buttonExtraClassName = 'rule-button-when-rule-has-preconditions-and-no-effects';
                 }
             }
             else if (rule.effectsStr) {
                 if (buttonIsForTheCurrentRule) {
-                    buttonExtraClassName = 'rule-button-when-rule-has-effects-and-no-preconditions-and-is-the-current-rule'
+                    buttonExtraClassName = 'rule-button-when-rule-has-effects-and-no-preconditions-and-is-the-current-rule';
                 }
                 else {
-                    buttonExtraClassName = 'rule-button-when-rule-has-effects-and-no-preconditions'
+                    buttonExtraClassName = 'rule-button-when-rule-has-effects-and-no-preconditions';
                 }
             }
+            else if (buttonIsForTheCurrentRule) {
+                buttonExtraClassName = 'rule-button-when-rule-has-no-preconditions-and-no-effects-but-is-the-current-rule';
+            }
             ruleButtons.push(
-                <Button onClick={this.handleRuleClick.bind(this, i)} title={AUTHOR_IS_USING_A_MAC ? "View production rule (toggle: ⇥, ⇧⇥)" : "View production rule (toggle: Tab, Shift+Tab)"} key={rule.expansion.join('')+this.props.currentSymbolName} className={buttonExtraClassName} style={buttonExtraClassName ? {} : {backgroundColor: buttonBackgroundColor}}>
+                <Button onClick={this.handleRuleClick.bind(this, i)} title={AUTHOR_IS_USING_A_MAC ? "View production rule (toggle: ⇥, ⇧⇥)" : "View production rule (toggle: Tab, Shift+Tab)"} key={rule.expansion.join('')+this.props.currentSymbolName} className={buttonExtraClassName} style={{height: "32px"}}>
                     {ruleNameExcerpt}
                 </Button>
             );
@@ -679,10 +678,6 @@ class RuleBar extends React.Component {
         else if (this.state.ruleHeadInputVal === '') {
             ruleDefinitionAddButtonIsDisabled = true;
             ruleDefinitionModalButtonHoverText += " (disabled: rule head is missing)"
-        }
-        else if (this.state.ruleExpansionInputVal === '') {
-            ruleDefinitionAddButtonIsDisabled = true;
-            ruleDefinitionModalButtonHoverText += " (disabled: rule body is empty)"
         }
         else if (this.state.ruleApplicationRate === '') {
             ruleDefinitionAddButtonIsDisabled = true;

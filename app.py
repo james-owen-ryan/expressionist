@@ -306,33 +306,32 @@ def export():
     output_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ''.join(['exports/', content_bundle_name])))
     # Index the grammar and save out the resulting files (Productionist-format grammar file [.grammar],
     # trie file (.marisa), and expressible meanings file [.meanings])
-    reductionist = Reductionist(
+    Reductionist(
         raw_grammar_json=app.grammar.to_json(to_file=True),  # JOR: I'm not sure what to_file actually does
         path_to_write_output_files_to=output_path,
         verbosity=0 if debug is False else 2
     )
-    if not reductionist.validator.errors:
-        print "\n--Success! Indexed this grammar's {n} generable lines to infer {m} expressible meanings.--".format(
-            n=reductionist.total_generable_outputs,
-            m=len(reductionist.expressible_meanings)
-        )
-        return "The grammar was successfully exported."
-    else:
-        print "\n--Errors--"
-        for error_message in reductionist.validator.error_messages:
-            print '\n{msg}'.format(msg=error_message)
-    if reductionist.validator.warnings:
-        print "\n--Warnings--"
-        for warning_message in reductionist.validator.warning_messages:
-            print '\n{msg}'.format(msg=warning_message)
-        return "The grammar was successfully exported, but errors were printed to console."
+    # if not reductionist.validator.errors:
+    #     print "\n--Success! Indexed this grammar's {n} generable lines to infer {m} expressible meanings.--".format(
+    #         n=reductionist.total_generable_outputs,
+    #         m=len(reductionist.expressible_meanings)
+    #     )
+    #     return "The grammar was successfully exported."
+    # else:
+    #     print "\n--Errors--"
+    #     for error_message in reductionist.validator.error_messages:
+    #         print '\n{msg}'.format(msg=error_message)
+    # if reductionist.validator.warnings:
+    #     print "\n--Warnings--"
+    #     for warning_message in reductionist.validator.warning_messages:
+    #         print '\n{msg}'.format(msg=warning_message)
+    #     return "The grammar was successfully exported, but errors were printed to console."
     return "The grammar failed to export. Please check the console for more details."
 
 
 @app.route('/api/grammar/build', methods=['GET', 'POST'])
 def build_productionist():
     """Build a Productionist by processing an exported content bundle."""
-    print "\n-- Building a Productionist..."
     # Grab the name the user gave for the content bundle
     content_bundle_name = request.data
     content_bundle_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), 'exports'))
@@ -349,7 +348,7 @@ def build_productionist():
 
 
 @app.route('/api/grammar/content_request', methods=['POST'])
-def tagged_content_request():
+def handle_content_request():
     """Furnish generated content that satisfies an author-defined content request."""
     # Receive the raw content request (as JSON data)
     data = request.data
@@ -371,7 +370,11 @@ def tagged_content_request():
     content_package = app.productionist.fulfill_content_request(content_request=content_request)
     if content_package:
         # Send the generated outputs back to the authoring tool as a single JSON package
-        content_package_json = json.dumps(content_package.payload)
+        content_package_json = json.dumps({
+            "text": content_package.text,
+            "tags": list(content_package.tags),
+            "treeExpression": content_package.tree_expression
+        })
         return content_package_json
     return "The content request cannot be satisfied by the exported content bundle."
 

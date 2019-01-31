@@ -25,8 +25,6 @@ def parse_rule(rule_string):
     """
     # this regex is a pain but it matches strings of either [[...]] or [...]
     split_list = re.split('(\[{2}[^\]\[]+\]{2})', rule_string)
-    # remove all empty strings
-    split_list = filter(None, split_list)
     derivation = []
     for token in split_list:
         if token[:2] == '[[':
@@ -174,13 +172,11 @@ class PCFG(object):
     def toggle_markup(self, nonterminal, markup):
         if markup in list(self.nonterminals.get(str(nonterminal.tag)).markup):
             self.remove_markup(nonterminal, markup)
-            print "removing markup"
         else:
             if str(nonterminal.tag) in self.nonterminals:
-                print "adding markup"
                 self.add_markup(nonterminal, markup)
             else:
-                print('nonterminal not found!')
+                print 'nonterminal not found!'
 
     def add_unused_markup(self, markup):
 
@@ -249,7 +245,6 @@ class PCFG(object):
             row_writer.writerow(header)
         for nonterminal in self.nonterminals.itervalues():
             if nonterminal.deep:
-                print "Expanding top-level symbol {}".format(nonterminal)
                 if self.monte_carlo:
                     self.monte_carlo_export(nonterminal, filename)
                 else:
@@ -306,11 +301,7 @@ class PCFG(object):
             temp['markup'] = markup_dict
             if not nonterminals.get(value.tag.__str__()):
                 nonterminals[value.tag.__str__()] = collections.defaultdict()
-
-            #print(nonterminals)
             nonterminals[value.tag.__str__()].update(temp)
-            #print(nonterminals)
-
         total['nonterminals'] = nonterminals
 
         total['markups'] = {}
@@ -342,10 +333,8 @@ class PCFG(object):
             if isinstance(obj, NonterminalSymbol):
                 return str(obj)
             else:
-                #print(type(obj))
                 raise TypeError
 
-        #print total
         return json.dumps(total, default=set_default, sort_keys=True)
         # create the nonterminal dictonary
 
@@ -478,7 +467,6 @@ def from_json(json_in):
     for markupSet in dict_rep.get('markups'):
         x = MarkupSet(markupSet)
         gram_res.add_new_markup_set(MarkupSet(markupSet))
-        print(markupSet)
         for tags in dict_rep['markups'][markupSet]:
             gram_res.add_unused_markup(Markup(tags, tagset=x))
 
