@@ -966,6 +966,10 @@ class State(object):
             # Return True if the state reference exists in the state
             state_reference = predicate[0]
             return bool(self.resolve(value=state_reference))
+        elif operator == 'does':  # As in 'does not exist'
+            # Return True if the state reference does not exist in the state
+            state_reference = predicate[0]
+            return not bool(self.resolve(value=state_reference))
         else:
             first_value = self.resolve(value=predicate[0])
             second_value = self.resolve(value=predicate[2])
@@ -1480,6 +1484,7 @@ class RuntimeExpression(object):
         )
         self.is_condition_expression = (
             (len(parsed_definition) == 2 and parsed_definition[1] == 'exists') or
+            (len(parsed_definition) == 4 and ' '.join(parsed_definition[1:]) == 'does not exist') or
             (len(parsed_definition) == 3 and parsed_definition[1] in ('==', '!=', '>', '<', '>=', '<='))
         )
         definition_is_well_formed = (
