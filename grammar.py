@@ -23,8 +23,12 @@ def parse_rule(rule_string):
     :type rule_string: string
     :returns: list[symbols]
     """
+    if rule_string == '':
+        return [TerminalSymbol('')]
     # this regex is a pain but it matches strings of either [[...]] or [...]
     split_list = re.split('(\[{2}[^\]\[]+\]{2})', rule_string)
+    # remove all empty strings
+    split_list = filter(None, split_list)
     derivation = []
     for token in split_list:
         if token[:2] == '[[':
