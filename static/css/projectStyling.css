@@ -101,6 +101,10 @@
     background-color: #ffe97f;
 }
 
+.rule-button-when-rule-has-no-preconditions-and-no-effects-but-is-the-current-rule {
+    background-color: #ffe97f;
+}
+
 .rule-button-when-rule-has-preconditions-and-no-effects {
     background: linear-gradient(to bottom, #57f7e0 5px, #f2f2f2 5px);
 }
