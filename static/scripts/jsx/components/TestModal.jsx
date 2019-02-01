@@ -162,10 +162,9 @@ class TestModal extends React.Component {
     }
 
     unlockProductionistStateStr() {
-        var lockedProductionistStateStr = this.state.lockedProductionistStateStr;
-        var updatedProductionistStateStr = this.state.productionistStateStr;
+        var newProductionistStateStr = this.state.viewLockedState ? this.state.lockedProductionistStateStr : this.state.productionistStateStr;
         this.setState({
-            productionistStateStr: this.viewLockedState ? lockedProductionistStateStr : updatedProductionistStateStr,
+            productionistStateStr: newProductionistStateStr,
             lockedProductionistStateStr: null,
             viewLockedState: false,
         })
@@ -449,7 +448,7 @@ class TestModal extends React.Component {
                             :
                             <div>
                                 <div style={{position: 'relative', height: '60vh', width: '100%'}} onClick={this.startStateEditing}>
-                                    <span style={{width: '100%', height: '60vh', padding: '25px', overflowY: 'scroll'}}>{this.state.viewLockedState ? this.state.lockedProductionistStateStr : this.state.productionistStateStr}</span>
+                                    <span style={{width: '100%', height: '60vh', overflowY: 'scroll'}}>{this.state.viewLockedState ? this.state.lockedProductionistStateStr : this.state.productionistStateStr}</span>
                                 </div>
                                 {
                                     this.state.lockedProductionistStateStr
