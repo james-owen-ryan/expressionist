@@ -40,7 +40,7 @@ class TestModal extends React.Component {
         this.viewGeneratedTags = this.viewGeneratedTags.bind(this);
         this.viewGeneratedTreeExpression = this.viewGeneratedTreeExpression.bind(this);
         this.viewProductionistState = this.viewProductionistState.bind(this);
-        this.handlePotentialTabbingHotKeyPress = this.handlePotentialTabbingHotKeyPress.bind(this);
+        this.handlePotentialHotKeyPress = this.handlePotentialHotKeyPress.bind(this);
         this.changeToLockedStateView = this.changeToLockedStateView.bind(this);
         this.changeToUpdatedStateView = this.changeToUpdatedStateView.bind(this);
         this.state = {
@@ -270,7 +270,8 @@ class TestModal extends React.Component {
         })
     }
 
-    handlePotentialTabbingHotKeyPress(e) {
+    handlePotentialHotKeyPress(e) {
+        // Check for rule tabbing (note: tabbing on other views is handled in the respective components)
         if (e.key === 'Tab' && this.props.show) {
             e.preventDefault();
             if (this.state.generatedContentPackageText === null || this.state.outputError) {
@@ -312,6 +313,33 @@ class TestModal extends React.Component {
 
             }
         }
+        else {
+            // Check for a hot-key match (ctrl/command + ...)
+            var viewLockedStateHotKeyMatch = false; // up
+            var viewUpdatedStateHotKeyMatch = false; // down
+            if (e.ctrlKey || e.metaKey) {
+                if (e.key === 'ArrowUp') {
+                    // Disable this if the author is editing the state or the state has not been locked
+                    if (this.state.lockedProductionistStateStr && !this.state.editingState) {
+                        e.preventDefault();
+                        viewLockedStateHotKeyMatch = true;
+                    }
+                }
+                else if (e.key === 'ArrowDown') {
+                    // Disable this if the author is editing the state or the state has not been locked
+                    if (this.state.lockedProductionistStateStr && !this.state.editingState) {
+                        e.preventDefault();
+                        viewUpdatedStateHotKeyMatch = true;
+                    }
+                }
+            }
+            if (viewLockedStateHotKeyMatch) {
+                this.setState({viewLockedState: true});
+            }
+            else if (viewUpdatedStateHotKeyMatch) {
+                this.setState({viewLockedState: false});
+            }
+        }
     }
 
     getTagsetsFromBundle(bundleName) {
@@ -346,7 +374,7 @@ class TestModal extends React.Component {
     }
 
     componentDidMount() {
-        document.addEventListener("keydown", this.handlePotentialTabbingHotKeyPress, false);
+        document.addEventListener("keydown", this.handlePotentialHotKeyPress, false);
     }
 
     componentWillReceiveProps(nextProps) {
@@ -456,8 +484,8 @@ class TestModal extends React.Component {
                                     <div style={{height: '10%'}}>
                                         <ButtonGroup style={{position: 'absolute', bottom: '0px', left: '0px'}}>
                                             <Button className="grp_button" onClick={this.state.lockedProductionistStateStr ? this.unlockProductionistStateStr : this.lockProductionistStateStr} title={this.state.lockedProductionistStateStr ? "Unlock this state in the content request (the updated state will always be sent instead)" : "Lock this state in the content request (this state will be resent instead of the updated state)"} style={this.state.lockedProductionistStateStr ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}}><Glyphicon glyph="lock"/></Button>
-                                            <Button className="grp_button" onClick={this.changeToLockedStateView} title="View locked state (sent via the content request)" style={this.state.viewLockedState ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}}><Glyphicon glyph="open"/></Button>
-                                            <Button className="grp_button" onClick={this.changeToUpdatedStateView} title="View updated state (received in the content package)" style={this.state.viewLockedState ? {height: '38px'} : {height: '38px', backgroundColor: "#ffe97f"}}><Glyphicon glyph="save"/></Button>
+                                            <Button className="grp_button" onClick={this.changeToLockedStateView} title={AUTHOR_IS_USING_A_MAC ? "View locked state (⌘↑)" : "View locked state (Ctrl+Up)"} style={this.state.viewLockedState ? {height: '38px', backgroundColor: "#ffe97f"} : {height: '38px'}}><Glyphicon glyph="open"/></Button>
+                                            <Button className="grp_button" onClick={this.changeToUpdatedStateView} title={AUTHOR_IS_USING_A_MAC ? "View updated state (⌘↓)" : "View locked state (Ctrl+Down)"} style={this.state.viewLockedState ? {height: '38px'} : {height: '38px', backgroundColor: "#ffe97f"}}><Glyphicon glyph="save"/></Button>
                                         </ButtonGroup>
                                     </div>
                                     :
