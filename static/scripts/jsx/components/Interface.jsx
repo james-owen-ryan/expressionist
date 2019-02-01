@@ -76,6 +76,7 @@ class Interface extends React.Component {
         this.letInterfaceKnowTextFieldEditingHasStopped = this.letInterfaceKnowTextFieldEditingHasStopped.bind(this);
         this.letInterFaceKnowTagDefinitionModalIsOpen = this.letInterFaceKnowTagDefinitionModalIsOpen.bind(this);
         this.letInterFaceKnowTagDefinitionModalIsClosed = this.letInterFaceKnowTagDefinitionModalIsClosed.bind(this);
+        this.symbolIsInWorkspace = this.symbolIsInWorkspace.bind(this);
         this.state = {
             currentGrammarName: 'new',
             bundleName: '',
@@ -376,6 +377,10 @@ class Interface extends React.Component {
         this.setState({currentGrammarName: grammarName.replace(".json", "")});
     }
 
+    symbolIsInWorkspace(symbolName) {
+        return symbolName === this.state.currentSymbol && this.state.currentRule === -1;
+    }
+
     handlePotentialHotKeyPress(e) {
         // Check for rule tabbing (note: tabbing on other views is handled in the respective components)
         var atLeastOneModalIsOpen = (this.state.showSaveModal || this.state.showLoadModal || this.state.showExportModal || this.state.showTestModal || this.state.showRuleDefinitionModal || this.state.tagDefinitionModalIsOpen);
@@ -514,7 +519,10 @@ class Interface extends React.Component {
             }
             // View rule head: jump from current rule to the that is its rule head ("go up", if you will)
             if (viewRuleHeadHotKeyMatch) {
-                this.setState({currentRule: -1});
+                this.updateCurrentSymbolName(this.state.currentSymbol);
+                this.updateCurrentRule(-1);
+                this.updateGeneratedContentPackageText([]);
+                this.updateGeneratedContentPackageText('');
             }
             // Go back: return to the previous symbol or rule
             else if (goBackHotKeyMatch) {
@@ -1066,7 +1074,8 @@ class Interface extends React.Component {
                                             symbolNameAlreadyExists={this.symbolNameAlreadyExists}
                                             playButtonIsJuicing={this.state.playButtonIsJuicing}
                                             letInterfaceKnowTextFieldEditingHasStarted={this.letInterfaceKnowTextFieldEditingHasStarted}
-                                            letInterfaceKnowTextFieldEditingHasStopped={this.letInterfaceKnowTextFieldEditingHasStopped}/>
+                                            letInterfaceKnowTextFieldEditingHasStopped={this.letInterfaceKnowTextFieldEditingHasStopped}
+                                            symbolIsInWorkspace={this.symbolIsInWorkspace}/>
             }
             else {
                 board = <RuleBoard  currentSymbolName={this.state.currentSymbol}

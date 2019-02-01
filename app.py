@@ -116,12 +116,12 @@ def delete_nt():
     return app.grammar.to_json()
 
 
-@app.route('/api/nonterminal/deep', methods=['POST'])
-def set_deep():
+@app.route('/api/nonterminal/set_top_level_status', methods=['POST'])
+def set_top_level_status():
     data = request.get_json()
     nonterminal = app.grammar.nonterminals.get(data["nonterminal"])
-    if nonterminal:
-        nonterminal.deep = not nonterminal.deep
+    new_top_level_status = data["status"]
+    nonterminal.deep = new_top_level_status
     return app.grammar.to_json()
 
 

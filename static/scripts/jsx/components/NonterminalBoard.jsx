@@ -16,13 +16,13 @@ class NonterminalBoard extends React.Component {
         super(props);
         this.handleClickerThing = this.handleClickerThing.bind(this);
         this.handleNonterminalRuleClickThrough = this.handleNonterminalRuleClickThrough.bind(this);
-        this.handleSetDeep = this.handleSetDeep.bind(this);
+        this.toggleSymbolTopLevelStatus = this.toggleSymbolTopLevelStatus.bind(this);
         this.handleNonterminalDelete = this.handleNonterminalDelete.bind(this);
         this.handleExpand = this.handleExpand.bind(this);
         this.startSymbolNameEditing = this.startSymbolNameEditing.bind(this);
         this.stopSymbolNameEditing = this.stopSymbolNameEditing.bind(this);
         this.updateSymbolNameInputVal = this.updateSymbolNameInputVal.bind(this);
-        this.stopEditingRuleNameOnEnter = this.stopEditingRuleNameOnEnter.bind(this);
+        this.handlePotentialHotKeyPress = this.handlePotentialHotKeyPress.bind(this);
         this.renameCurrentSymbol = this.renameCurrentSymbol.bind(this);
         this.state = {
             editingSymbolName: false,
@@ -47,13 +47,14 @@ class NonterminalBoard extends React.Component {
         this.props.updateGeneratedContentPackageText("")
     }
 
-    handleSetDeep() {
+    toggleSymbolTopLevelStatus() {
         if (this.props.currentSymbolName != "") {
             var object = {
                 "nonterminal": this.props.currentSymbolName,
+                "status": !this.props.nonterminal.deep
             }
             ajax({
-                url: $SCRIPT_ROOT + '/api/nonterminal/deep',
+                url: $SCRIPT_ROOT + '/api/nonterminal/set_top_level_status',
                 type: "POST",
                 contentType: "application/json",
                 data: JSON.stringify(object),
@@ -115,10 +116,24 @@ class NonterminalBoard extends React.Component {
         this.setState({symbolNameInputVal: e.target.value});
     }
 
-    stopEditingRuleNameOnEnter(e) {
+    handlePotentialHotKeyPress(e) {
+        // Stop rule editing upon Enter keypress
         if (e.key === 'Enter' && this.state.editingSymbolName) {
             e.preventDefault();
             this.stopSymbolNameEditing();
+        }
+        else {
+            // Check for a hot-key match (ctrl/command + ...)
+            if (e.ctrlKey || e.metaKey) {
+                // Toggle top-level status of this symbol
+                if (e.shiftKey && e.key === '8') {
+                    // Make sure a rule is not taking up the workspace
+                    if (this.props.symbolIsInWorkspace(this.props.currentSymbolName)) {
+                        e.preventDefault();
+                        this.toggleSymbolTopLevelStatus();
+                    }
+                }
+            }
         }
     }
 
@@ -162,7 +177,7 @@ class NonterminalBoard extends React.Component {
     }
 
     componentDidMount() {
-        document.addEventListener("keydown", this.stopEditingRuleNameOnEnter, false);
+        document.addEventListener("keydown", this.handlePotentialHotKeyPress, false);
     }
 
     render() {
@@ -171,13 +186,11 @@ class NonterminalBoard extends React.Component {
         var markup
         var glyph_nt
         if (this.props.nonterminal) {
-            var deep_str = ""
+            var deep_str = AUTHOR_IS_USING_A_MAC ? "Toggle top-level status (⌘*)" : "Toggle top-level status (Ctrl+*)";
             if (this.props.nonterminal && this.props.nonterminal.deep) {
-                deep_str = "Toggle top-level status"
                 glyph_nt = <Glyphicon glyph="star"/>
             }
             else {
-                deep_str = "Toggle top-level status"
                 glyph_nt = <Glyphicon glyph="star-empty"/>
             }
             if( this.props.referents != []) {
@@ -197,7 +210,7 @@ class NonterminalBoard extends React.Component {
                         <span title="Current symbol (click to edit name)" className="symbol-board-header" style={{"backgroundColor": this.props.nonterminal.rules.length > 0 ? "#57F7E0" : "#FF9891"}} onClick={this.startSymbolNameEditing}>{this.props.currentSymbolName}</span>
                     }
                     <br />
-                    <Button bsStyle={this.props.nonterminal.deep ? "success" : "default" } onClick={this.handleSetDeep} title={deep_str}>{glyph_nt}</Button>
+                    <Button bsStyle={this.props.nonterminal.deep ? "success" : "default" } onClick={this.toggleSymbolTopLevelStatus} title={deep_str}>{glyph_nt}</Button>
                     <Button id="playButton" onClick={this.handleExpand} title={AUTHOR_IS_USING_A_MAC ? "Test symbol rewriting (⌘↩)" : "Test symbol rewriting (Ctrl+Enter)"} bsStyle={this.props.playButtonIsJuicing ? 'success' : 'default'}><Glyphicon glyph="play"/></Button>
                     <Button onClick={this.startSymbolNameEditing} title="Rename symbol"><Glyphicon glyph="pencil"/></Button>
                     <Button onClick={this.handleNonterminalDelete} title="Delete symbol"><Glyphicon glyph="trash"/></Button>
