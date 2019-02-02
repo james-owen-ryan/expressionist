@@ -609,9 +609,32 @@ class Productionist(object):
             # Example: ["'Jeff'", 'as', 'name']
             value_to_set_variable_to, as_operator, variable_to_set = realized_expression_definition
             reference = variable_to_set
-        else:  # runtime_expression.is_simple_expression
+        elif runtime_expression.is_simple_expression:
             # Example: [name]
             reference = realized_expression_definition[0]
+        # Handle salted runtime expressions that don't produce a string; w're allowing these expressions to be
+        # salted into rule bodies, but since they don't return a string, we set 'reference' to the empty string,
+        # which will cause nothing to be realized in the generated text when one of these expressions is salted
+        # in the body of an executed rule
+        elif runtime_expression.is_declaration_expression:
+            # Examples: ['name', '=', "'Jeff'"], ['story.tension', '+=', "5"]
+            variable_to_set, equals_sign, value_to_set_variable_to  = realized_expression_definition
+            reference = ''
+        else:  # runtime_expression.is_increment_expression
+            # Examples: ['story.tension' '-=' '5'], ['story.tension' '+=' 'story.act.current.tension']
+            variable_to_set = realized_expression_definition[0]
+            operator = realized_expression_definition[1]
+            current_value = state.resolve(value=variable_to_set)
+            increment = state.resolve(value=realized_expression_definition[2])
+            if operator == '+=':
+                value_to_set_variable_to = current_value + increment
+            elif operator == '-=':
+                value_to_set_variable_to = current_value - increment
+            elif operator == '*=':
+                value_to_set_variable_to = current_value * increment
+            else:  # /=
+                value_to_set_variable_to = float(current_value/increment)
+            reference = ''
         if variable_to_set:
             state.update(key=variable_to_set, value=value_to_set_variable_to)
         result = state.resolve(value=reference)
@@ -1466,7 +1489,11 @@ class ProductionRule(object):
             )
             effects.append(runtime_expression_object)
             # Make sure the runtime expression is a valid 'as' expression
-            assert runtime_expression_object.is_as_expression, (
+            effect_is_valid_expression_type = (
+                runtime_expression_object.is_declaration_expression or
+                runtime_expression_object.is_increment_expression
+            )
+            assert effect_is_valid_expression_type, (
                 "AuthoringError: Malformed effect definition for rule {rule_id}: '{effect_definition}'".format(
                     rule_id=self.id,
                     effect_definition=effect_definition
@@ -1481,8 +1508,24 @@ class ProductionRule(object):
     def execute_effects(self, state):
         """Execute all of the effects that are attached to this production rule."""
         for effect in self.effects:
-            value, as_operator, key = effect.definition
-            state.update(key=key, value=value)
+            if effect.is_declaration_expression:
+                # Examples: ['story.tension', '=', '5'], ['villain', '=', 'story.star.worst_enemy']
+                key, equals_sign, value = effect.definition
+            else:  # increment expression
+                # Examples: ['story.tension' '-=' '5'], ['story.tension' '+=' 'story.act.current.tension']
+                key = effect.definition[0]
+                operator = effect.definition[1]
+                current_value = state.resolve(value=key)
+                increment = state.resolve(value=effect.definition[2])
+                if operator == '+=':
+                    value = current_value + increment
+                elif operator == '-=':
+                    value = current_value - increment
+                elif operator == '*=':
+                    value = current_value * increment
+                else:  # /=
+                    value = float(current_value / increment)
+            state.update(key=key, value=str(value))  # update() expects a string for value, so we cast to that
         return state
 
 
@@ -1499,6 +1542,8 @@ class RuntimeExpression(object):
         self.is_with_expression = (
             len(parsed_definition) == 5 and parsed_definition[1] == 'with' and parsed_definition[3] == 'as'
         )
+        self.is_declaration_expression = len(parsed_definition) == 3 and parsed_definition[1] == '='
+        self.is_increment_expression = len(parsed_definition) == 3 and parsed_definition[1] in ('+=', '-=', '*=', '/=')
         self.is_condition_expression = (
             (len(parsed_definition) == 2 and parsed_definition[1] == 'exists') or
             (len(parsed_definition) == 4 and ' '.join(parsed_definition[1:]) == 'does not exist') or
@@ -1541,6 +1586,8 @@ class RuntimeExpression(object):
             self.is_simple_expression or
             self.is_as_expression or
             self.is_with_expression or
+            self.is_declaration_expression or
+            self.is_increment_expression or
             self.is_condition_expression or
             self.is_ternary_expression
         )
