@@ -534,29 +534,16 @@ class Productionist(object):
     def _process_runtime_expression(self, runtime_expression, state, n_tabs_for_debug):
         """Consult the state to resolve runtime expressions in the given raw generated text to fill in its gaps."""
         # First, terminally expand any nonterminal symbols that are referenced in the runtime expression
-        grounded_expression_definition = []
-        for expression_operator_or_symbol_reference in runtime_expression.definition:
-            if type(expression_operator_or_symbol_reference) is NonterminalSymbol:
-                referenced_symbol = expression_operator_or_symbol_reference
-                # Note that this will cause the state to update (while still using the same variable name 'state')
-                terminal_expansion_of_that_symbol, state = self._terminally_expand_nonterminal_symbol(
-                    nonterminal_symbol=referenced_symbol,
-                    state=state,
-                    n_tabs_for_debug=n_tabs_for_debug+1
-                )
-                # Turn this into a string literal, since otherwise it will be evaluated as a key in the state
-                string_literal_of_terminal_expansion = "'{expansion}'".format(
-                    expansion=terminal_expansion_of_that_symbol
-                )
-                grounded_expression_definition.append(string_literal_of_terminal_expansion)
-            else:
-                expression_operator = expression_operator_or_symbol_reference
-                grounded_expression_definition.append(expression_operator)
+        realized_expression_definition = self._resolve_symbol_references_in_expression_definition(
+            definition=runtime_expression.definition,
+            state=state,
+            n_tabs_for_debug=n_tabs_for_debug
+        )
         # Finally, execute the runtime expression and return the result (note: side effects may also
         # trigger updates to the state)
         result, updated_state = self._execute_runtime_expression(
             runtime_expression=runtime_expression,
-            realized_expression_definition=grounded_expression_definition,
+            realized_expression_definition=realized_expression_definition,
             state=state,
             n_tabs_for_debug=n_tabs_for_debug+1
         )
@@ -566,21 +553,51 @@ class Productionist(object):
             return None, None
         return result, updated_state
 
-    @staticmethod
-    def _execute_runtime_expression(runtime_expression, realized_expression_definition, state, n_tabs_for_debug):
+    def _resolve_symbol_references_in_expression_definition(self, definition, state, n_tabs_for_debug):
+        """Terminally expand any nonterminal symbols that are referenced in the given runtime expression."""
+        grounded_expression_definition = []
+        for expression_operator_or_symbol_reference in definition:
+            if type(expression_operator_or_symbol_reference) is NonterminalSymbol:
+                referenced_symbol = expression_operator_or_symbol_reference
+                # Note that this will cause the state to update (while still using the same variable name 'state')
+                terminal_expansion_of_that_symbol, state = self._terminally_expand_nonterminal_symbol(
+                    nonterminal_symbol=referenced_symbol,
+                    state=state,
+                    n_tabs_for_debug=n_tabs_for_debug
+                )
+                # Turn this into a string literal, since otherwise it will be evaluated as a key in the state
+                string_literal_of_terminal_expansion = "'{expansion}'".format(
+                    expansion=terminal_expansion_of_that_symbol
+                )
+                grounded_expression_definition.append(string_literal_of_terminal_expansion)
+            else:
+                expression_operator = expression_operator_or_symbol_reference
+                grounded_expression_definition.append(expression_operator)
+        return grounded_expression_definition
+
+    def _execute_runtime_expression(self, runtime_expression, realized_expression_definition, state, n_tabs_for_debug):
         """Execute the given runtime expression."""
-        # # Next, check if there is a conditional in the expression, since these must be processed first
-        # if 'if' in realized_expression_definition:
-        #     index_at_beginning_of_conditional = realized_expression_definition.index('if')-1
-        #     conditional_expression = realized_expression_definition[index_at_beginning_of_conditional:]
-        #     resolved_conditional_expression = self._resolve_conditional_expression_in_runtime_expression(
-        #         conditional_expression=conditional_expression,
-        #         state=state
-        #     )
-        #     # In the expression template, replace the conditional expression with its resolved form
-        #     realized_expression_definition = (
-        #         realized_expression_definition[:index_at_beginning_of_conditional] + resolved_conditional_expression
-        #     )
+        # First, check if it's a ternary expression, in which case its condition must be evaluated
+        # to determine which of its subexpressions we will actually be executing, which we will execute
+        # recursively (since this allows for nested ternary expressions)
+        if runtime_expression.is_ternary_expression:
+            condition_holds = state.evaluate(predicate=runtime_expression.condition.definition)
+            if condition_holds:
+                nested_runtime_expression = runtime_expression.expression_if_condition_passes
+            else:
+                nested_runtime_expression = runtime_expression.expression_if_condition_fails
+            realized_nested_expression_definition = self._resolve_symbol_references_in_expression_definition(
+                definition=nested_runtime_expression.definition,
+                state=state,
+                n_tabs_for_debug=n_tabs_for_debug
+            )
+            return self._execute_runtime_expression(
+                runtime_expression=nested_runtime_expression,
+                realized_expression_definition=realized_nested_expression_definition,
+                state=state,
+                n_tabs_for_debug=n_tabs_for_debug
+            )
+        # Execute the runtime expression at hand
         variable_to_set = None
         value_to_set_variable_to = None
         if runtime_expression.is_with_expression:
@@ -597,7 +614,7 @@ class Productionist(object):
             reference = realized_expression_definition[0]
         if variable_to_set:
             state.update(key=variable_to_set, value=value_to_set_variable_to)
-        result = state.resolve(reference)
+        result = state.resolve(value=reference)
         return result, state
 
     def _resolve_conditional_expression_in_runtime_expression(self, conditional_expression, state):
@@ -1487,11 +1504,45 @@ class RuntimeExpression(object):
             (len(parsed_definition) == 4 and ' '.join(parsed_definition[1:]) == 'does not exist') or
             (len(parsed_definition) == 3 and parsed_definition[1] in ('==', '!=', '>', '<', '>=', '<='))
         )
+        self.is_ternary_expression = '?' in parsed_definition and ':' in parsed_definition
+        if self.is_ternary_expression:
+            # Construct nested runtime expressions
+            parsed_condition_block = parsed_definition[:parsed_definition.index('?')]
+            raw_condition_block = ' '.join([str(element) for element in parsed_condition_block])
+            self.condition = RuntimeExpression(
+                raw_definition=raw_condition_block,
+                parsed_definition=parsed_condition_block
+            )
+            parsed_expression_if_condition_passes = (
+                parsed_definition[parsed_definition.index('?')+1:parsed_definition.index(':')]
+            )
+            raw_expression_if_condition_passes = (
+                ' '.join([str(element) for element in parsed_expression_if_condition_passes])
+            )
+            self.expression_if_condition_passes = RuntimeExpression(
+                raw_definition=raw_expression_if_condition_passes,
+                parsed_definition=parsed_expression_if_condition_passes
+            )
+            parsed_expression_if_condition_fails = (
+                parsed_definition[parsed_definition.index(':')+1:]
+            )
+            raw_expression_if_condition_fails = (
+                ' '.join([str(element) for element in parsed_expression_if_condition_fails])
+            )
+            self.expression_if_condition_fails = RuntimeExpression(
+                raw_definition=raw_expression_if_condition_fails,
+                parsed_definition=parsed_expression_if_condition_fails
+            )
+        else:
+            self.condition = None
+            self.expression_if_condition_passes = None
+            self.expression_if_condition_fails = None
         definition_is_well_formed = (
             self.is_simple_expression or
             self.is_as_expression or
             self.is_with_expression or
-            self.is_condition_expression
+            self.is_condition_expression or
+            self.is_ternary_expression
         )
         assert definition_is_well_formed, (
             "Invalid syntax in runtime expression '{raw_definition}'".format(raw_definition=raw_definition)
