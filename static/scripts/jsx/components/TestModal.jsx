@@ -271,46 +271,63 @@ class TestModal extends React.Component {
     }
 
     handlePotentialHotKeyPress(e) {
-        // Check for rule tabbing (note: tabbing on other views is handled in the respective components)
         if (e.key === 'Tab' && this.props.show) {
             e.preventDefault();
-            if (this.state.generatedContentPackageText === null || this.state.outputError) {
-                // If all the other views are disabled, go to the state view
-                this.viewProductionistState();
-            }
-            else if (this.state.showText) {
-                if (e.shiftKey) {
+            if (!this.state.editingState) {
+                // Tab switches to a new view
+                if (this.state.generatedContentPackageText === null || this.state.outputError) {
+                    // If all the other views are disabled, go to the state view
                     this.viewProductionistState();
                 }
-                else {
-                    this.viewGeneratedTags();
+                else if (this.state.showText) {
+                    if (e.shiftKey) {
+                        this.viewProductionistState();
+                    }
+                    else {
+                        this.viewGeneratedTags();
+                    }
                 }
-            }
-            else if (this.state.showTags) {
-                if (e.shiftKey) {
-                    this.viewGeneratedText();
+                else if (this.state.showTags) {
+                    if (e.shiftKey) {
+                        this.viewGeneratedText();
+                    }
+                    else {
+                        this.viewGeneratedTreeExpression();
+                    }
                 }
-                else {
-                    this.viewGeneratedTreeExpression();
-                }
-            }
-            else if (this.state.showTreeExpression) {
-                if (e.shiftKey) {
-                    this.viewGeneratedTags();
-                }
-                else {
-                    this.viewProductionistState();
-                }
+                else if (this.state.showTreeExpression) {
+                    if (e.shiftKey) {
+                        this.viewGeneratedTags();
+                    }
+                    else {
+                        this.viewProductionistState();
+                    }
 
+                }
+                else if (this.state.showState) {
+                    if (e.shiftKey) {
+                        this.viewGeneratedTreeExpression();
+                    }
+                    else {
+                        this.viewGeneratedText();
+                    }
+
+                }
             }
-            else if (this.state.showState) {
-                if (e.shiftKey) {
-                    this.viewGeneratedTreeExpression();
+            else if (this.state.editingState) {
+                // Tab inserts whitespace
+                var stateEditInput = document.getElementById("stateEditInput")
+                var cursorPositionStart = stateEditInput.selectionStart;
+                var cursorPositionEnd = stateEditInput.selectionEnd;
+                var stateStr = this.state.viewLockedState ? this.state.lockedProductionistStateStr : this.state.productionistStateStr;
+                var stateStrWithWhitespaceInserted = stateStr.slice(0, cursorPositionStart) + '    ' + stateStr.slice(cursorPositionEnd)
+                var callbackToMoveCursorOnceStateIsSet = function () { this.props.moveCursorToPositionOrRange.call(null, "stateEditInput", cursorPositionStart+4, cursorPositionStart+4); };
+                if (this.state.viewLockedState) {
+                    this.setState({lockedProductionistStateStr: stateStrWithWhitespaceInserted}, callbackToMoveCursorOnceStateIsSet);
                 }
                 else {
-                    this.viewGeneratedText();
+                    this.setState({productionistStateStr: stateStrWithWhitespaceInserted}, callbackToMoveCursorOnceStateIsSet);
                 }
-
             }
         }
         else {

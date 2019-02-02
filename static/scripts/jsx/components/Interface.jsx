@@ -77,6 +77,7 @@ class Interface extends React.Component {
         this.letInterFaceKnowTagDefinitionModalIsOpen = this.letInterFaceKnowTagDefinitionModalIsOpen.bind(this);
         this.letInterFaceKnowTagDefinitionModalIsClosed = this.letInterFaceKnowTagDefinitionModalIsClosed.bind(this);
         this.symbolIsInWorkspace = this.symbolIsInWorkspace.bind(this);
+        this.moveCursorToPositionOrRange = this.moveCursorToPositionOrRange.bind(this);
         this.state = {
             currentGrammarName: 'new',
             bundleName: '',
@@ -868,6 +869,12 @@ class Interface extends React.Component {
         this.setState({generatedContentPackageText: newGeneratedContentPackageText});
     }
 
+    moveCursorToPositionOrRange(elementId, startPosition, endPosition) {
+        document.getElementById(elementId).focus();
+        document.getElementById(elementId).selectionStart = startPosition;
+        document.getElementById(elementId).selectionEnd = endPosition;
+    }
+
     resetGrammarHistoryAndNavigationHistory() {
         navigationHistory = [];
         currentIndexInNavigationHistory = -1;
@@ -1152,7 +1159,8 @@ class Interface extends React.Component {
                                 goBack={this.goBack}
                                 goForward={this.goForward}
                                 undo={this.undo}
-                                redo={this.redo}/>
+                                redo={this.redo}
+                                moveCursorToPositionOrRange={this.moveCursorToPositionOrRange}/>
                     <div className="muwrap">
                         <div className="show-y-wrapper">
                             <MarkupBar  className="markup-bar"
@@ -1184,7 +1192,8 @@ class Interface extends React.Component {
                                     currentRule={this.state.currentRule}
                                     getListOfMatchingSymbolNames={this.getListOfMatchingSymbolNames}
                                     getListOfMatchingStateElements={this.getListOfMatchingStateElements}
-                                    stateElements={this.state.stateElements}/>
+                                    stateElements={this.state.stateElements}
+                                    moveCursorToPositionOrRange={this.moveCursorToPositionOrRange}/>
                     </div>
                 </div>
 

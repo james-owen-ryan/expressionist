@@ -42,7 +42,7 @@ class HeaderBar extends React.Component {
                         <Button id="headerBarTestButton" title={this.props.testButtonDisabled ? "Test Productionist module (disabled: requires built Productionist module)" : AUTHOR_IS_USING_A_MAC ? "Test Productionist module (⌘.)" : "Test Productionist module (Ctrl+.)"} disabled={this.props.testButtonDisabled} onClick={this.props.openTestModal} bsStyle='default'>Test</Button>
                     </ButtonGroup>
                 </ButtonToolbar>
-                <TestModal show={this.props.showTestModal} onHide={this.props.closeTestModal} bundleName={this.props.bundleName} playButtonIsJuicing={this.props.playButtonIsJuicing}></TestModal>
+                <TestModal show={this.props.showTestModal} onHide={this.props.closeTestModal} bundleName={this.props.bundleName} playButtonIsJuicing={this.props.playButtonIsJuicing} moveCursorToPositionOrRange={this.props.moveCursorToPositionOrRange}></TestModal>
                 <Modal show={this.props.showLoadModal} onHide={this.props.closeLoadModal}>
                     <Modal.Header closeButton>
                         <Modal.Title>Load grammar...</Modal.Title>

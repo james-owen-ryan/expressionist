@@ -32,7 +32,6 @@ class RuleBar extends React.Component {
         this.toggleConnectNewRuleHeadToCurrentSymbol = this.toggleConnectNewRuleHeadToCurrentSymbol.bind(this);
         this.displayConnectBackCheckbox = this.displayConnectBackCheckbox.bind(this);
         this.pullNewRuleInWorkspaceAndRefocusOnRuleBodyInput = this.pullNewRuleInWorkspaceAndRefocusOnRuleBodyInput.bind(this);
-        this.moveCursorToPositionOrRange = this.moveCursorToPositionOrRange.bind(this);
         this.switchToRuleView = this.switchToRuleView.bind(this);
         this.switchToPreconditionsView = this.switchToPreconditionsView.bind(this);
         this.switchToEffectsView = this.switchToEffectsView.bind(this);
@@ -127,34 +126,34 @@ class RuleBar extends React.Component {
                 var fieldWithFocus = document.activeElement.id;
                 if (fieldWithFocus == "ruleHeadInput") {
                     if (e.shiftKey) {
-                        this.moveCursorToPositionOrRange("ruleApplicationRateInput", 0, String(this.state.ruleApplicationRate).length);
+                        this.props.moveCursorToPositionOrRange("ruleApplicationRateInput", 0, String(this.state.ruleApplicationRate).length);
                     }
                     else {
-                        this.moveCursorToPositionOrRange("ruleExpansionInput", this.state.ruleExpansionInputVal.length, this.state.ruleExpansionInputVal.length);
+                        this.props.moveCursorToPositionOrRange("ruleExpansionInput", this.state.ruleExpansionInputVal.length, this.state.ruleExpansionInputVal.length);
                     }
                 }
                 else if (fieldWithFocus == "ruleExpansionInput") {
                     if (e.shiftKey) {
-                        this.moveCursorToPositionOrRange("ruleHeadInput", 0, this.state.ruleHeadInputVal.length);
+                        this.props.moveCursorToPositionOrRange("ruleHeadInput", 0, this.state.ruleHeadInputVal.length);
                     }
                     else {
-                        this.moveCursorToPositionOrRange("ruleApplicationRateInput", 0, String(this.state.ruleApplicationRate).length);
+                        this.props.moveCursorToPositionOrRange("ruleApplicationRateInput", 0, String(this.state.ruleApplicationRate).length);
                     }
                 }
                 else if (fieldWithFocus == "ruleApplicationRateInput") {
                     if (e.shiftKey) {
-                        this.moveCursorToPositionOrRange("ruleExpansionInput", this.state.ruleExpansionInputVal.length, this.state.ruleExpansionInputVal.length);
+                        this.props.moveCursorToPositionOrRange("ruleExpansionInput", this.state.ruleExpansionInputVal.length, this.state.ruleExpansionInputVal.length);
                     }
                     else {
-                        this.moveCursorToPositionOrRange("ruleHeadInput", 0, this.state.ruleHeadInputVal.length);
+                        this.props.moveCursorToPositionOrRange("ruleHeadInput", 0, this.state.ruleHeadInputVal.length);
                     }
                 }
                 else {
                     if (e.shiftKey) {
-                        this.moveCursorToPositionOrRange("ruleApplicationRateInput", 0, String(this.state.ruleApplicationRate).length);
+                        this.props.moveCursorToPositionOrRange("ruleApplicationRateInput", 0, String(this.state.ruleApplicationRate).length);
                     }
                     else {
-                        this.moveCursorToPositionOrRange("ruleHeadInput", 0, this.state.ruleHeadInputVal.length);
+                        this.props.moveCursorToPositionOrRange("ruleHeadInput", 0, this.state.ruleHeadInputVal.length);
                     }
                 }
             }
@@ -213,18 +212,12 @@ class RuleBar extends React.Component {
                 }
             }
             if (positionToMoveCursorTo) {
-                this.setState({ruleExpansionInputVal: inputValue}, this.moveCursorToPositionOrRange.bind(this, "ruleExpansionInput", positionToMoveCursorTo, positionToMoveCursorTo));
+                this.setState({ruleExpansionInputVal: inputValue}, this.props.moveCursorToPositionOrRange.bind(this, "ruleExpansionInput", positionToMoveCursorTo, positionToMoveCursorTo));
             }
             else {
                 this.setState({ruleExpansionInputVal: inputValue});
             }
         }
-    }
-
-    moveCursorToPositionOrRange(elementId, startPosition, endPosition) {
-        document.getElementById(elementId).focus();
-        document.getElementById(elementId).selectionStart = startPosition;
-        document.getElementById(elementId).selectionEnd = endPosition;
     }
 
     updateApplicationRate(e) {
@@ -273,11 +266,11 @@ class RuleBar extends React.Component {
             var ruleBodySegmentToRightOfCursor = this.state.ruleExpansionInputVal.slice(cursorPosition);
             var ruleBodyWithReferenceInserted = ruleBodySegmentToLeftOfCursor.concat(referenceToClickedNonterminal).concat(ruleBodySegmentToRightOfCursor);
             var positionToMoveCursorTo = cursorPosition + referenceToClickedNonterminal.length;
-            this.setState({ruleExpansionInputVal: ruleBodyWithReferenceInserted}, this.moveCursorToPositionOrRange.bind(this, "ruleExpansionInput", positionToMoveCursorTo, positionToMoveCursorTo));
+            this.setState({ruleExpansionInputVal: ruleBodyWithReferenceInserted}, this.props.moveCursorToPositionOrRange.bind(this, "ruleExpansionInput", positionToMoveCursorTo, positionToMoveCursorTo));
         }
         else {
             // Change the rule head to the clicked nonterminal and automatically select it with the cursor
-            this.setState({ruleHeadInputVal: nonterminalName}, this.moveCursorToPositionOrRange.bind(this, "ruleHeadInput", 0, nonterminalName.length));
+            this.setState({ruleHeadInputVal: nonterminalName}, this.props.moveCursorToPositionOrRange.bind(this, "ruleHeadInput", 0, nonterminalName.length));
         }
     }
 
@@ -289,7 +282,7 @@ class RuleBar extends React.Component {
             var preconditionsSegmentToRightOfCursor = this.state.rulePreconditionsInputVal.slice(cursorPosition);
             var preconditionsSegmentWithReferenceInserted = preconditionsSegmentToLeftOfCursor.concat(stateElement).concat(preconditionsSegmentToRightOfCursor);
             var positionToMoveCursorTo = cursorPosition + stateElement.length;
-            this.setState({rulePreconditionsInputVal: preconditionsSegmentWithReferenceInserted}, this.moveCursorToPositionOrRange.bind(this, "rulePreconditionsInput", positionToMoveCursorTo, positionToMoveCursorTo));
+            this.setState({rulePreconditionsInputVal: preconditionsSegmentWithReferenceInserted}, this.props.moveCursorToPositionOrRange.bind(this, "rulePreconditionsInput", positionToMoveCursorTo, positionToMoveCursorTo));
         }
         else {
             // Insert a reference to the clicked state element at the current cursor position in the text area
@@ -298,7 +291,7 @@ class RuleBar extends React.Component {
             var effectsSegmentToRightOfCursor = this.state.ruleEffectsInputVal.slice(cursorPosition);
             var effectsSegmentWithReferenceInserted = effectsSegmentToLeftOfCursor.concat(stateElement).concat(effectsSegmentToRightOfCursor);
             var positionToMoveCursorTo = cursorPosition + stateElement.length;
-            this.setState({ruleEffectsInputVal: effectsSegmentWithReferenceInserted}, this.moveCursorToPositionOrRange.bind(this, "ruleEffectsInput", positionToMoveCursorTo, positionToMoveCursorTo));
+            this.setState({ruleEffectsInputVal: effectsSegmentWithReferenceInserted}, this.props.moveCursorToPositionOrRange.bind(this, "ruleEffectsInput", positionToMoveCursorTo, positionToMoveCursorTo));
         }
     }
 
