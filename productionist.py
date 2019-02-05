@@ -170,7 +170,7 @@ class Productionist(object):
         # persistent state, because we make a copy here, but eventually it will if this generation instance
         # is ultimately successful)
         if content_request.merge_state:
-            initial_state_for_this_instance = self.state.merge(content_request.merge_state)
+            initial_state_for_this_instance = self.state.merge(content_request.state)
         else:
             initial_state_for_this_instance = State(initial_state_dictionary=content_request.state)
         # Reset the temporary variable that stores state updates made in a given generation
