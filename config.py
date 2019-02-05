@@ -4,7 +4,7 @@
 # this parameter should only be turned on in cases where the number of instances of the same tag
 # is semantically or operationally meaningful)
 EXPORT_DUPLICATE_TAGS_ON_EXPRESSIBLE_MEANINGS = False
-TRIE_OUTPUT = False
+TRIE_OUTPUT = True  # This should only be True if you will be using a Python Productionist
 # The repetition penalty causes text to be reused less frequently
 PRODUCTIONIST_REPETITION_PENALTY_MULTIPLIER = 0.033  # Initially 30 times less likely to be used after first usage
 PRODUCTIONIST_REPETITION_PENALTY_RECOVERY_RATE = 1.2  # Sheds 15% of its current penalty after each non-usage instance
