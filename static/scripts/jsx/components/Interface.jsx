@@ -282,8 +282,11 @@ class Interface extends React.Component {
     }
 
     closeRuleDefinitionModal() {
-        this.setState({showRuleDefinitionModal: false});
-        this.setState({idOfRuleToEdit: null});
+        this.setState({
+            showRuleDefinitionModal: false,
+            idOfRuleToEdit: null,
+            idOfRuleToDuplicate: null
+        });
     }
 
     toggleWhetherRuleDefinitionModalIsOpen() {
