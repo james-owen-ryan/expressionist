@@ -1691,4 +1691,4 @@ class RuntimeExpression(object):
 
     def __str__(self):
         """Return string representation."""
-        return self.raw_definition
+        return '{{definition}}'.format(self.raw_definition)
