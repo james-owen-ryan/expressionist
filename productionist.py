@@ -1617,61 +1617,74 @@ class RuntimeExpression(object):
         """Initialize a RuntimeExpression object."""
         self.raw_definition = raw_definition
         self.definition = parsed_definition  # A list of expression fragments (strings) and NonterminalSymbol objects
-        # Validate the syntax of this expression
-        self.is_simple_expression = len(parsed_definition) == 1
-        self.is_as_expression = len(parsed_definition) == 3 and parsed_definition[1] == 'as'
-        self.is_with_expression = (
-            len(parsed_definition) == 5 and parsed_definition[1] == 'with' and parsed_definition[3] == 'as'
-        )
-        self.is_declaration_expression = parsed_definition[1] == '='
-        self.is_increment_expression = len(parsed_definition) == 3 and parsed_definition[1] in ('+=', '-=', '*=', '/=')
-        self.is_condition_expression = (
-            (len(parsed_definition) == 2 and parsed_definition[1] == 'exists') or
-            (len(parsed_definition) == 4 and ' '.join(parsed_definition[1:]) == 'does not exist') or
-            (set(parsed_definition) & {'==', '!=', '>', '<', '>=', '<='})
-        )
-        self.is_ternary_expression = '?' in parsed_definition and ':' in parsed_definition
-        if self.is_ternary_expression:
-            # Construct nested runtime expressions
-            parsed_condition_block = parsed_definition[:parsed_definition.index('?')]
-            raw_condition_block = ' '.join([str(element) for element in parsed_condition_block])
-            self.condition = RuntimeExpression(
-                raw_definition=raw_condition_block,
-                parsed_definition=parsed_condition_block
+        try:
+            # Validate the syntax of this expression
+            self.is_simple_expression = len(parsed_definition) == 1
+            self.is_as_expression = len(parsed_definition) == 3 and parsed_definition[1] == 'as'
+            self.is_with_expression = (
+                len(parsed_definition) == 5 and parsed_definition[1] == 'with' and parsed_definition[3] == 'as'
             )
-            parsed_expression_if_condition_passes = (
-                parsed_definition[parsed_definition.index('?')+1:parsed_definition.index(':')]
+            self.is_declaration_expression = len(parsed_definition) > 0 and parsed_definition[1] == '='
+            self.is_increment_expression = (
+                len(parsed_definition) == 3 and parsed_definition[1] in ('+=', '-=', '*=', '/=')
             )
-            raw_expression_if_condition_passes = (
-                ' '.join([str(element) for element in parsed_expression_if_condition_passes])
+            self.is_condition_expression = (
+                (len(parsed_definition) == 2 and parsed_definition[1] == 'exists') or
+                (len(parsed_definition) == 4 and ' '.join(parsed_definition[1:]) == 'does not exist') or
+                (set(parsed_definition) & {'==', '!=', '>', '<', '>=', '<='})
             )
-            self.expression_if_condition_passes = RuntimeExpression(
-                raw_definition=raw_expression_if_condition_passes,
-                parsed_definition=parsed_expression_if_condition_passes
+            self.is_ternary_expression = '?' in parsed_definition and ':' in parsed_definition
+            if self.is_ternary_expression:
+                # Construct nested runtime expressions
+                parsed_condition_block = parsed_definition[:parsed_definition.index('?')]
+                raw_condition_block = ' '.join([str(element) for element in parsed_condition_block])
+                self.condition = RuntimeExpression(
+                    raw_definition=raw_condition_block,
+                    parsed_definition=parsed_condition_block
+                )
+                parsed_expression_if_condition_passes = (
+                    parsed_definition[parsed_definition.index('?')+1:parsed_definition.index(':')]
+                )
+                raw_expression_if_condition_passes = (
+                    ' '.join([str(element) for element in parsed_expression_if_condition_passes])
+                )
+                self.expression_if_condition_passes = RuntimeExpression(
+                    raw_definition=raw_expression_if_condition_passes,
+                    parsed_definition=parsed_expression_if_condition_passes
+                )
+                parsed_expression_if_condition_fails = (
+                    parsed_definition[parsed_definition.index(':')+1:]
+                )
+                raw_expression_if_condition_fails = (
+                    ' '.join([str(element) for element in parsed_expression_if_condition_fails])
+                )
+                self.expression_if_condition_fails = RuntimeExpression(
+                    raw_definition=raw_expression_if_condition_fails,
+                    parsed_definition=parsed_expression_if_condition_fails
+                )
+            else:
+                self.condition = None
+                self.expression_if_condition_passes = None
+                self.expression_if_condition_fails = None
+            definition_is_well_formed = (
+                self.is_simple_expression or
+                self.is_as_expression or
+                self.is_with_expression or
+                self.is_declaration_expression or
+                self.is_increment_expression or
+                self.is_condition_expression or
+                self.is_ternary_expression
             )
-            parsed_expression_if_condition_fails = (
-                parsed_definition[parsed_definition.index(':')+1:]
+        except IndexError:
+            assert False, (
+                "Invalid syntax in runtime expression '{raw_definition}' (parsed as: {parsed_definition}".format(
+                    raw_definition=raw_definition,
+                    parsed_definition=str(parsed_definition)
+                )
             )
-            raw_expression_if_condition_fails = (
-                ' '.join([str(element) for element in parsed_expression_if_condition_fails])
-            )
-            self.expression_if_condition_fails = RuntimeExpression(
-                raw_definition=raw_expression_if_condition_fails,
-                parsed_definition=parsed_expression_if_condition_fails
-            )
-        else:
-            self.condition = None
-            self.expression_if_condition_passes = None
-            self.expression_if_condition_fails = None
-        definition_is_well_formed = (
-            self.is_simple_expression or
-            self.is_as_expression or
-            self.is_with_expression or
-            self.is_declaration_expression or
-            self.is_increment_expression or
-            self.is_condition_expression or
-            self.is_ternary_expression
-        )
         assert definition_is_well_formed, (
-            "Invalid syntax in runtime expression '{raw_definition}'".format(raw_definition=raw_definition)
+            "Invalid syntax in runtime expression '{raw_definition}' (parsed as: {parsed_definition}".format(
+                raw_definition=raw_definition,
+                parsed_definition=str(parsed_definition)
+            )
         )
