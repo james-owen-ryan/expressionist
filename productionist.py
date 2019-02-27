@@ -1688,3 +1688,7 @@ class RuntimeExpression(object):
                 parsed_definition=str(parsed_definition)
             )
         )
+
+    def __str__(self):
+        """Return string representation."""
+        return self.raw_definition
