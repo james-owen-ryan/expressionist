@@ -1624,7 +1624,7 @@ class RuntimeExpression(object):
             self.is_with_expression = (
                 len(parsed_definition) == 5 and parsed_definition[1] == 'with' and parsed_definition[3] == 'as'
             )
-            self.is_declaration_expression = len(parsed_definition) > 0 and parsed_definition[1] == '='
+            self.is_declaration_expression = len(parsed_definition) > 1 and parsed_definition[1] == '='
             self.is_increment_expression = (
                 len(parsed_definition) == 3 and parsed_definition[1] in ('+=', '-=', '*=', '/=')
             )
