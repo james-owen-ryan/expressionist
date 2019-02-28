@@ -947,7 +947,7 @@ class State(object):
         else:
             self.updates_this_generation_instance = updates_this_generation_instance
 
-    def resolve(self, value):
+    def resolve(self, value, suppress_warning):
         """Resolve the given value, which is either a primitive type or a state reference."""
         # If it's a string literal, strip off the single quotes and return the result (the actual string
         # being referenced in the string literal)
@@ -980,7 +980,12 @@ class State(object):
         associated_state_entry = self.now
         for key in keys:
             if key not in associated_state_entry:
-                # The variable cannot be resolved because there is no associated state entry; return None
+                # The variable cannot be resolved because there is no associated state entry; print a warning
+                # (in red type) and return None
+                # if CONFIG.verbosity > 1 and not suppress_warning:
+                #     print '\033[91mWarning: runtime-expression value {value} is not in the state\033[0m'.format(
+                #         value=value
+                #     )
                 return None
             associated_state_entry = associated_state_entry[key]
         return associated_state_entry
@@ -1024,15 +1029,14 @@ class State(object):
 
     def evaluate(self, predicate):
         """Evaluate the given predicate (a 'definition' attribute of a RuntimeExpression object)."""
-        operator = predicate[1]
-        if operator == 'exists':
+        if ' '.join(predicate[1:]) == 'exists':
             # Return True if the state reference exists in the state
             state_reference = predicate[0]
-            return bool(self.resolve(value=state_reference))
-        elif operator == 'does':  # As in 'does not exist'
+            return bool(self.resolve(value=state_reference, suppress_warning=True))
+        elif ' '.join(predicate[1:]) == 'does not exist':
             # Return True if the state reference does not exist in the state
             state_reference = predicate[0]
-            return not bool(self.resolve(value=state_reference))
+            return not bool(self.resolve(value=state_reference, suppress_warning=True))
         else:
             operator = (set(predicate) & {'==', '!=', '>', '<', '>=', '<='}).pop()
             first_value = self.resolve(value=' '.join(predicate).split(operator)[0].rstrip())
@@ -1560,7 +1564,7 @@ class ProductionRule(object):
         #         if precondition_holds:
         #             print "{whitespace}It holds".format(whitespace='  ' * (n_tabs_for_debug+2))
         #         else:
-        #             print "{whitespace}It failed -- abandoning rule".format(
+        #             print "{whitespace}\033[93mIt failed -- abandoning rule\033[0m".format(
         #                 whitespace='  ' * (n_tabs_for_debug + 2)
         #             )
         return all(state.evaluate(predicate=precondition.definition) for precondition in self.preconditions)
