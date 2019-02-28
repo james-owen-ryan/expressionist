@@ -201,32 +201,35 @@ class Productionist(object):
         for expressible_meaning in satisficing_expressible_meanings:
             if self.verbosity >= 3:
                 print "-- Targeting EM{em_id}...".format(em_id=expressible_meaning.id)
-            # Select one of the grammar paths associated with this expressible meaning
-            selected_recipe = self._select_recipe_for_expressible_meaning(expressible_meaning=expressible_meaning)
-            # Execute that grammar path to produce the generated content satisfying the content request
-            generated_text, updated_state = self._follow_recipe(
-                recipe=selected_recipe,
-                state=initial_state_for_this_instance
-            )
-            if generated_text is not None:  # Note that an empty string is valid here
-                # Package that up with all the associated metadata
-                content_package = self._build_content_package(
-                    generated_text=generated_text,
-                    updated_state=updated_state,
-                    selected_recipe=selected_recipe,
-                    content_request=content_request
-                )
-                # Update Productionist's persistent state, which allows for state to be maintained
-                # across generation instances
-                self.state = updated_state
-                # Lastly, if repetition-penalty mode is engaged, penalize all the rules that we executed to produce
-                # that content (so that they will be less likely to be used again) and decay the penalties for all
-                # the other production rules in the grammar that we didn't execute this time around
-                if self.repetition_penalty_mode:
-                    self._update_repetition_penalties(
-                        explicit_path_taken=content_package.explicit_grammar_path_taken)
-                # Return the package
-                return content_package
+                # Target the grammar paths ("recipes") associated with this expressible meaning, one by one
+                candidate_recipes = list(expressible_meaning.recipes)
+                while candidate_recipes:
+                    selected_recipe = self._select_recipe_for_expressible_meaning(candidate_recipes)
+                    candidate_recipes.remove(selected_recipe)
+                    # Execute that grammar path to produce the generated content satisfying the content request
+                    generated_text, updated_state = self._follow_recipe(
+                        recipe=selected_recipe,
+                        state=initial_state_for_this_instance
+                    )
+                    if generated_text is not None:  # Note that an empty string is valid here
+                        # Package that up with all the associated metadata
+                        content_package = self._build_content_package(
+                            generated_text=generated_text,
+                            updated_state=updated_state,
+                            selected_recipe=selected_recipe,
+                            content_request=content_request
+                        )
+                        # Update Productionist's persistent state, which allows for state to be maintained
+                        # across generation instances
+                        self.state = updated_state
+                        # Lastly, if repetition-penalty mode is engaged, penalize all the rules that we executed to produce
+                        # that content (so that they will be less likely to be used again) and decay the penalties for all
+                        # the other production rules in the grammar that we didn't execute this time around
+                        if self.repetition_penalty_mode:
+                            self._update_repetition_penalties(
+                                explicit_path_taken=content_package.explicit_grammar_path_taken)
+                        # Return the package
+                        return content_package
         if self.verbosity >= 3:
             print "-- Productionist could not satisfy the following content request:\n\n{content_request}".format(
                 content_request=content_request
@@ -284,35 +287,35 @@ class Productionist(object):
                 score += weight
         return score
 
-    def _select_recipe_for_expressible_meaning(self, expressible_meaning):
+    def _select_recipe_for_expressible_meaning(self, candidate_recipes):
         """Select one of the grammar paths associated with the given expressible meaning."""
         if self.verbosity >= 3:
-            if len(expressible_meaning.recipes) == 1:
-                print "  Selecting EM{em_id}'s sole recipe...".format(em_id=expressible_meaning.id)
+            if len(candidate_recipes[0].expressible_meaning.recipes) == 1:
+                print "  Selecting EM{em_id}'s sole recipe...".format(em_id=candidate_recipes[0].expressible_meaning.id)
             else:
                 print "  Selecting one of EM{em_id}'s {n} recipes...".format(
-                    em_id=expressible_meaning.id, n=len(expressible_meaning.recipes)
+                    em_id=candidate_recipes[0].expressible_meaning.id,
+                    n=len(candidate_recipes[0].expressible_meaning.recipes)
                 )
-        candidates = expressible_meaning.recipes
         if self.shuffle_candidate_sets:
-            random.shuffle(candidates)
+            random.shuffle(candidate_recipes)
         # If there's only one option, we can just select that right off and move on
-        if len(candidates) == 1:
-            selected_recipe = candidates[0]
+        if len(candidate_recipes) == 1:
+            selected_recipe = candidate_recipes[0]
         # If no scoring mode is engaged, we can just select a path randomly
         elif not self.scoring_modes_engaged:
-            selected_recipe = random.choice(candidates)
+            selected_recipe = random.choice(candidate_recipes)
         else:
             # If it is engaged, we'll want to select a path that won't generate a lot of repetition; to
             # prevent repetition, we can score candidate paths according to the current repetition
             # penalties attached to the symbols in the production rules on the paths; first let's
             # compute a utility distribution over the candidate paths
             scores = {}
-            for recipe in candidates:
+            for recipe in candidate_recipes:
                 scores[recipe] = self._score_candidate_recipe(recipe=recipe)
             # Check if any candidate even earned any points; if not, we can just pick randomly
             if not any(scores.values()):
-                selected_recipe = random.choice(candidates)
+                selected_recipe = random.choice(candidate_recipes)
             elif self.probabilistic_mode:
                 # Next, if probabilistic mode is engaged, fit a probability distribution to the utility distribution
                 probability_ranges = self._fit_probability_distribution_to_decision_candidates(scores=scores)
@@ -321,7 +324,7 @@ class Productionist(object):
                     probability_ranges=probability_ranges
                 )
             else:
-                selected_recipe = max(candidates, key=lambda candidate: scores[candidate])
+                selected_recipe = max(candidate_recipes, key=lambda candidate: scores[candidate])
         if self.verbosity >= 3:
             print "    Selected {recipe}...".format(recipe=selected_recipe)
         return selected_recipe
