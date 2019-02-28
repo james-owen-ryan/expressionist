@@ -1474,7 +1474,7 @@ class ProductionRule(object):
             if type(element) is NonterminalSymbol:
                 body_str += '[[{symbol_name}]]'.format(symbol_name=element.name)
             elif type(element) is RuntimeExpression:
-                body_str += '{{expression_definition}}'.format(expression_definition=element.raw_definition)
+                body_str += '{{{expression_definition}}}'.format(expression_definition=element.raw_definition)
             else:
                 body_str += '{terminal_symbol}'.format(terminal_symbol=element)
         return '{head} -> {body}'.format(head=self.head, body=body_str)
@@ -1550,7 +1550,7 @@ class ProductionRule(object):
         #         rule_spec=str(self)
         #     )
         #     for precondition in self.preconditions:
-        #         print "{whitespace}Evaluating precondition: {precondition}".format(
+        #         print "{whitespace}Evaluating precondition: {{{precondition}}}".format(
         #             whitespace='  ' * (n_tabs_for_debug+1),
         #             precondition=precondition.raw_definition
         #         )
@@ -1693,4 +1693,4 @@ class RuntimeExpression(object):
 
     def __str__(self):
         """Return string representation."""
-        return '{{definition}}'.format(self.raw_definition)
+        return '{{{definition}}}'.format(definition=self.raw_definition)
