@@ -67,11 +67,12 @@ class Productionist(object):
         # rule that increases each time the rule is used and decays as the rule is not used
         self.repetition_penalty_mode = repetition_penalty_mode
         if repetition_penalty_mode:
-            self.repetition_penalties = {
-                str(symbol): 1.0 for symbol in self.grammar.nonterminal_symbols+self.grammar.terminal_symbols
-            }
             if self.verbosity > 0:
                 print "Initializing new repetitions dictionary..."
+            self.repetition_penalties = {}
+            for production_rule in self.grammar.production_rules:
+                for symbol_or_runtime_expression in production_rule.body:
+                    self.repetition_penalties[str(symbol_or_runtime_expression)] = 1.0
         else:
             self.repetition_penalties = {}
         # In terse mode, the system will favor production rules that may produce terser dialogue
