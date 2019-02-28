@@ -983,7 +983,7 @@ class State(object):
                 # The variable cannot be resolved because there is no associated state entry; print a warning
                 # (in red type) and return None
                 # if CONFIG.verbosity > 1 and not suppress_warning:
-                #     print '\033[91mWarning: runtime-expression value {value} is not in the state\033[0m'.format(
+                #     print "\033[91mWarning: runtime-expression value '{value}' is not in the state\033[0m".format(
                 #         value=value
                 #     )
                 return None
