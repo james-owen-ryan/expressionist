@@ -71,6 +71,7 @@ class Productionist(object):
                 print "Initializing new repetitions dictionary..."
             self.repetition_penalties = {}
             for production_rule in self.grammar.production_rules:
+                self.repetition_penalties[str(production_rule.head)] = 1.0
                 for symbol_or_runtime_expression in production_rule.body:
                     self.repetition_penalties[str(symbol_or_runtime_expression)] = 1.0
         else:
