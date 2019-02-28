@@ -454,7 +454,6 @@ class Productionist(object):
         A "wildcard rule" is one that is not marked as being semantically meaningful, and is thus not
         included on the targeted path (stored as the 'remaining_path' attribute).
         """
-
         if self.shuffle_candidate_sets:
             random.shuffle(candidate_wildcard_rules)
         # If there's only choice, we can just select that and move on
