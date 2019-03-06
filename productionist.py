@@ -19,7 +19,7 @@ class Productionist(object):
         # If verbosity is 0, no information will be printed out during processing; if 1, information
         # about how far along Productionist is in its general processing will be printed out; if 2,
         # information about the paths taken through the grammar to generate content will also be printed
-        self.verbosity = verbosity
+        self.verbosity = 99
         # Grab the path to the directory with the content bundle
         if content_bundle_directory[-1] == '/':  # Strip off trailing slash, if applicable
             content_bundle_directory = content_bundle_directory[:-1]
@@ -201,35 +201,35 @@ class Productionist(object):
         for expressible_meaning in satisficing_expressible_meanings:
             if self.verbosity >= 3:
                 print "-- Targeting EM{em_id}...".format(em_id=expressible_meaning.id)
-                # Target the grammar paths ("recipes") associated with this expressible meaning, one by one
-                candidate_recipes = list(expressible_meaning.recipes)
-                while candidate_recipes:
-                    selected_recipe = self._select_recipe_for_expressible_meaning(candidate_recipes)
-                    candidate_recipes.remove(selected_recipe)
-                    # Execute that grammar path to produce the generated content satisfying the content request
-                    generated_text, updated_state = self._follow_recipe(
-                        recipe=selected_recipe,
-                        state=initial_state_for_this_instance
+            # Target the grammar paths ("recipes") associated with this expressible meaning, one by one
+            candidate_recipes = list(expressible_meaning.recipes)
+            while candidate_recipes:
+                selected_recipe = self._select_recipe_for_expressible_meaning(candidate_recipes)
+                candidate_recipes.remove(selected_recipe)
+                # Execute that grammar path to produce the generated content satisfying the content request
+                generated_text, updated_state = self._follow_recipe(
+                    recipe=selected_recipe,
+                    state=initial_state_for_this_instance
+                )
+                if generated_text is not None:  # Note that an empty string is valid here
+                    # Package that up with all the associated metadata
+                    content_package = self._build_content_package(
+                        generated_text=generated_text,
+                        updated_state=updated_state,
+                        selected_recipe=selected_recipe,
+                        content_request=content_request
                     )
-                    if generated_text is not None:  # Note that an empty string is valid here
-                        # Package that up with all the associated metadata
-                        content_package = self._build_content_package(
-                            generated_text=generated_text,
-                            updated_state=updated_state,
-                            selected_recipe=selected_recipe,
-                            content_request=content_request
-                        )
-                        # Update Productionist's persistent state, which allows for state to be maintained
-                        # across generation instances
-                        self.state = updated_state
-                        # Lastly, if repetition-penalty mode is engaged, penalize all the rules that we executed to produce
-                        # that content (so that they will be less likely to be used again) and decay the penalties for all
-                        # the other production rules in the grammar that we didn't execute this time around
-                        if self.repetition_penalty_mode:
-                            self._update_repetition_penalties(
-                                explicit_path_taken=content_package.explicit_grammar_path_taken)
-                        # Return the package
-                        return content_package
+                    # Update Productionist's persistent state, which allows for state to be maintained
+                    # across generation instances
+                    self.state = updated_state
+                    # Lastly, if repetition-penalty mode is engaged, penalize all the rules that we executed to produce
+                    # that content (so that they will be less likely to be used again) and decay the penalties for all
+                    # the other production rules in the grammar that we didn't execute this time around
+                    if self.repetition_penalty_mode:
+                        self._update_repetition_penalties(
+                            explicit_path_taken=content_package.explicit_grammar_path_taken)
+                    # Return the package
+                    return content_package
         if self.verbosity >= 3:
             print "-- Productionist could not satisfy the following content request:\n\n{content_request}".format(
                 content_request=content_request
@@ -947,7 +947,7 @@ class State(object):
         else:
             self.updates_this_generation_instance = updates_this_generation_instance
 
-    def resolve(self, value, suppress_warning):
+    def resolve(self, value, suppress_warning=False):
         """Resolve the given value, which is either a primitive type or a state reference."""
         # If it's a string literal, strip off the single quotes and return the result (the actual string
         # being referenced in the string literal)
@@ -978,16 +978,42 @@ class State(object):
         # Otherwise the value references a variable, potentially using dot notation, so parse that reference
         keys = value.split('.')
         associated_state_entry = self.now
-        for key in keys:
+        for i, key in enumerate(keys):
+            index_in_array_located_at_key = None
+            if '[' in key:  # Array index
+                n_closing_brackets_needed = 1
+                for j, character in enumerate(key.split('[', 1)[-1]):
+                    if character == '[':
+                        n_closing_brackets_needed += 1
+                    elif character == ']':
+                        n_closing_brackets_needed -= 1
+                        if n_closing_brackets_needed == 0:
+                            index_reference = key[:j]
+                            index_in_array_located_at_key = self.resolve(index_reference)
+                if key.startswith('['):
+                    key = None
+                else:
+                    key = key.split('[')[0]
             if key not in associated_state_entry:
                 # The variable cannot be resolved because there is no associated state entry; print a warning
                 # (in red type) and return None
                 # if CONFIG.verbosity > 1 and not suppress_warning:
-                #     print "\033[91mWarning: runtime-expression value '{value}' is not in the state\033[0m".format(
+                #     print "\033[91mWarning: value '{value}' is not in the state\033[0m".format(
                 #         value=value
                 #     )
                 return None
-            associated_state_entry = associated_state_entry[key]
+            if key is not None:
+                associated_state_entry = associated_state_entry[key]
+            if index_in_array_located_at_key is not None:
+                try:
+                    associated_state_entry = associated_state_entry[index_in_array_located_at_key]
+                except Exception as error:
+                    raise Exception(
+                        "\033[91mError: An array index in '{value}' is malformed: {error}\033[0m".format(
+                            value=value,
+                            error=error
+                        )
+                    )
         return associated_state_entry
 
     def update(self, key, value):
@@ -1037,6 +1063,33 @@ class State(object):
             # Return True if the state reference does not exist in the state
             state_reference = predicate[0]
             return not bool(self.resolve(value=state_reference, suppress_warning=True))
+        elif 'includes' in predicate:
+            # Return True if the state reference is an array that includes the value
+            index_of_operator = predicate.index('includes')
+            state_reference = ' '.join(predicate[:index_of_operator])
+            value_reference = ' '.join(predicate[index_of_operator+1:])
+            array = self.resolve(value=state_reference)
+            value = self.resolve(value=value_reference)
+            if type(array) is not list:
+                # if CONFIG.verbosity > 1:
+                #     print "\033[91mWarning: '{state_reference}' is not an array\033[0m".format(
+                #         state_reference=state_reference
+                #     )
+                return False
+            return value in array
+        elif 'include' in predicate:  # 'does not include' expression
+            # Return True if the state reference is an array that includes the value
+            predicate_str = ' '.join(predicate)
+            state_reference, value_reference = predicate_str.split(' does not include ')
+            array = self.resolve(value=state_reference)
+            value = self.resolve(value=value_reference)
+            if type(array) is not list:
+                # if CONFIG.verbosity > 1:
+                #     print "\033[91mWarning: '{state_reference}' is not an array\033[0m".format(
+                #         state_reference=state_reference
+                #     )
+                return True
+            return value not in array
         else:
             operator = (set(predicate) & {'==', '!=', '>', '<', '>=', '<='}).pop()
             first_value = self.resolve(value=' '.join(predicate).split(operator)[0].rstrip())
@@ -1639,6 +1692,8 @@ class RuntimeExpression(object):
             self.is_condition_expression = (
                 (len(parsed_definition) == 2 and parsed_definition[1] == 'exists') or
                 (len(parsed_definition) == 4 and ' '.join(parsed_definition[1:]) == 'does not exist') or
+                'includes' in parsed_definition or
+                'does not include' in raw_definition or
                 (set(parsed_definition) & {'==', '!=', '>', '<', '>=', '<='})
             )
             self.is_ternary_expression = '?' in parsed_definition and ':' in parsed_definition
