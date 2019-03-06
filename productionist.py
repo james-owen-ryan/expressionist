@@ -979,28 +979,33 @@ class State(object):
         keys = value.split('.')
         associated_state_entry = self.now
         for i, key in enumerate(keys):
+            # Resolve potential reference to an array index
             index_in_array_located_at_key = None
-            if '[' in key:  # Array index
+            if '[' in key:  # Array index included
                 n_closing_brackets_needed = 1
-                for j, character in enumerate(key.split('[', 1)[-1]):
+                raw_index_reference = key.split('[', 1)[-1]
+                for j, character in enumerate(raw_index_reference):
                     if character == '[':
                         n_closing_brackets_needed += 1
                     elif character == ']':
                         n_closing_brackets_needed -= 1
                         if n_closing_brackets_needed == 0:
-                            index_reference = key[:j]
+                            index_reference = raw_index_reference[:j]
                             index_in_array_located_at_key = self.resolve(index_reference)
+                            if raw_index_reference[j + 1:]:  # Another index, e.g., '[1]' in 'words[0][1]'
+                                keys.insert(i+1, raw_index_reference[j+1:])
+                            break
                 if key.startswith('['):
                     key = None
                 else:
                     key = key.split('[')[0]
-            if key not in associated_state_entry:
+            if key is not None and key not in associated_state_entry:
                 # The variable cannot be resolved because there is no associated state entry; print a warning
                 # (in red type) and return None
-                # if CONFIG.verbosity > 1 and not suppress_warning:
-                #     print "\033[91mWarning: value '{value}' is not in the state\033[0m".format(
-                #         value=value
-                #     )
+                if CONFIG.verbosity > 1 and not suppress_warning:
+                    print "\033[91mWarning: value '{value}' is not in the state\033[0m".format(
+                        value=value
+                    )
                 return None
             if key is not None:
                 associated_state_entry = associated_state_entry[key]
