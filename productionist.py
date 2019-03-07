@@ -1002,10 +1002,10 @@ class State(object):
             if key is not None and key not in associated_state_entry:
                 # The variable cannot be resolved because there is no associated state entry; print a warning
                 # (in red type) and return None
-                if CONFIG.verbosity > 1 and not suppress_warning:
-                    print "\033[91mWarning: value '{value}' is not in the state\033[0m".format(
-                        value=value
-                    )
+                # if CONFIG.verbosity > 1 and not suppress_warning:
+                #     print "\033[91mWarning: value '{value}' is not in the state\033[0m".format(
+                #         value=value
+                #     )
                 return None
             if key is not None:
                 associated_state_entry = associated_state_entry[key]
