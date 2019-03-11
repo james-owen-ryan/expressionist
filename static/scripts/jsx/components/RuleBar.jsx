@@ -376,7 +376,6 @@ class RuleBar extends React.Component {
         var ruleHeadName = this.state.ruleHeadInputVal;
         var appRate = this.state.ruleApplicationRate;
         var expansion = this.state.ruleExpansionInputVal;
-        var expansion = this.state.ruleExpansionInputVal;
         var preconditions = this.state.rulePreconditionsInputVal;
         var effects = this.state.ruleEffectsInputVal;
         var object = {
