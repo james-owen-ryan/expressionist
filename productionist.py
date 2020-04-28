@@ -19,7 +19,7 @@ class Productionist(object):
         # If verbosity is 0, no information will be printed out during processing; if 1, information
         # about how far along Productionist is in its general processing will be printed out; if 2,
         # information about the paths taken through the grammar to generate content will also be printed
-        self.verbosity = 99
+        self.verbosity = verbosity
         # Grab the path to the directory with the content bundle
         if content_bundle_directory[-1] == '/':  # Strip off trailing slash, if applicable
             content_bundle_directory = content_bundle_directory[:-1]
@@ -150,7 +150,7 @@ class Productionist(object):
             )
         id_to_tag = self.grammar.id_to_tag
         for line in f.readlines():
-            meaning_id, all_paths_str, all_tags_str = line.strip('\n').split('\t')
+            meaning_id, all_paths_str, all_tags_str = line.rstrip.split('\t')
             if self.trie:
                 path_trie_keys = [int(path_trie_key) for path_trie_key in all_paths_str.split('|')]
                 recipes = [self.trie.restore_key(path_trie_key) for path_trie_key in path_trie_keys]
@@ -235,6 +235,36 @@ class Productionist(object):
                 content_request=content_request
             )
         return None
+
+    def render_expressible_meaning(self, expressible_meaning):
+        """Render the given expressible meaning."""
+        if self.verbosity >= 3:
+            print "-- Targeting EM{em_id}...".format(em_id=expressible_meaning.id)
+        # Target the grammar paths ("recipes") associated with this expressible meaning, one by one
+        candidate_recipes = list(expressible_meaning.recipes)
+        while candidate_recipes:
+            selected_recipe = self._select_recipe_for_expressible_meaning(candidate_recipes)
+            candidate_recipes.remove(selected_recipe)
+            # Execute that grammar path to produce the generated content satisfying the content request
+            blank_state = State(initial_state_dictionary=None)
+            generated_text, updated_state = self._follow_recipe(recipe=selected_recipe, state=blank_state)
+            if generated_text is not None:  # Note that an empty string is valid here
+                # Package that up with all the associated metadata
+                content_package = self._build_content_package(
+                    generated_text=generated_text,
+                    updated_state=updated_state,
+                    selected_recipe=selected_recipe,
+                    content_request=None
+                )
+                # Lastly, if repetition-penalty mode is engaged, penalize all the rules that we executed to produce
+                # that content (so that they will be less likely to be used again) and decay the penalties for all
+                # the other production rules in the grammar that we didn't execute this time around
+                if self.repetition_penalty_mode:
+                    self._update_repetition_penalties(
+                        explicit_path_taken=content_package.explicit_grammar_path_taken
+                    )
+                # Return the package
+                return content_package
 
     def _reset_temporary_attributes(self):
         """Reset any temporary attributes that were used in the course of the previous generation instance."""
@@ -684,13 +714,11 @@ class Productionist(object):
         # need to save a copy of the explicit path that we took through the grammar, since this
         # will be consumed as we build the bracketed expression
         explicit_path_taken = list(self.explicit_path_taken)
-        if targeted_symbol:
-            bracketed_expression = self._produce_bracketed_expression(symbol_to_start_from=targeted_symbol)
-        else:
-            bracketed_expression = self._produce_bracketed_expression()
-        # Postprocess the generated text to programmatically clean it up
-        generated_text = generated_text.replace('?.', '?')
-        generated_text = generated_text.replace('!.', '!')
+        # if targeted_symbol:
+        #     bracketed_expression = self._produce_bracketed_expression(symbol_to_start_from=targeted_symbol)
+        # else:
+        #     bracketed_expression = self._produce_bracketed_expression()
+        bracketed_expression = ''
         # Instantiate an Output object
         output = ContentPackage(
             text=generated_text,
