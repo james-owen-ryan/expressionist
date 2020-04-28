@@ -662,8 +662,8 @@ class Validator(object):
                 "[Error] A cycle was detected. It is associated with the nonterminal symbol '[[{symbol}]]'".format(
                     symbol=self.symbol_associated_with_cycle.name
                 ) +
-                ", which recursively references it itself via the variant '{variant}'".format(
-                    variant=self.rule_associated_with_cycle
+                ", which recursively references it itself via the production rule '{rule}'".format(
+                    rule=self.rule_associated_with_cycle
                 )
             )
         # Make sure there is at least one top-level symbol; if not, the grammar cannot generate content
