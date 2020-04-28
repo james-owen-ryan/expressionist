@@ -18,6 +18,7 @@ class NonterminalSymbol(object):
         self.markup = set()
         self.deep = deep
         self.complete = False
+        self.pinned = False  # Whether the symbol is pinned to the top of the list of nonterminal symbols
         for markups in list(markup):
             if markups not in list(self.markup):
                 self.markup.add(markups)

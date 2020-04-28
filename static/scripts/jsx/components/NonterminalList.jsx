@@ -58,6 +58,17 @@ class NonterminalList extends React.Component {
         topLevelSymbols.sort(function(a, b){
             return a.toLowerCase() == b.toLowerCase() ? 0 : +(a.toLowerCase() > b.toLowerCase()) || -1;
         });
+        // Place pinned symbols next
+        var pinnedSymbols = [];
+        for (var i = 0; i < nonterminals.length; i++){
+            var symbolName = nonterminals[i];
+            if (this.props.nonterminals[symbolName].pinned == true){
+                topLevelSymbols.push(symbolName);
+            }
+        }
+        pinnedSymbols.sort(function(a, b){
+            return a.toLowerCase() == b.toLowerCase() ? 0 : +(a.toLowerCase() > b.toLowerCase()) || -1;
+        });
         // Place incomplete symbols next (these are ones for which no production rules have been authored)
         var incompleteSymbols = [];
         for (var i = 0; i < nonterminals.length; i++){
@@ -81,7 +92,7 @@ class NonterminalList extends React.Component {
             return a.toLowerCase() == b.toLowerCase() ? 0 : +(a.toLowerCase() > b.toLowerCase()) || -1;
         });
         // Return the sorted list
-        return symbolDefinition.concat(topLevelSymbols).concat(incompleteSymbols).concat(allOtherSymbols);
+        return symbolDefinition.concat(topLevelSymbols).concat(pinnedSymbols).concat(incompleteSymbols).concat(allOtherSymbols);
     }
 
     addNonterminal() {
@@ -134,6 +145,7 @@ class NonterminalList extends React.Component {
                     {   symbolMatches.map((name) => {
                             var complete = this.props.nonterminals[name].complete;
                             var deep = this.props.nonterminals[name].deep;
+                            var pinned = this.props.nonterminals[name].pinned;
                             var thisIsANewSymbol = false
                             if (name.indexOf('$symbol') !== -1){
                                 thisIsANewSymbol = true
@@ -142,6 +154,7 @@ class NonterminalList extends React.Component {
                                 <Nonterminal    name={name}
                                                 complete={complete}
                                                 deep={deep}
+                                                pinned={pinned}
                                                 onClick={this.clickNonterminalUpdate.bind(this, name)} 
                                                 key={name}
                                                 thisIsANewSymbol={thisIsANewSymbol}

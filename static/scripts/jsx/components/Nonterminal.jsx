@@ -98,11 +98,13 @@ class Nonterminal extends React.Component {
                 </ListGroupItem>
             );
         } else {
-            var deep_glyph = ""
+            var leadingGlyph = '';
             if (this.props.deep === true)
-                deep_glyph = <Glyphicon glyph="star"/>
+                leadingGlyph = <Glyphicon glyph="star"/>;
+            else if (this.props.pinned == true)
+                leadingGlyph = <Glyphicon glyph="pushpin"/>;
             return (
-                <ListGroupItem title="View symbol" bsSize="xsmall" bsStyle={this.props.complete ? "success" : "danger" } style={this.props.isCurrentNonterminal ? {"backgroundColor": "#ffe97f"} : {}} onClick={this.props.onClick}>{deep_glyph} {this.props.name}</ListGroupItem>
+                <ListGroupItem title="View symbol" bsSize="xsmall" bsStyle={this.props.complete ? "success" : "danger" } style={this.props.isCurrentNonterminal ? {"backgroundColor": "#ffe97f"} : {}} onClick={this.props.onClick}>{leadingGlyph} {this.props.name}</ListGroupItem>
             );
         }
     }

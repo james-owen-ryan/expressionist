@@ -14,7 +14,6 @@ debug = False
 
 @app.route('/api/default', methods=['GET'])
 def default():
-
     return app.grammar.to_json()
 
 
@@ -122,6 +121,15 @@ def set_top_level_status():
     nonterminal = app.grammar.nonterminals.get(data["nonterminal"])
     new_top_level_status = data["status"]
     nonterminal.deep = new_top_level_status
+    return app.grammar.to_json()
+
+
+@app.route('/api/nonterminal/set_pinned_status', methods=['POST'])
+def set_symbol_pinned_status():
+    data = request.get_json()
+    nonterminal = app.grammar.nonterminals.get(data["nonterminal"])
+    new_pinned_status = data["status"]
+    nonterminal.pinned = new_pinned_status
     return app.grammar.to_json()
 
 

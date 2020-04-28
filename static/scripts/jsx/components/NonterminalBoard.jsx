@@ -17,6 +17,7 @@ class NonterminalBoard extends React.Component {
         this.handleClickerThing = this.handleClickerThing.bind(this);
         this.handleNonterminalRuleClickThrough = this.handleNonterminalRuleClickThrough.bind(this);
         this.toggleSymbolTopLevelStatus = this.toggleSymbolTopLevelStatus.bind(this);
+        this.toggleSymbolPinnedStatus = this.toggleSymbolPinnedStatus.bind(this);
         this.handleNonterminalDelete = this.handleNonterminalDelete.bind(this);
         this.handleExpand = this.handleExpand.bind(this);
         this.startSymbolNameEditing = this.startSymbolNameEditing.bind(this);
@@ -55,6 +56,25 @@ class NonterminalBoard extends React.Component {
             }
             ajax({
                 url: $SCRIPT_ROOT + '/api/nonterminal/set_top_level_status',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(object),
+                success: () => {
+                    this.props.updateFromServer();
+                },
+                cache: false
+            })
+        }
+    }
+
+    toggleSymbolPinnedStatus() {
+        if (this.props.currentSymbolName != "") {
+            var object = {
+                "nonterminal": this.props.currentSymbolName,
+                "status": !this.props.nonterminal.pinned
+            }
+            ajax({
+                url: $SCRIPT_ROOT + '/api/nonterminal/set_pinned_status',
                 type: "POST",
                 contentType: "application/json",
                 data: JSON.stringify(object),
@@ -133,6 +153,14 @@ class NonterminalBoard extends React.Component {
                         this.toggleSymbolTopLevelStatus();
                     }
                 }
+                // Toggle pinned status of this symbol
+                if (e.key === 'p') {
+                    // Make sure a rule is not taking up the workspace
+                    if (this.props.symbolIsInWorkspace(this.props.currentSymbolName)) {
+                        e.preventDefault();
+                        this.toggleSymbolPinnedStatus();
+                    }
+                }
             }
         }
     }
@@ -186,12 +214,18 @@ class NonterminalBoard extends React.Component {
         var markup
         var glyph_nt
         if (this.props.nonterminal) {
-            var deep_str = AUTHOR_IS_USING_A_MAC ? "Toggle top-level status (⌘*)" : "Toggle top-level status (Ctrl+*)";
+            var toggleTopLevelStatusTooltip = AUTHOR_IS_USING_A_MAC ? "Toggle top-level status (⌘*)" : "Toggle top-level status (Ctrl+*)";
             if (this.props.nonterminal && this.props.nonterminal.deep) {
                 glyph_nt = <Glyphicon glyph="star"/>
             }
             else {
                 glyph_nt = <Glyphicon glyph="star-empty"/>
+            }
+            if (this.props.nonterminal && this.props.nonterminal.pinned) {
+                var togglePinnedStatusTooltip = AUTHOR_IS_USING_A_MAC ? "Unpin symbol (⌘P)" : "Unpin symbol (Ctrl+P)";
+            }
+            else {
+                var togglePinnedStatusTooltip = AUTHOR_IS_USING_A_MAC ? "Pin symbol (⌘P)" : "Pin symbol (Ctrl+P)";
             }
             if( this.props.referents != []) {
                 var referents = this.props.referents.map(this.handleClickerThing)
@@ -210,7 +244,8 @@ class NonterminalBoard extends React.Component {
                         <span title="Current symbol (click to edit name)" className="symbol-board-header" style={{"backgroundColor": this.props.nonterminal.rules.length > 0 ? "#57F7E0" : "#FF9891"}} onClick={this.startSymbolNameEditing}>{this.props.currentSymbolName}</span>
                     }
                     <br />
-                    <Button bsStyle={this.props.nonterminal.deep ? "success" : "default" } onClick={this.toggleSymbolTopLevelStatus} title={deep_str}>{glyph_nt}</Button>
+                    <Button bsStyle={this.props.nonterminal.deep ? "success" : "default" } onClick={this.toggleSymbolTopLevelStatus} title={toggleTopLevelStatusTooltip}>{glyph_nt}</Button>
+                    <Button bsStyle={this.props.nonterminal.pinned ? "success" : "default" } onClick={this.toggleSymbolPinnedStatus} title={togglePinnedStatusTooltip}><Glyphicon glyph="pushpin"/></Button>
                     <Button id="playButton" onClick={this.handleExpand} title={AUTHOR_IS_USING_A_MAC ? "Test symbol rewriting (⌘↩)" : "Test symbol rewriting (Ctrl+Enter)"} bsStyle={this.props.playButtonIsJuicing ? 'success' : 'default'}><Glyphicon glyph="play"/></Button>
                     <Button onClick={this.startSymbolNameEditing} title="Rename symbol"><Glyphicon glyph="pencil"/></Button>
                     <Button onClick={this.handleNonterminalDelete} title="Delete symbol"><Glyphicon glyph="trash"/></Button>

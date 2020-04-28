@@ -272,6 +272,7 @@ class PCFG(object):
             else:
                 value.complete = False
             temp['deep'] = value.deep
+            temp['pinned'] = value.pinned
             temp['complete'] = value.complete
 
             rules_list = []
