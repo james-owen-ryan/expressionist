@@ -14,7 +14,7 @@ class NonterminalBoard extends React.Component {
 
     constructor(props) {
         super(props);
-        this.handleClickerThing = this.handleClickerThing.bind(this);
+        this.createSymbolUsageListGroupItem = this.createSymbolUsageListGroupItem.bind(this);
         this.handleNonterminalRuleClickThrough = this.handleNonterminalRuleClickThrough.bind(this);
         this.toggleSymbolTopLevelStatus = this.toggleSymbolTopLevelStatus.bind(this);
         this.toggleSymbolPinnedStatus = this.toggleSymbolPinnedStatus.bind(this);
@@ -31,14 +31,12 @@ class NonterminalBoard extends React.Component {
         }
     }
 
-    handleClickerThing(object){
-        var idx = object.index
-        var symbol = object.symbol
+    createSymbolUsageListGroupItem(usageIndex, usageObject){
         return <ListGroupItem
             title="View symbol usage"
-            key={object.index}
+            key={usageIndex}
             style={{"border": "0px"}}
-            onClick={this.handleNonterminalRuleClickThrough.bind(this, symbol, idx)}>{object['symbol']} <Glyphicon glyph="circle-arrow-right" style={{"top": "1px"}}/> {object['expansion']}</ListGroupItem>
+            onClick={this.handleNonterminalRuleClickThrough.bind(this, usageObject.symbol, usageIndex)}>{usageObject['symbol']} <Glyphicon glyph="circle-arrow-right" style={{"top": "1px"}}/> {usageObject['expansion']}</ListGroupItem>
     }
 
     handleNonterminalRuleClickThrough(tag, index) {
@@ -227,8 +225,9 @@ class NonterminalBoard extends React.Component {
             else {
                 var togglePinnedStatusTooltip = AUTHOR_IS_USING_A_MAC ? "Pin symbol (⌘P)" : "Pin symbol (Ctrl+P)";
             }
-            if( this.props.referents != []) {
-                var referents = this.props.referents.map(this.handleClickerThing)
+            var usages = [];
+            for (let i = 0; i < this.props.usages.length; i++) {
+                usages.push(this.createSymbolUsageListGroupItem(i, this.props.usages[i]));
             }
         }
 
@@ -255,7 +254,7 @@ class NonterminalBoard extends React.Component {
                 <div style={{"width": "70%", "margin": "0 auto"}}>
                     <Panel>
                         <ListGroup style={{"maxHeight": "20vh", "overflowY": "auto"}}>
-                            {referents}
+                            {usages}
                         </ListGroup>
                     </Panel>
                 </div>

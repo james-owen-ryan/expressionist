@@ -1063,16 +1063,16 @@ class Interface extends React.Component {
         this.updateNavigationHistory(this.state.currentSymbol, this.state.currentRule);
         var definedRules = [];
         var board;
-        var referents;
+        var symbolUsages;
         if (this.state.currentSymbol in this.state.nonterminals) {
-            var current = this.state.nonterminals[this.state.currentSymbol]
+            var currentSymbol = this.state.nonterminals[this.state.currentSymbol]
             definedRules = this.state.nonterminals[this.state.currentSymbol].rules
             // Check which board we need to render
-            if (this.state.currentRule === -1 || current.rules[this.state.currentRule] === null ) {
-                var referents = []
-                if ("referents" in current)  {
-                    var referents = current["referents"];
-                    referents = referents.map(this.getGeneratedContentPackage.bind(this))
+            if (this.state.currentRule === -1 || currentSymbol.rules[this.state.currentRule] === null ) {
+                var symbolUsages = []
+                if ("usages" in currentSymbol)  {
+                    symbolUsages = currentSymbol["usages"];
+                    symbolUsages = symbolUsages.map(this.getGeneratedContentPackage.bind(this))
                 }
                 board = <NonterminalBoard   updateGeneratedContentPackageTags={this.updateGeneratedContentPackageTags}
                                             updateGeneratedContentPackageText={this.updateGeneratedContentPackageText}
@@ -1080,7 +1080,7 @@ class Interface extends React.Component {
                                             updateFromServer={this.updateFromServer}
                                             updateCurrentSymbolName={this.updateCurrentSymbolName}
                                             updateCurrentRule={this.updateCurrentRule}
-                                            referents={referents}
+                                            usages={symbolUsages}
                                             currentSymbolName={this.state.currentSymbol}
                                             nonterminal={this.state.nonterminals[this.state.currentSymbol]}
                                             symbolNameAlreadyExists={this.symbolNameAlreadyExists}

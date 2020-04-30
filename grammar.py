@@ -255,8 +255,7 @@ class PCFG(object):
                     self.exhaustively_and_nonprobabilistically_export(nonterminal=nonterminal, filename=filename)
 
     def to_json(self, to_file=None):
-        # total represents our final dictionary we will convert to JSON
-        total = {}
+        grammar_dictionary = {}
         # use defaultdict as it allows us to assume they are sets
         markups = collections.defaultdict(set)
         # nonterminals are their own dictionaries
@@ -265,30 +264,30 @@ class PCFG(object):
             to_file = False
         else:
             to_file = True
-        for key, value in self.nonterminals.iteritems():
+        for nonterminal_symbol_name, nonterminal_symbol_object in self.nonterminals.iteritems():
             temp = collections.defaultdict()
-            if len(value.rules) != 0:
-                value.complete = True
+            if len(nonterminal_symbol_object.rules) != 0:
+                nonterminal_symbol_object.complete = True
             else:
-                value.complete = False
-            temp['deep'] = value.deep
-            temp['pinned'] = value.pinned
-            temp['complete'] = value.complete
+                nonterminal_symbol_object.complete = False
+            temp['deep'] = nonterminal_symbol_object.deep
+            temp['pinned'] = nonterminal_symbol_object.pinned
+            temp['complete'] = nonterminal_symbol_object.complete
 
             rules_list = []
             i = 0
-            for rule in value.rules:
+            for rule in nonterminal_symbol_object.rules:
                 # createJSON representation for individual rule markup
                 if to_file == False:
                     for symbol in rule.body:
                         if isinstance(symbol, NonterminalSymbol):
                             if not nonterminals.get(symbol.tag):
                                 nonterminals[symbol.tag] = collections.defaultdict()
-                            if not nonterminals[symbol.tag].get('referents'):
-                                nonterminals[symbol.tag]['referents'] = []
-                            ref_tag = {"symbol": str(value.tag), "index": i}
-                            if not ref_tag in nonterminals[symbol.tag]['referents']:
-                                nonterminals[symbol.tag]['referents'].append(ref_tag)
+                            if not nonterminals[symbol.tag].get('usages'):
+                                nonterminals[symbol.tag]['usages'] = []
+                            ref_tag = {"symbol": str(nonterminal_symbol_object.tag), "index": i}
+                            if not ref_tag in nonterminals[symbol.tag]['usages']:
+                                nonterminals[symbol.tag]['usages'].append(ref_tag)
                 rules_list.append({
                     'expansion': rule.derivation_json(),
                     'app_rate': rule.application_rate,
@@ -299,35 +298,35 @@ class PCFG(object):
             temp['rules'] = rules_list
 
             markup_dict = collections.defaultdict(set)
-            for markup in value.markup:
+            for markup in nonterminal_symbol_object.markup:
                 markup_dict[markup.tagset.__str__()] |= {markup.tag}
                 markups[markup.tagset.__str__()] |= {markup.tag}
 
             temp['markup'] = markup_dict
-            if not nonterminals.get(value.tag.__str__()):
-                nonterminals[value.tag.__str__()] = collections.defaultdict()
-            nonterminals[value.tag.__str__()].update(temp)
-        total['nonterminals'] = nonterminals
+            if not nonterminals.get(nonterminal_symbol_object.tag.__str__()):
+                nonterminals[nonterminal_symbol_object.tag.__str__()] = collections.defaultdict()
+            nonterminals[nonterminal_symbol_object.tag.__str__()].update(temp)
+        grammar_dictionary['nonterminals'] = nonterminals
 
-        total['markups'] = {}
-        for markupset in self.markup_class:
-            total['markups'][str(markupset)] = set()
-            for tag_object in self.markup_class[markupset]:
-                if total['markups'].get(str(markupset)):
-                    total['markups'][str(markupset)] |= {tag_object}
+        grammar_dictionary['markups'] = {}
+        for tagset in self.markup_class:
+            grammar_dictionary['markups'][str(tagset)] = set()
+            for tag_object in self.markup_class[tagset]:
+                if grammar_dictionary['markups'].get(str(tagset)):
+                    grammar_dictionary['markups'][str(tagset)] |= {tag_object}
                 else:
-                    total['markups'][str(markupset)] = {tag_object}
+                    grammar_dictionary['markups'][str(tagset)] = {tag_object}
             # Sort these in reverse order of definition time, meaning the most recently
             # defined mark-up shows up at the top of the drop-down; this makes it easy
             # to find and attribute a new tag that you've just defined in the case of
             # a very large tagset
-            total['markups'][str(markupset)] = sorted(
-                total['markups'][str(markupset)],
+            grammar_dictionary['markups'][str(tagset)] = sorted(
+                grammar_dictionary['markups'][str(tagset)],
                 key=lambda tag: tag.time_of_definition_index, reverse=True
             )
             # Just save the strings for the tags for each of the tag objects
-            total['markups'][str(markupset)] = [
-                str(tag_object.tag) for tag_object in total['markups'][str(markupset)]
+            grammar_dictionary['markups'][str(tagset)] = [
+                str(tag_object.tag) for tag_object in grammar_dictionary['markups'][str(tagset)]
                 ]
 
         def set_default(obj):
@@ -340,8 +339,9 @@ class PCFG(object):
             else:
                 raise TypeError
 
-        return json.dumps(total, default=set_default, sort_keys=True)
-        # create the nonterminal dictonary
+        print json.dumps(grammar_dictionary, default=set_default, sort_keys=True, indent=4)
+
+        return json.dumps(grammar_dictionary, default=set_default, sort_keys=True)
 
     def n_possible_derivations(self):
         """Return the number of possible terminal derivations that may yielded by this grammar."""
