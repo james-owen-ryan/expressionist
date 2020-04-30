@@ -254,7 +254,7 @@ class PCFG(object):
                 else:
                     self.exhaustively_and_nonprobabilistically_export(nonterminal=nonterminal, filename=filename)
 
-    def to_json(self, to_file=None):
+    def to_json(self, to_file=False):
         grammar_dictionary = {}
         # use defaultdict as it allows us to assume they are sets
         markups = collections.defaultdict(set)
@@ -339,8 +339,9 @@ class PCFG(object):
             else:
                 raise TypeError
 
-        print json.dumps(grammar_dictionary, default=set_default, sort_keys=True, indent=4)
-
+        if to_file:
+            # Prettify the file for human readability
+            return json.dumps(grammar_dictionary, default=set_default, sort_keys=True, indent=4)
         return json.dumps(grammar_dictionary, default=set_default, sort_keys=True)
 
     def n_possible_derivations(self):

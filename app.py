@@ -73,7 +73,7 @@ def load_file_grammar():
 def save_grammar():
     grammar_name = request.data
     # Make sure the name includes a '.json' file extension
-    if grammar_name[-5:] != '.json':
+    if not grammar_name.endswith('.json'):
         grammar_name += '.json'
     try:
         filename = os.path.abspath(os.path.join(os.path.dirname(__file__), ''.join(['grammars/', grammar_name])))
