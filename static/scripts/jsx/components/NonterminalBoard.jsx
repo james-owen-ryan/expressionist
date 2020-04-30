@@ -240,7 +240,7 @@ class NonterminalBoard extends React.Component {
                         ?
                         <textarea type='text' title="Press Enter or click outside this area to submit your changes." value={this.state.symbolNameInputVal} onChange={this.updateSymbolNameInputVal} onBlur={this.stopSymbolNameEditing} style={{width: '90%', border: '0px solid #d7d7d7', height: '43px', marginTop: '10px', marginBottom: '15px', fontSize: '18px', padding: '8px 12px', backgroundColor: '#f2f2f2'}} autoFocus="true"/>
                         :
-                        <span title="Current symbol (click to edit name)" className="symbol-board-header" style={{"backgroundColor": this.props.nonterminal.rules.length > 0 ? "#57F7E0" : "#FF9891"}} onClick={this.startSymbolNameEditing}>{this.props.currentSymbolName}</span>
+                        <span title="Current symbol (click to edit name)" className="symbol-board-header" style={{"backgroundColor": this.props.nonterminal.complete ? "#57F7E0" : "#FF9891"}} onClick={this.startSymbolNameEditing}>{this.props.currentSymbolName}</span>
                     }
                     <br />
                     <Button bsStyle={this.props.nonterminal.deep ? "success" : "default" } onClick={this.toggleSymbolTopLevelStatus} title={toggleTopLevelStatusTooltip}>{glyph_nt}</Button>

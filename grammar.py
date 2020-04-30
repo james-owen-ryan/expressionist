@@ -260,10 +260,6 @@ class PCFG(object):
         markups = collections.defaultdict(set)
         # nonterminals are their own dictionaries
         nonterminals = collections.defaultdict()
-        if to_file is None:
-            to_file = False
-        else:
-            to_file = True
         for nonterminal_symbol_name, nonterminal_symbol_object in self.nonterminals.iteritems():
             temp = collections.defaultdict()
             if len(nonterminal_symbol_object.rules) != 0:
@@ -272,13 +268,12 @@ class PCFG(object):
                 nonterminal_symbol_object.complete = False
             temp['deep'] = nonterminal_symbol_object.deep
             temp['pinned'] = nonterminal_symbol_object.pinned
-            temp['complete'] = nonterminal_symbol_object.complete
 
             rules_list = []
             i = 0
             for rule in nonterminal_symbol_object.rules:
                 # createJSON representation for individual rule markup
-                if to_file == False:
+                if not to_file:
                     for symbol in rule.body:
                         if isinstance(symbol, NonterminalSymbol):
                             if not nonterminals.get(symbol.tag):
@@ -307,6 +302,17 @@ class PCFG(object):
                 nonterminals[nonterminal_symbol_object.tag.__str__()] = collections.defaultdict()
             nonterminals[nonterminal_symbol_object.tag.__str__()].update(temp)
         grammar_dictionary['nonterminals'] = nonterminals
+
+        # Determine whether each nonterminal symbol will be displayed as "complete" in the interface, meaning
+        # that it both has at least one production rule and is referenced in at least one production rule
+        for nonterminal_symbol_name, nonterminal_symbol_object in nonterminals.items():
+            nonterminals[nonterminal_symbol_name]['complete'] = False
+            if nonterminals[nonterminal_symbol_name]['rules']:
+                try:
+                    if nonterminals[nonterminal_symbol_name]['usages']:
+                        nonterminals[nonterminal_symbol_name]['complete'] = True
+                except KeyError:
+                    continue
 
         grammar_dictionary['markups'] = {}
         for tagset in self.markup_class:
