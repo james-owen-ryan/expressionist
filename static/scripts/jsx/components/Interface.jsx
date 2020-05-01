@@ -419,6 +419,7 @@ class Interface extends React.Component {
             var quickNewHotKeyMatch = false;  // g
             var quickLoadHotKeyMatch = false;  // o
             var quickSaveHotKeyMatch = false;  // s
+            var quickSaveAsHotKeyMatch = false;  // shift+s (opens Save modal)
             var quickExportHotKeyMatch = false;  // e
             var quickBuildHotKeyMatch = false;  // b
             var quickTestHotKeyMatch = false;  // .
@@ -493,8 +494,14 @@ class Interface extends React.Component {
                             quickLoadHotKeyMatch = true;
                             break;
                         case 's':
-                            e.preventDefault();
-                            quickSaveHotKeyMatch = true;
+                            if (e.shiftKey) {
+                                e.preventDefault();
+                                quickSaveAsHotKeyMatch = true;
+                            }
+                            else {
+                                e.preventDefault();
+                                quickSaveHotKeyMatch = true;
+                            }
                             break;
                         case 'e':
                             e.preventDefault();
@@ -601,6 +608,10 @@ class Interface extends React.Component {
                 else {
                     document.getElementById("headerBarTestButton").click();
                 }
+            }
+            // Quick save as: open the Save modal
+            else if (quickSaveAsHotKeyMatch) {
+                this.openSaveModal();
             }
             // Quick save: do a quick save by overwriting the current grammar file
             else if (quickSaveHotKeyMatch) {
