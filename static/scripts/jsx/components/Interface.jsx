@@ -79,8 +79,8 @@ class Interface extends React.Component {
         this.symbolIsInWorkspace = this.symbolIsInWorkspace.bind(this);
         this.moveCursorToPositionOrRange = this.moveCursorToPositionOrRange.bind(this);
         this.state = {
-            currentGrammarName: 'new',
-            bundleName: '',
+            currentGrammarName: "",
+            bundleName: "",
             nonterminals: [],
             tagsets: [],
             generatedContentPackageText: "",
@@ -164,6 +164,7 @@ class Interface extends React.Component {
             data: filename,
             success: () => {
                 this.setState({
+                    currentGrammarName: filename,
                     currentSymbol: '',
                     currentRule: -1,
                     generatedContentPackageText: '',
@@ -604,6 +605,10 @@ class Interface extends React.Component {
             // Quick save: do a quick save by overwriting the current grammar file
             else if (quickSaveHotKeyMatch) {
                 // Generate a juicy response (button lights green and TURNS back to gray)
+                if (!this.getCurrentGrammarName()) {
+                    this.openSaveModal();
+                    return
+                }
                 this.setState({saveButtonIsJuicing: true});
                 ajax({
                     url: $SCRIPT_ROOT + '/api/grammar/save',
@@ -843,6 +848,8 @@ class Interface extends React.Component {
             cache: false,
             success: (data) => {
                 this.setState({
+                    // Retrieve the grammar name in case of page refresh
+                    currentGrammarName: 'name' in data ? data['name'] : "",
                     nonterminals: data['nonterminals'],
                     tagsets: data['markups']
                 });

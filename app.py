@@ -54,7 +54,7 @@ def load_bundle():
 
 @app.route('/api/grammar/load', methods=['POST'])
 def load_grammar():
-    """Load a grammar into memory given a JSON string sent via POST (allows the app to reflect undo and redo changes)."""
+    """Load a grammar into memory given a JSON string sent via POST (allows the app to track undo and redo changes)."""
     app.grammar = grammar.from_json(str(request.data))
     return app.grammar.to_json()
 
@@ -66,23 +66,22 @@ def load_file_grammar():
     grammar_file = open(user_file, 'r')
     if grammar_file:
         app.grammar = grammar.from_json(str(grammar_file.read()))
-    return app.grammar.to_json()
+    return app.grammar.to_json(to_file=grammar_name + ".json")
 
 
 @app.route('/api/grammar/save', methods=['GET', 'POST'])
 def save_grammar():
-    grammar_name = request.data
+    grammar_filename = grammar_name = request.data
     # Make sure the name includes a '.json' file extension
-    if not grammar_name.endswith('.json'):
-        grammar_name += '.json'
-    try:
-        filename = os.path.abspath(os.path.join(os.path.dirname(__file__), ''.join(['grammars/', grammar_name])))
-        outfile = open(filename, 'w+')
-        outfile.write(app.grammar.to_json(to_file=True))
-    except Exception as error:
-        print repr(error)
-        return "Unable to save grammar. Please check console for more details."
-    return "The grammar was successfully saved."
+    if not grammar_filename.endswith('.json'):
+        grammar_filename += '.json'
+    if grammar_name.endswith('.json'):
+        grammar_name = grammar_name[:-5]
+    app.grammar.set_name(name=grammar_name)
+    file_location = os.path.abspath(os.path.join(os.path.dirname(__file__), ''.join(['grammars/', grammar_filename])))
+    outfile = open(file_location, 'w+')
+    outfile.write(app.grammar.to_json(to_file=grammar_filename))
+    return "The grammar was saved to '{file_location}'.".format(file_location=file_location)
 
 
 @app.route('/api/grammar/new', methods=['GET'])
@@ -315,10 +314,11 @@ def export():
     # Index the grammar and save out the resulting files (Productionist-format grammar file [.grammar],
     # trie file (.marisa), and expressible meanings file [.meanings])
     Reductionist(
-        raw_grammar_json=app.grammar.to_json(to_file=True),  # JOR: I'm not sure what to_file actually does
+        raw_grammar_json=app.grammar.to_json(),
         path_to_write_output_files_to=output_path,
         verbosity=0 if debug is False else 2
     )
+    # TODO SURFACE VALIDATOR OUTPUT
     # if not reductionist.validator.errors:
     #     print "\n--Success! Indexed this grammar's {n} generable lines to infer {m} expressible meanings.--".format(
     #         n=reductionist.total_generable_outputs,
@@ -392,7 +392,7 @@ def handle_content_request():
 
 
 if __name__ == '__main__':
-    app.grammar = grammar.from_json(str(open('./grammars/new.json', 'r').read()))
+    app.grammar = grammar.from_json('{"markups": {}, "nonterminals": {}}')
     app.productionist = None  # Gets set upon export
     app.debug = debug
     app.run()

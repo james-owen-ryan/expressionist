@@ -46,10 +46,15 @@ class PCFG(object):
     """
 
     def __init__(self, monte_carlo=False):
+        self.name = None
         self.nonterminals = {}
         self.system_vars = []
         self.markup_class = {}
         self.monte_carlo = monte_carlo  # Whether export will rely on a Monte Carlo derivation procedure
+
+    def set_name(self, name):
+        """Set the name of this grammar."""
+        self.name = name
 
     def add_nonterminal(self, nonterminal):
         """ add a nonterminal to our grammar"""
@@ -256,6 +261,8 @@ class PCFG(object):
 
     def to_json(self, to_file=False):
         grammar_dictionary = {}
+        if self.name:
+            grammar_dictionary['name'] = self.name
         # use defaultdict as it allows us to assume they are sets
         markups = collections.defaultdict(set)
         # nonterminals are their own dictionaries
@@ -444,8 +451,13 @@ class PCFG(object):
 
 
 def from_json(json_in):
-    gram_res = PCFG()
     dict_rep = json.loads(json_in)
+    grammar_object = PCFG()
+    try:
+        grammar_name = dict_rep['name']
+        grammar_object.set_name(name=grammar_name)
+    except KeyError:
+        pass
     nonterminals = dict_rep.get('nonterminals')
     for tag, nonterminal in nonterminals.iteritems():
         rules = nonterminal['rules']
@@ -460,7 +472,7 @@ def from_json(json_in):
                 tmp_markups.append(new_mark)
 
         temp_nonterm = NonterminalSymbol(tag, markup=set(tmp_markups), deep=nonterminal['deep'])
-        gram_res.add_nonterminal(temp_nonterm)
+        grammar_object.add_nonterminal(temp_nonterm)
 
         for ruleindex, rule in enumerate(rules):
             # rule is an object
@@ -468,7 +480,7 @@ def from_json(json_in):
             application_rate = rule['app_rate']
             preconditions_str = rule['preconditionsStr']
             effects_str = rule['effectsStr']
-            gram_res.add_rule(
+            grammar_object.add_rule(
                 rule_head=temp_nonterm,
                 rule_body=expansion,
                 application_rate=application_rate,
@@ -478,8 +490,8 @@ def from_json(json_in):
 
     for markupSet in dict_rep.get('markups'):
         x = MarkupSet(markupSet)
-        gram_res.add_new_markup_set(MarkupSet(markupSet))
+        grammar_object.add_new_markup_set(MarkupSet(markupSet))
         for tags in dict_rep['markups'][markupSet]:
-            gram_res.add_unused_markup(Markup(tags, tagset=x))
+            grammar_object.add_unused_markup(Markup(tags, tagset=x))
 
-    return gram_res
+    return grammar_object

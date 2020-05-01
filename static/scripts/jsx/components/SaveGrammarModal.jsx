@@ -59,6 +59,15 @@ class SaveGrammarModal extends React.Component {
         return false
     }
 
+    checkSaveGrammarName() {
+        if (this.state.grammarFileNames.indexOf(this.props.getCurrentGrammarName()) > -1){
+            return 'warning'
+        } else if (!this.props.getCurrentGrammarName()) {
+            return 'error'
+        }
+        return null
+    }
+
     setSaveButtonStyle(){
         if (this.props.saveButtonIsJuicing) {
             return 'success'
@@ -72,15 +81,6 @@ class SaveGrammarModal extends React.Component {
         else {
             return this.checkSaveGrammarName();
         }
-    }
-
-    checkSaveGrammarName() {
-        if (this.state.grammarFileNames.indexOf(this.props.getCurrentGrammarName()) > -1){
-            return 'warning'
-        } else if (this.props.getCurrentGrammarName() == '') {
-            return 'error'
-        }
-        return null
     }
 
     componentWillMount(){
