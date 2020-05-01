@@ -56,12 +56,12 @@ def load_bundle():
         user_file = os.path.abspath(os.path.join(os.path.dirname(__file__), ''.join(['exports/', bundle_name, '.grammar'])))
         grammar_file = open(user_file, 'r')
     except Exception as error:
-        print repr(error)
+        raise Exception(repr(error))
     return str(grammar_file.read())
 
 
 @app.route('/api/grammar/load', methods=['POST'])
-def load_grammar():
+def load_previous_grammar_state():
     """Load a grammar into memory given a JSON string sent via POST (allows the app to track undo and redo changes)."""
     app.grammar = grammar.from_json(str(request.data))
     return app.grammar.to_json()
@@ -70,10 +70,12 @@ def load_grammar():
 @app.route('/api/grammar/from_file', methods=['POST'])
 def load_file_grammar():
     grammar_name = request.data
-    user_file = os.path.abspath(os.path.join(os.path.dirname(__file__), ''.join(['grammars/', grammar_name])))
+    filename = grammar_name + ".json"
+    user_file = os.path.abspath(os.path.join(os.path.dirname(__file__), ''.join(['grammars/', filename])))
     grammar_file = open(user_file, 'r')
     if grammar_file:
         app.grammar = grammar.from_json(str(grammar_file.read()))
+        app.grammar.set_name(name=grammar_name)
     return app.grammar.to_json(to_file=grammar_name + ".json")
 
 
