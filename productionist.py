@@ -150,7 +150,7 @@ class Productionist(object):
             )
         id_to_tag = self.grammar.id_to_tag
         for line in f.readlines():
-            meaning_id, all_paths_str, all_tags_str = line.rstrip.split('\t')
+            meaning_id, all_paths_str, all_tags_str = line.rstrip().split('\t')
             if self.trie:
                 path_trie_keys = [int(path_trie_key) for path_trie_key in all_paths_str.split('|')]
                 recipes = [self.trie.restore_key(path_trie_key) for path_trie_key in path_trie_keys]

@@ -42,11 +42,7 @@ def load_dir():
 
 @app.route('/api/load_bundles', methods=['GET'])
 def load_bundles():
-    results = []
-    for filename in os.listdir(os.path.abspath(os.path.join(os.path.dirname(__file__), 'exports/'))):
-        if filename.endswith('.grammar'):
-            results.append(filename[:-len('.grammar')])
-    return jsonify(results=results)
+    return jsonify(results=os.listdir(os.path.abspath(os.path.join(os.path.dirname(__file__), 'exports/'))))
 
 
 @app.route('/api/load_bundle', methods=['POST'])
