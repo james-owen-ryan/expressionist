@@ -33,12 +33,20 @@ def check_if_grammar_states_are_the_same():
 
 @app.route('/api/grammar/load_dir', methods=['GET'])
 def load_dir():
-    return jsonify(results=os.listdir(os.path.abspath(os.path.join(os.path.dirname(__file__), 'grammars/'))))
+    results = []
+    for filename in os.listdir(os.path.abspath(os.path.join(os.path.dirname(__file__), 'grammars/'))):
+        if filename.endswith('.json'):
+            results.append(filename[:-len('.json')])
+    return jsonify(results=results)
 
 
 @app.route('/api/load_bundles', methods=['GET'])
 def load_bundles():
-    return jsonify(results=os.listdir(os.path.abspath(os.path.join(os.path.dirname(__file__), 'exports/'))))
+    results = []
+    for filename in os.listdir(os.path.abspath(os.path.join(os.path.dirname(__file__), 'exports/'))):
+        if filename.endswith('.grammar'):
+            results.append(filename[:-len('.grammar')])
+    return jsonify(results=results)
 
 
 @app.route('/api/load_bundle', methods=['POST'])
