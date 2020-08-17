@@ -370,8 +370,6 @@ class Interface extends React.Component {
         return generatedContentPackage
     }
 
-    toggleSymbolPinnedStatus
-
     updateSymbolFilterQuery(query) {
         this.setState({symbolFilterQuery: query});
     }

@@ -8,7 +8,7 @@ from terminal_symbol import TerminalSymbol
 class NonterminalSymbol(object):
     """A non-terminal symbol in a grammar."""
 
-    def __init__(self, tag, markup=None, deep=False):
+    def __init__(self, tag, markup=None, deep=False, pinned=False):
         """Initialize a NonterminalSymbol object."""
         if markup is None:
             markup = set()
@@ -18,7 +18,7 @@ class NonterminalSymbol(object):
         self.markup = set()
         self.deep = deep
         self.complete = False
-        self.pinned = False  # Whether the symbol is pinned to the top of the list of nonterminal symbols
+        self.pinned = pinned  # Whether the symbol is pinned to the top of the list of nonterminal symbols
         for markups in list(markup):
             if markups not in list(self.markup):
                 self.markup.add(markups)

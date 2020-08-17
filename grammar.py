@@ -475,7 +475,12 @@ def from_json(json_in):
                 new_mark = Markup(i, tmp_set)
                 tmp_markups.append(new_mark)
 
-        temp_nonterm = NonterminalSymbol(tag, markup=set(tmp_markups), deep=nonterminal['deep'])
+        temp_nonterm = NonterminalSymbol(
+            tag,
+            markup=set(tmp_markups),
+            deep=nonterminal['deep'],
+            pinned=nonterminal['pinned']
+        )
         grammar_object.add_nonterminal(temp_nonterm)
 
         for ruleindex, rule in enumerate(rules):
