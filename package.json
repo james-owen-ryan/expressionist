@@ -14,7 +14,7 @@
     "classnames": "^2.2.5",
     "es6-promise": "^3.3.1",
     "jquery": "^2.1.4",
-    "lodash": "^3.10.1",
+    "lodash": "^4.17.21",
     "react": "^15.5.4",
     "react-autocomplete": "^1.8.1",
     "react-bootstrap": "^0.30.8",
